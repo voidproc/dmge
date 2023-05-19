@@ -30,15 +30,7 @@ namespace dmge
 
 		void run();
 
-		void setModifiedVRAM();
-
-		void updateTileData();
-
 		void draw(const Point pos, int scale);
-
-		void draw2(const Point pos, int scale);
-
-		void drawTileData(const Point pos);
 
 		PPUMode mode() const
 		{
@@ -48,8 +40,6 @@ namespace dmge
 		bool modeChangedToOAMScan() const;
 		bool modeChangedToHBlank() const;
 		bool modeChangedToVBlank() const;
-
-		TextureRegion tile(uint8 id);
 
 		int dot() const
 		{
@@ -62,8 +52,6 @@ namespace dmge
 		int dot_ = 0;
 		uint8 prevLYC_ = 0;
 		PPUMode mode_ = PPUMode::OAMScan;
-		Array<RenderTexture> tiles_;
-		bool modifiedVRAM_ = false;
 		bool prevStatInt_ = false;
 
 		// Pixel FIFO
@@ -87,9 +75,6 @@ namespace dmge
 		void updateLY_();
 		void updateSTAT_();
 		void updateMode_();
-		void updateTileData_();
-		void drawBG_();
-		void drawBG2_();
 		void scanline_();
 		void scanOAM_();
 	};

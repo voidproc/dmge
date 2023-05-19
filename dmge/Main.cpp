@@ -35,6 +35,7 @@ void Main()
 	Console.open();
 	Console.writeln(U"Setup ...");
 
+
 	// ---- Setup ----
 
 	loadAssets();
@@ -56,6 +57,7 @@ void Main()
 
 	mem.init(&ppu, &timer, &joypad);
 	mem.load(config.cartridgePath);
+
 
 	// ---- Wait ----
 
@@ -82,7 +84,7 @@ void Main()
 	// トレース中
 	bool trace = false;
 
-	// VBlankに変化したので描画する（暫定）
+	// VBlankに変化したので描画する
 	bool toDraw = false;
 
 	// アプリケーションを終了する
@@ -203,12 +205,7 @@ void Main()
 
 			joypad.update();
 
-			//ppu.updateTileData();
-
-			// タイルデータ(128x192)をデバッグ描画
-			//ppu.drawTileData(Point{ 160 * Scale + 1, Scene::Height() - 192 });
-
-			ppu.draw2(Point{ 0, 0 }, Scale);
+			ppu.draw(Point{ 0, 0 }, Scale);
 
 			drawStatusText(U"FPS:{:3d}"_fmt(Profiler::FPS()));
 

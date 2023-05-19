@@ -7,7 +7,6 @@ namespace dmge
 	PPU::PPU(Memory* mem, LCD* lcd)
 		: mem_{ mem }, lcd_{ lcd }
 	{
-		tiles_ << RenderTexture{ 16 * 8, 24 * 8 };
 		dot_ = 70224 - 52 + 4;
 
 		canvas_.resize(160 + 8, 144, Palette::White);
@@ -92,27 +91,9 @@ namespace dmge
 
 	}
 
-	void PPU::setModifiedVRAM()
-	{
-		modifiedVRAM_ = true;
-	}
-
-	void PPU::updateTileData()
-	{
-		// VRAMが更新されていたら
-		if (modifiedVRAM_)
-		{
-			updateTileData_();
-			modifiedVRAM_ = false;
-		}
-	}
-
 	void PPU::draw(const Point pos, int scale)
 	{
-		if (not lcd_->isEnabled())
-		{
-			return;
-		}
+		if (not lcd_->isEnabled()) return;
 
 		{
 			Graphics2D::SetScissorRect(Rect{ pos, Size{ 160, 144 } * scale });
@@ -123,99 +104,14 @@ namespace dmge
 
 			const Transformer2D transformer{ Mat3x2::Scale(scale).translated(pos) };
 
-
-			if (lcd_->isEnabledBgAndWindow())
+			for (int y : step(144))
 			{
-				drawBG_();
-
-				// Windowを描画
-				//...
-			}
-
-			if (lcd_->isEnabledSprite())
-			{
-				// Spriteを描画
-				//...
-			}
-		}
-
-		//{
-		//	for (int iy : step(32))
-		//	{
-		//		for (int ix : step(32))
-		//		{
-		//			uint16 tileDataAddr = lcd_->bgTileMapAddress() + iy * 0x20 + ix;
-		//			const uint8 tileId = mem_->read(tileDataAddr);
-		//			FontAsset(U"debug")(U"{:02x}"_fmt(tileId)).drawAt(6, Vec2{ 320 + 16 * ix, 16 * iy });
-		//		}
-		//	}
-		//}
-	}
-
-	void PPU::draw2(const Point pos, int scale)
-	{
-		if (not lcd_->isEnabled()) return;
-
-		{
-			//Graphics2D::SetScissorRect(Rect{ pos, Size{ 160, 144 } * scale });
-
-			//RasterizerState rs = RasterizerState::Default2D;
-			//rs.scissorEnable = true;
-			//const ScopedRenderStates2D renderStates{ rs };
-
-			const Transformer2D transformer{ Mat3x2::Scale(scale).translated(pos) };
-
-			drawBG2_();
-		}
-	}
-
-	void PPU::drawTileData(const Point pos)
-	{
-		// タイルデータをデバッグ描画
-		tiles_[0].draw(pos);
-	}
-
-	void PPU::drawBG_()
-	{
-		// BGを描画
-
-		for (int iy = 0; iy < 144 / 8 + 1; iy++)
-		{
-			for (int ix = 0; ix < 160 / 8 + 1; ix++)
-			{
-				uint16 addrRow = lcd_->bgTileMapAddress() + (iy + lcd_->scy() / 8) * 0x20;
-				if (addrRow > lcd_->bgTileMapAddress() + 0x3ff)
+				for (int x : step(160 + 8))
 				{
-					addrRow -= 0x400;
+					Rect{ x, y, 1, 1 }.draw(canvas_.at(y, x));
 				}
-
-				const uint16 addrRowLeftside = (addrRow & 0xff) / 0x20 * 0x20 + (addrRow & 0xff00);
-				uint16 addr = addrRow + ix + lcd_->scx() / 8;
-				if (addr > addrRowLeftside + 0x1f)
-				{
-					addr -= 0x20;
-				}
-
-				const uint8 tileId = mem_->read(addr);
-				tile(tileId).draw(ix * 8 - (lcd_->scx() % 8), iy * 8 - (lcd_->scy() % 8));
 			}
 		}
-	}
-
-	void PPU::drawBG2_()
-	{
-		const uint8 scy = lcd_->scy();
-		const uint8 scx = lcd_->scx();
-
-		for (int y : step(144))
-		{
-			for (int x : step(160 + 8))
-			{
-				Rect{ x, y, 1, 1}.draw(canvas_.at(y, x));
-			}
-		}
-
-		Rect{ 0, 0, 160, 144 }.drawFrame(1, Palette::Red);
 	}
 
 	void PPU::scanline_()
@@ -361,12 +257,6 @@ namespace dmge
 		return dot_ == 144 * 456;
 	}
 
-	TextureRegion PPU::tile(uint8 id)
-	{
-		const Point tileBasePos{ 0, lcd_->tileDataAddress() == Address::TileData2 ? 16 * 8 : 0 };
-		return tiles_[0](tileBasePos.movedBy((id % 16) * 8, (id / 16) * 8), 8, 8);
-	}
-
 	void PPU::updateLY_()
 	{
 		if (not lcd_->isEnabled())
@@ -425,37 +315,4 @@ namespace dmge
 		const uint8 stat = lcd_->stat();
 		mem_->write(Address::STAT, (stat & ~3) | (uint8)mode_);
 	}
-
-	void PPU::updateTileData_()
-	{
-		// タイルデータをデコードしテクスチャに描画
-
-		const auto bgPalette = lcd_->bgp();
-
-		{
-			const ScopedRenderTarget2D target{ tiles_[0] };
-
-			for (int iy : step(24))
-			{
-				for (int ix : step(16))
-				{
-					for (int y : step(8))
-					{
-						const uint16 addr = 0x8000 + iy * 16 * 16 + ix * 16;
-						const uint8 data0 = mem_->read(addr + y * 2);
-						const uint8 data1 = mem_->read(addr + y * 2 + 1);
-
-						for (int x : step(8))
-						{
-							const int shift = 7 - x;
-							const int c = ((data0 >> shift) & 1) | (((data1 >> shift) & 1) << 1);
-							const Color color = paletteColorMap_.at(bgPalette[c]);//???
-							Rect{ ix * 8 + x, iy * 8 + y, 1, 1 }.draw(color);
-						}
-					}
-				}
-			}
-		}
-	}
 }
-

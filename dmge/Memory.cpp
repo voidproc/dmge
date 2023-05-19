@@ -144,13 +144,6 @@ namespace dmge
 			sram_[bankingMode_ == 0 ? offset : ramBank_ * 0x2000 + offset] = value;
 		}
 
-		// VRAM
-
-		else if (ADDRESS_IN_RANGE(addr, Address::VRAM))
-		{
-			ppu_->setModifiedVRAM();
-		}
-
 		// Joypad
 
 		else if (addr == Address::JOYP)

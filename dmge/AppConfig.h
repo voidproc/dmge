@@ -13,5 +13,4 @@ namespace dmge
 
 		void print();
 	};
-
 }

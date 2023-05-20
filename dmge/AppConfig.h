@@ -21,6 +21,9 @@ namespace dmge
 		// FPSを表示する
 		bool showFPS = true;
 
+		// 表示倍率
+		int scale = 3;
+
 		// config.ini のパース結果を返す
 		static AppConfig LoadConfig();
 

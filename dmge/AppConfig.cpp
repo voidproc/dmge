@@ -8,44 +8,28 @@ namespace dmge
 
 		INI ini{ U"config.ini" };
 
-		if (ini.hasGlobalValue(U"cartridge"))
-		{
-			config.cartridgePath = ini.getGlobalValue(U"cartridge");
-		}
+		config.cartridgePath = ParseOr<String>(ini[U"cartridge"], U"");
 
-		if (ini.hasGlobalValue(U"breakpoint"))
-		{
-			config.breakpoints = ini.getGlobalValue(U"breakpoint")
-				.split(U',')
-				.map([](const String& s) { return ParseInt<uint16>(s, 16); });
-		}
+		config.breakpoints = ParseOr<String>(ini[U"breakpoint"], U"")
+			.split(U',')
+			.map([](const String& s) { return ParseInt<uint16>(s, 16); });
 
-		if (ini.hasGlobalValue(U"breakpointmemw"))
-		{
-			config.breakpointsMemWrite = ini.getGlobalValue(U"breakpointmemw")
-				.split(U',')
-				.map([](const String& s) { return ParseInt<uint16>(s, 16); });
-		}
+		config.breakpointsMemWrite = ParseOr<String>(ini[U"breakpointmemw"], U"")
+			.split(U',')
+			.map([](const String& s) { return ParseInt<uint16>(s, 16); });
 
-		if (ini.hasGlobalValue(U"enablebreakpoint"))
-		{
-			config.enableBreakpoint = static_cast<bool>(ParseInt<int>(ini.getGlobalValue(U"enablebreakpoint")));
-		}
+		config.enableBreakpoint = ParseOr<bool>(ini[U"enablebreakpoint"], false);
 
-		if (ini.hasGlobalValue(U"showfps"))
-		{
-			config.showFPS = static_cast<bool>(ParseInt<int>(ini.getGlobalValue(U"showfps")));
-		}
+		config.showFPS = ParseOr<bool>(ini[U"showfps"], U"");
+
+		config.scale = ParseOr<int>(ini[U"scale"], 3);
 
 		return config;
 	}
 
 	void AppConfig::print()
 	{
-		if (not cartridgePath.empty())
-		{
-			Console.writeln(U"cartridgePath={}"_fmt(cartridgePath));
-		}
+		Console.writeln(U"cartridgePath={}"_fmt(cartridgePath));
 
 		if (not breakpoints.empty())
 		{

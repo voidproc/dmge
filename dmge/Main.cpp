@@ -26,8 +26,19 @@ void drawStatusText(StringView text)
 
 void Main()
 {
-	const int Scale = 3;
-	const Size SceneSize{ 160 * Scale, 144 * Scale };
+	Console.open();
+	Console.writeln(U"Setup ...");
+
+	dmge::AppConfig config = dmge::AppConfig::LoadConfig();
+	config.print();
+
+	if (not FileSystem::Exists(config.cartridgePath))
+	{
+		Console.writeln(U"Cartridge not found");
+		return;
+	}
+
+	const auto SceneSize = Size{ 160, 144 } * config.scale;
 
 	Scene::Resize(SceneSize);
 	Window::Resize(SceneSize);
@@ -35,16 +46,7 @@ void Main()
 	Scene::SetTextureFilter(TextureFilter::Nearest);
 	const ScopedRenderStates2D renderState{ SamplerState::ClampNearest };
 
-	Console.open();
-	Console.writeln(U"Setup ...");
-
-
-	// ---- Setup ----
-
 	loadAssets();
-
-	dmge::AppConfig config = dmge::AppConfig::LoadConfig();
-	config.print();
 
 	dmge::Memory mem;
 
@@ -212,7 +214,7 @@ void Main()
 
 			joypad.update();
 
-			ppu.draw(Point{ 0, 0 }, Scale);
+			ppu.draw(Point{ 0, 0 }, config.scale);
 
 			if (config.showFPS)
 			{

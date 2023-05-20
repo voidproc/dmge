@@ -53,7 +53,7 @@ namespace dmge
 		write(0xff50, 0x01); // Boot ROM enable/disable
 	}
 
-	void Memory::load(FilePath cartridgePath)
+	void Memory::loadCartridge(FilePath cartridgePath)
 	{
 		BinaryReader reader{ cartridgePath };
 		rom_.resize(reader.size());

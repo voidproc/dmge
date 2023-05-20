@@ -56,7 +56,7 @@ void Main()
 	dmge::Joypad joypad{ &mem };
 
 	mem.init(&ppu, &timer, &joypad);
-	mem.load(config.cartridgePath);
+	mem.loadCartridge(config.cartridgePath);
 
 
 	// ---- Wait ----

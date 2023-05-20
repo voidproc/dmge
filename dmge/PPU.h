@@ -104,11 +104,11 @@ namespace dmge
 
 		// ピクセルフェッチャーのいるX座標
 		// ウィンドウフェッチが開始すると0にリセットされる
-		int fetcherX_ = 0;
+		uint8 fetcherX_ = 0;
 
 		// レンダリング中のX座標
 		// スプライト用。ウィンドウフェッチによりリセットされない
-		int canvasX_ = 0;
+		uint8 canvasX_ = 0;
 
 		// このフレーム内で LY==WY となったことがある（ウィンドウに到達した）
 		bool toDrawWindow_ = false;
@@ -117,7 +117,7 @@ namespace dmge
 		bool drawingWindow_ = false;
 
 		// ウィンドウフェッチを行った行数
-		int windowLine_ = 0;
+		uint8 windowLine_ = 0;
 
 		// OAMバッファ
 		// スキャンラインのはじめのあたり（OAMScanモード時）に構築される
@@ -136,9 +136,6 @@ namespace dmge
 		void updateSTAT_();
 		void scanOAM_();
 		void scanline_();
-
-		// タイルデータの、左から dotNth 個目のドットの色番号を得る
-		uint8 tileColor_(uint8 tileDataLo, uint8 tileDataHi, int dotNth);
 
 	};
 }

@@ -1,5 +1,6 @@
 ﻿#include "PPU.h"
 #include "LCD.h"
+#include "TileData.h"
 #include "BitMask/InterruptFlag.h"
 
 namespace dmge
@@ -136,7 +137,7 @@ namespace dmge
 			dot_ = 0;
 		}
 
-		uint8 ly = dot_ / 456;
+		uint8 ly = static_cast<uint8>(dot_ / 456);
 		lcd_->ly(ly);
 	}
 
@@ -191,6 +192,7 @@ namespace dmge
 	void PPU::scanOAM_()
 	{
 		const uint8 ly = lcd_->ly();
+		const int spriteSize = lcd_->isEnabledTallSprite() ? 16 : 8;
 
 		// X座標が同じOAMをバッファに追加しないよう、
 		// バッファに追加したOAMのX座標を記録しておく
@@ -199,21 +201,28 @@ namespace dmge
 		// OAMメモリを走査して、描画対象のOAMをバッファに格納していく
 		for (uint16 addr = 0xfe00; addr <= 0xfe9f; addr += 4)
 		{
+			// 1ライン10個まで
 			if (oamBuffer_.size() >= 10) break;
 
 			BufferedOAM oam;
 			oam.y = mem_->read(addr);
+
+			// Y座標が描画範囲にあるか？
+			if (ly + 16 < oam.y) continue;
+			if (ly + 16 >= oam.y + spriteSize) continue;
+
 			oam.x = mem_->read(addr + 1);
 
+			// X座標が描画範囲にあるか？
 			if (oam.x == 0) continue;
-			if (ly + 16 < oam.y) continue;
-			if (ly + 16 >= oam.y + (lcd_->isEnabledTallSprite() ? 16 : 8)) continue;
 
 			// 同じX座標のOAMを複数描画しない
 			if (xList.contains(oam.x)) continue;
+
 			xList << oam.x;
 
 			oam.tile = mem_->read(addr + 2);
+
 			const uint8 flags = mem_->read(addr + 3);
 			oam.priority = (flags >> 7) & 1;
 			oam.yFlip = (flags >> 6) & 1;
@@ -221,7 +230,9 @@ namespace dmge
 			oam.palette = (flags >> 4) & 1;
 			oam.cgbFlag = flags & 0b1111;
 
-			if (lcd_->isEnabledTallSprite())
+			// 8x16サイズのスプライトの場合、上半分のタイルIDはLSB=0、下半分はLSB=1となる
+			// ただし yFlip==true の場合は反対になる
+			if (spriteSize == 16)
 			{
 				if ((not oam.yFlip && (ly + 16 < oam.y + 8)) ||
 					(oam.yFlip && (ly + 16 >= oam.y + 8)))
@@ -255,9 +266,8 @@ namespace dmge
 		const uint8 wy = lcd_->wy();
 		const uint8 wx = lcd_->wx();
 		const bool enabledWindow = lcd_->isEnabledWindow();
-		const uint16 tileDataAddrBase = lcd_->tileDataAddress();
 
-		// このフレームでウィンドウに到達したかどうかを toDrawWinodw_ に記録する
+		// このフレームでウィンドウに到達したかどうかを toDrawWindow_ に記録する
 		if (ly == wy)
 		{
 			toDrawWindow_ = true;
@@ -273,31 +283,34 @@ namespace dmge
 		}
 
 		// ピクセルフェッチャーのいるX座標
-		const int x = fetcherX_;
+		const uint8 x = fetcherX_;
 
-		// タイルマップのアドレス
-		const uint16 tileMapAddrBase = drawingWindow_ ? lcd_->windowTileMapAddress() : lcd_->bgTileMapAddress();
-		const uint16 addrOffsetX = drawingWindow_ ?
-			x / 8 :
-			((x / 8) + (scx / 8)) & 0x1f;
-		const uint16 addrOffsetY = drawingWindow_ ?
-			32 * (windowLine_ / 8) :
-			32 * (((ly + scy) & 0xff) / 8);
-		const uint16 tileAddr = tileMapAddrBase + ((addrOffsetX + addrOffsetY) & 0x3ff);
 
-		// タイルID
+		// タイルマップの中の、描画対象のタイルのアドレスを得る
+		uint16 tileAddr;
+
+		if (drawingWindow_)
+		{
+			const uint16 tileMapAddrBase = lcd_->windowTileMapAddress();
+			const uint16 addrOffsetX = x / 8;
+			const uint16 addrOffsetY = 32 * (windowLine_ / 8);
+			tileAddr = tileMapAddrBase + ((addrOffsetX + addrOffsetY) & 0x3ff);
+		}
+		else
+		{
+			const uint16 tileMapAddrBase = lcd_->bgTileMapAddress();
+			const uint16 addrOffsetX = ((x / 8) + (scx / 8)) & 0x1f;
+			const uint16 addrOffsetY = 32 * (((ly + scy) & 0xff) / 8);
+			tileAddr = tileMapAddrBase + ((addrOffsetX + addrOffsetY) & 0x3ff);
+		}
+
+		// タイルデータのアドレスを得る
 		const uint8 tileId = mem_->read(tileAddr);
-
-		// タイルデータのアドレス
-		const uint16 tileDataAddr = tileDataAddrBase + (tileDataAddrBase == 0x8000 ? tileId : (int8)tileId) * 0x10;
-		const uint16 tileDataAddrOffset = 2 * ((drawingWindow_ ? windowLine_ : (ly + scy)) % 8);
+		const uint16 tileDataAddr = TileData::GetAddress(lcd_->tileDataAddress(), tileId, drawingWindow_ ? (windowLine_ % 8) : ((ly + scy) % 8));
 
 		// タイルデータを参照
-		const uint8 tileLo = mem_->read(tileDataAddr + tileDataAddrOffset);
-		const uint8 tileHi = mem_->read(tileDataAddr + tileDataAddrOffset + 1);
-
-		const int shift = 7 - (x % 8); // 左から shift 個目のドットを描画する
-		const uint8 color = tileColor_(tileLo, tileHi, shift);
+		const uint16 tileData = mem_->read16(tileDataAddr);
+		const uint8 color = TileData::GetColor(tileData, x % 8);
 
 		// 実際の描画色
 		Color dispColor = displayColorPalette_[(int)lcd_->bgp(color)];
@@ -313,16 +326,12 @@ namespace dmge
 				// スプライトの、左から oamX 個目のドットを描画する
 				const int oamX = canvasX_ + 8 - oam.x;
 
-				// ただし xFlip==true の場合は右から描画する
-				const int shiftX = oam.xFlip ? (oamX % 8) : (7 - (oamX % 8));
-
-				// yFlip==true の場合は下から描画する
-				const int shiftY = 2 * (oam.yFlip ? (7 - (ly % 8)) : (ly % 8));
+				// タイルデータのアドレスを得る
+				const uint16 oamTileDataAddr = TileData::GetAddress(0x8000, oam.tile, ly % 8, oam.yFlip);
 
 				// タイルデータを参照
-				const uint8 oamTileLo = mem_->read(0x8000 + oam.tile * 0x10 + shiftY);
-				const uint8 oamTileHi = mem_->read(0x8000 + oam.tile * 0x10 + shiftY + 1);
-				const uint8 oamColor = tileColor_(oamTileLo, oamTileHi, shiftX);
+				const uint16 oamTileData = mem_->read16(oamTileDataAddr);
+				const uint8 oamColor = TileData::GetColor(oamTileData, oamX % 8, oam.xFlip);
 
 				// BGとのマージ
 				if (oamColor != 0 && not (oam.priority == 1 && color != 0))
@@ -336,10 +345,5 @@ namespace dmge
 
 		fetcherX_++;
 		canvasX_++;
-	}
-
-	uint8 PPU::tileColor_(uint8 tileDataLo, uint8 tileDataHi, int dotNth)
-	{
-		return ((tileDataLo >> dotNth) & 1) | (((tileDataHi >> dotNth) & 1) << 1);
 	}
 }

@@ -18,7 +18,7 @@ namespace dmge
 
 		void reset();
 
-		void load(FilePath cartridgePath);
+		void loadCartridge(FilePath cartridgePath);
 
 		void write(uint16 addr, uint8 value);
 

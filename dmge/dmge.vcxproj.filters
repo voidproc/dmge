@@ -174,6 +174,9 @@
     <ClCompile Include="Joypad.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="TileData.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Image Include="App\icon.ico">
@@ -851,6 +854,9 @@
     </ClInclude>
     <ClInclude Include="BitMask\TAC.h">
       <Filter>Header Files\BitMask</Filter>
+    </ClInclude>
+    <ClInclude Include="TileData.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

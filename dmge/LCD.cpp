@@ -9,6 +9,7 @@ namespace dmge
 	LCD::LCD(Memory* mem)
 		: mem_{ mem }
 	{
+
 	}
 
 	bool LCD::isEnabled() const
@@ -119,58 +120,17 @@ namespace dmge
 		return mem_->read(Address::LYC);
 	}
 
-	Array<Colors::Gray> LCD::bgp() const
+	Colors::Gray LCD::bgp(int n)
 	{
-		const uint8 palette = mem_->read(Address::BGP);
-
-		return {
-			static_cast<Colors::Gray>((palette >> 0) & 0b11),
-			static_cast<Colors::Gray>((palette >> 2) & 0b11),
-			static_cast<Colors::Gray>((palette >> 4) & 0b11),
-			static_cast<Colors::Gray>((palette >> 6) & 0b11),
-		};
+		const uint8 paletteData = mem_->read(Address::BGP);
+		return static_cast<Colors::Gray>((paletteData >> (n * 2)) & 0b11);
 	}
 
-	std::array<Colors::Gray, 4 * 2> LCD::obp() const
+	Colors::Gray LCD::obp(int palette, int n)
 	{
-		const uint8 pal0 = mem_->read(Address::OBP0);
-		const uint8 pal1 = mem_->read(Address::OBP1);
-
-		return {
-			static_cast<Colors::Gray>((pal0 >> 0) & 0b11),
-			static_cast<Colors::Gray>((pal0 >> 2) & 0b11),
-			static_cast<Colors::Gray>((pal0 >> 4) & 0b11),
-			static_cast<Colors::Gray>((pal0 >> 6) & 0b11),
-			static_cast<Colors::Gray>((pal1 >> 0) & 0b11),
-			static_cast<Colors::Gray>((pal1 >> 2) & 0b11),
-			static_cast<Colors::Gray>((pal1 >> 4) & 0b11),
-			static_cast<Colors::Gray>((pal1 >> 6) & 0b11),
-		};
+		const uint8 paletteData = mem_->read(palette == 0 ? Address::OBP0 : Address::OBP1);
+		return static_cast<Colors::Gray>((paletteData >> (n * 2)) & 0b11);
 	}
-
-	//Array<Colors::Gray> LCD::obp0() const
-	//{
-	//	const uint8 palette = mem_->read(Address::OBP0);
-
-	//	return {
-	//		static_cast<Colors::Gray>((palette >> 0) & 0b11),
-	//		static_cast<Colors::Gray>((palette >> 2) & 0b11),
-	//		static_cast<Colors::Gray>((palette >> 4) & 0b11),
-	//		static_cast<Colors::Gray>((palette >> 6) & 0b11),
-	//	};
-	//}
-
-	//Array<Colors::Gray> LCD::obp1() const
-	//{
-	//	const uint8 palette = mem_->read(Address::OBP1);
-
-	//	return {
-	//		static_cast<Colors::Gray>((palette >> 0) & 0b11),
-	//		static_cast<Colors::Gray>((palette >> 2) & 0b11),
-	//		static_cast<Colors::Gray>((palette >> 4) & 0b11),
-	//		static_cast<Colors::Gray>((palette >> 6) & 0b11),
-	//	};
-	//}
 
 	uint8 LCD::wy() const
 	{

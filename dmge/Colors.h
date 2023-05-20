@@ -4,6 +4,7 @@ namespace dmge
 {
 	namespace Colors
 	{
+		// DMGにおけるピクセルの色番号
 		enum class Gray : uint8
 		{
 			White = 0,

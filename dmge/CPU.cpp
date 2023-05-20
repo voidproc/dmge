@@ -849,6 +849,10 @@ namespace dmge
 		void halt_(CPU* cpu, Memory* mem, const Instruction*)
 		{
 			// opcode: 0x76
+
+			// HALT : 割り込みの状況によって低電力モードになったりならなかったりする
+			// 
+
 			if (cpu->ime)
 			{
 				cpu->powerSavingMode_ = true;
@@ -2078,12 +2082,17 @@ namespace dmge
 
 	void CPU::run()
 	{
+		// HALTによって低電力モードになっている場合はPCからのフェッチ＆実行をしない
 		if (powerSavingMode_)
 		{
 			return;
 		}
 
-		// run instruction (pc)
+		// 現在のPCの命令をフェッチし、
+		// 次のPCと消費サイクルを計算、
+		// フェッチした命令を実行
+		// ※実行した結果、消費サイクルが書き変わる場合は consumedCycles が変更されている（ジャンプ命令でジャンプしなかった場合など）
+		// ※実行した結果、次のPCが書き変わる場合は addrNext が変更されているので PC に反映する（JPやCALLなど）
 
 		const auto& instruction = getInstruction(pc);
 
@@ -2102,6 +2111,8 @@ namespace dmge
 	{
 		const uint8 intEnable = mem_->read(Address::IE);
 		const uint8 intFlag = mem_->read(Address::IF);
+
+		// 低電力モードから抜ける？
 
 		if (not ime)
 		{
@@ -2140,6 +2151,7 @@ namespace dmge
 				// 低電力モードから抜ける
 				powerSavingMode_ = false;
 
+				// 割り込みを１つ実行して、この回は終了
 				break;
 			}
 		}

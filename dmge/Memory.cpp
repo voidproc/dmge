@@ -187,16 +187,23 @@ namespace dmge
 			//...
 		}
 
+
+	HOOK:
+
 		// フック
 
-		HOOK:
-		for (const auto& hook : writeHooks_)
+		if (not writeHooks_.empty())
 		{
-			hook(addr, value);
+			for (const auto& hook : writeHooks_)
+			{
+				hook(addr, value);
+			}
 		}
 
 		if (doWrite)
+		{
 			mem_[addr] = value;
+		}
 	}
 
 	void Memory::writeDirect(uint16 addr, uint8 value)

@@ -203,4 +203,4 @@ namespace dmge
 	}
 }
 
-#define ADDRESS_IN_RANGE(addr,name) InRange(addr,static_cast<uint16>(name),static_cast<uint16>(name##_End))
+#define ADDRESS_IN_RANGE(addr,name) (name<=addr&&addr<=name##_End)

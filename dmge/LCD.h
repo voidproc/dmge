@@ -42,13 +42,15 @@ namespace dmge
 		// LYC (0xff45)
 		uint8 lyc() const;
 
+
 		// BGP (0xff47)
-		Array<Colors::Gray> bgp() const;
+		Colors::Gray bgp(int n);
+		//const std::array<Colors::Gray, 4>& bgp();
 
 		// OBP (0xff48-49)
-		std::array<Colors::Gray, 4 * 2> obp() const;
-		//Array<Colors::Gray> obp0() const;
-		//Array<Colors::Gray> obp1() const;
+		// palette: 0=OBP0, 1=OBP1
+		Colors::Gray obp(int palette, int n);
+		//std::array<Colors::Gray, 4 * 2> obp();
 
 		// WY, WX (0xff4a-4b)
 		uint8 wy() const;
@@ -56,5 +58,8 @@ namespace dmge
 
 	private:
 		Memory* mem_;
+
+		uint8 bgpPrev_;
+		std::array<Colors::Gray, 4> bgpCache_;
 	};
 }

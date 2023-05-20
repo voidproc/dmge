@@ -25,8 +25,8 @@ namespace dmge
 		{
 			value |= (KeyA.pressed() ? 0 : 1) << 0;
 			value |= (KeyS.pressed() ? 0 : 1) << 1;
-			value |= (KeyEnter.pressed() ? 0 : 1) << 2;
-			value |= (KeyBackspace.pressed() ? 0 : 1) << 3;
+			value |= (KeyBackspace.pressed() ? 0 : 1) << 2;
+			value |= (KeyEnter.pressed() ? 0 : 1) << 3;
 			value |= 0b11010000;
 		}
 

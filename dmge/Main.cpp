@@ -13,7 +13,7 @@
 void loadAssets()
 {
 	FontAsset::Register(U"debug", 8, U"fonts/PressStart2P-Regular.ttf", FontStyle::Bitmap);
-	FontAsset::Load(U"debug", U"0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ");
+	FontAsset::Load(U"debug", U"0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ=-~^|@`[{;+:*]},<.>/?_");
 }
 
 void drawStatusText(StringView text)
@@ -92,23 +92,27 @@ void Main()
 
 
 	// メモリ書き込み時にブレーク
-	mem.setWriteHook([&](uint16 addr, uint8 value) {
-		if (not config.enableBreakpoint)
-		{
-			return;
-		}
 
-		for (const auto& mem : config.breakpointsMemWrite)
-		{
-			if (addr == mem)
+	if (config.enableBreakpoint)
+	{
+		mem.setWriteHook([&](uint16 addr, uint8 value) {
+			if (not config.enableBreakpoint)
 			{
-				trace = true;
-				Console.writeln(U"Break(Memory Write): pc={:04X} mem={:04X} val={:02X}"_fmt(cpu.pc, addr, value));
-				cpu.dump();
-				break;
+				return;
 			}
-		}
-	});
+
+			for (const auto& mem : config.breakpointsMemWrite)
+			{
+				if (addr == mem)
+				{
+					trace = true;
+					Console.writeln(U"Break(Memory Write): pc={:04X} mem={:04X} val={:02X}"_fmt(cpu.pc, addr, value));
+					cpu.dump();
+					break;
+				}
+			}
+		});
+	}
 
 
 	Console.writeln(U"Start main loop");

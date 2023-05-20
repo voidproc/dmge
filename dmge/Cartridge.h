@@ -33,4 +33,12 @@ namespace dmge
 		HUC3 = 0xFE,
 		HUC1_RAM_BATTERY = 0xFF,
 	};
+
+	struct CartridgeHeader
+	{
+		String title;
+		CartridgeType type;
+		int romSizeKB;
+		int ramSizeKB;
+	};
 }

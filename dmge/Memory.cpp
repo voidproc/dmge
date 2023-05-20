@@ -60,15 +60,12 @@ namespace dmge
 		reader.read(rom_.data(), rom_.size());
 
 		// ヘッダ読み込み
-		readTitle_();
-		readCartridgeType_();
-		readROMSize_();
-		readRAMSize_();
+		readCartridgeHeader_();
 
 		// SRAM (32KiB)
 		sram_.resize(0x8000);
 
-		switch (cartridgeType_)
+		switch (cartridgeHeader_.type)
 		{
 		case CartridgeType::ROM_ONLY:
 		case CartridgeType::MBC1:
@@ -99,7 +96,7 @@ namespace dmge
 			// ROM Bank
 			// set the ROM Bank Number
 
-			switch (romSizeKB_)
+			switch (cartridgeHeader_.romSizeKB)
 			{
 			case 32:   value &= 0b00000001; break;
 			case 64:   value &= 0b00000011; break;
@@ -221,7 +218,7 @@ namespace dmge
 		{
 			// ROM Bank 0
 			// 大容量ROMのとき、モード1の場合、ROMバンク番号の上位2bitがセカンダリバンクの影響を受ける
-			if (romSizeKB_ >= 1024)
+			if (cartridgeHeader_.romSizeKB >= 1024)
 			{
 				value = rom_[0x4000 * (romBank() | (ramBank_ << 5)) + addr];
 			}
@@ -250,7 +247,7 @@ namespace dmge
 
 	int Memory::romBank() const
 	{
-		if (romSizeKB_ >= 1024)
+		if (cartridgeHeader_.romSizeKB >= 1024)
 		{
 			return romBank_ + (ramBank_ << 5);
 		}
@@ -258,34 +255,34 @@ namespace dmge
 		return romBank_;
 	}
 
-	void Memory::readTitle_()
+	void Memory::readCartridgeHeader_()
 	{
-		title_ = rom_.slice(Address::Title, 15).map([](uint8 x) { return static_cast<char32_t>(x); }).join(U""_sv, U""_sv, U""_sv);
-	}
+		// Title
+		cartridgeHeader_.title = rom_.slice(Address::Title, 15).map([](uint8 x) { return static_cast<char32_t>(x); }).join(U""_sv, U""_sv, U""_sv);
 
-	void Memory::readCartridgeType_()
-	{
-		cartridgeType_ = static_cast<CartridgeType>(rom_[Address::CartridgeType]);
-	}
+		// Type
+		cartridgeHeader_.type = static_cast<CartridgeType>(rom_[Address::CartridgeType]);
 
-	void Memory::readROMSize_()
-	{
-		uint8 code = rom_[Address::ROMSize];
-		romSizeKB_ = 32 * (1 << code);
-	}
+		// ROM Size
 
-	void Memory::readRAMSize_()
-	{
-		uint8 code = rom_[Address::RAMSize];
+		const uint8 romSize = rom_[Address::ROMSize];
+		cartridgeHeader_.romSizeKB = 32 * (1 << romSize);
 
-		switch (code)
+		// RAM Size
+
+		const uint8 ramSize = rom_[Address::RAMSize];
+		int ramSizeKB;
+
+		switch (ramSize)
 		{
-		case 0: ramSizeKB_ = 0; break;
-		case 1: ramSizeKB_ = 0; break;
-		case 2: ramSizeKB_ = 8; break;
-		case 3: ramSizeKB_ = 32; break;
-		case 4: ramSizeKB_ = 128; break;
-		case 5: ramSizeKB_ = 64; break;
+		case 0: ramSizeKB = 0; break;
+		case 1: ramSizeKB = 0; break;
+		case 2: ramSizeKB = 8; break;
+		case 3: ramSizeKB = 32; break;
+		case 4: ramSizeKB = 128; break;
+		case 5: ramSizeKB = 64; break;
 		}
+
+		cartridgeHeader_.ramSizeKB = ramSizeKB;
 	}
 }

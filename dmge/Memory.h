@@ -51,22 +51,17 @@ namespace dmge
 		Array<uint8> sram_;
 
 		// カートリッジのヘッダ情報
+		CartridgeHeader cartridgeHeader_;
 
-		String title_;
-		CartridgeType cartridgeType_ = CartridgeType::ROM_ONLY;
-		int romSizeKB_ = 0;
-		int ramSizeKB_ = 0;
-		bool ramEnabled_ = false;
+		// ROM / RAM バンク
 		int romBank_ = 1;
 		int ramBank_ = 0;
+		int ramEnabled_ = false;
 		int bankingMode_ = 0;
 
 		// メモリ書き込み時フック
 		Array<std::function<void(uint16, uint8)>> writeHooks_;
 
-		void readTitle_();
-		void readCartridgeType_();
-		void readROMSize_();
-		void readRAMSize_();
+		void readCartridgeHeader_();
 	};
 }

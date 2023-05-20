@@ -850,8 +850,8 @@ namespace dmge
 		{
 			// opcode: 0x76
 
-			// HALT : 割り込みの状況によって低電力モードになったりならなかったりする
-			// 
+			// HALT
+			// 割り込みの状況によって低電力モードになったりならなかったりする
 
 			if (cpu->ime)
 			{
@@ -2061,7 +2061,6 @@ namespace dmge
 				{ 0xff, 2, 8, 0, U"SET"_sv, U"7,A"_sv, set_ },
 			}
 		};
-
 	}
 
 	CPU::CPU(Memory* mem, PPU* ppu, LCD* lcd, dmge::Timer* timer)
@@ -2184,7 +2183,8 @@ namespace dmge
 	const Instruction& CPU::getInstruction(uint16 addr) const
 	{
 		const uint8 code = mem_->read(addr);
-		const uint8 opcode = (code != 0xcb) ? code : mem_->read(addr + 1);
-		return (code != 0xcb ? Instructions::unprefixed : Instructions::cbprefixed)[opcode];
+		if (code != 0xcb) return Instructions::unprefixed[code];
+
+		return Instructions::cbprefixed[mem_->read(addr + 1)];
 	}
 }

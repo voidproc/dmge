@@ -96,9 +96,6 @@ namespace dmge
 		// 前回STATによる割り込み要求をしたか（してたら今回は要求しない）
 		bool prevStatInt_ = false;
 
-
-		// レンダリング
-
 		// レンダリング結果
 		Grid<Color> canvas_;
 

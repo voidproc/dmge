@@ -64,5 +64,6 @@ namespace dmge
 		}
 
 		Console.writeln(U"enableBreakpoint={}"_fmt(enableBreakpoint));
+		Console.writeln(U"showFPS={}"_fmt(showFPS));
 	}
 }

@@ -16,7 +16,10 @@ namespace dmge
 		Array<uint16> breakpointsMemWrite;
 
 		// ブレークポイントを使用する
-		bool enableBreakpoint;
+		bool enableBreakpoint = false;
+
+		// FPSを表示する
+		bool showFPS = true;
 
 		// config.ini のパース結果を返す
 		static AppConfig LoadConfig();

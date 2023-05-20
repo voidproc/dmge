@@ -18,13 +18,16 @@ void loadAssets()
 
 void drawStatusText(StringView text)
 {
-	FontAsset(U"debug")(text).draw(Scene::Rect().tr().movedBy(-8 * text.length(), 0));
+	const Size size{ 8 * text.length(), 8 };
+	const Rect region{ Scene::Rect().tr().movedBy(-size.x, 1), size };
+	region.stretched(1, 1).draw(Color{0, 128});
+	FontAsset(U"debug")(text).draw(region.pos);
 }
 
 void Main()
 {
 	const int Scale = 3;
-	const Size SceneSize{ 160 * Scale + 192, 144 * Scale };
+	const Size SceneSize{ 160 * Scale, 144 * Scale };
 
 	Scene::Resize(SceneSize);
 	Window::Resize(SceneSize);
@@ -211,7 +214,10 @@ void Main()
 
 			ppu.draw(Point{ 0, 0 }, Scale);
 
-			drawStatusText(U"FPS:{:3d}"_fmt(Profiler::FPS()));
+			if (config.showFPS)
+			{
+				drawStatusText(U"FPS:{:3d}"_fmt(Profiler::FPS()));
+			}
 
 			toDraw = false;
 		}

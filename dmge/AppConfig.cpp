@@ -32,6 +32,11 @@ namespace dmge
 			config.enableBreakpoint = static_cast<bool>(ParseInt<int>(ini.getGlobalValue(U"enablebreakpoint")));
 		}
 
+		if (ini.hasGlobalValue(U"showfps"))
+		{
+			config.showFPS = static_cast<bool>(ParseInt<int>(ini.getGlobalValue(U"showfps")));
+		}
+
 		return config;
 	}
 

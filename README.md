@@ -1,25 +1,29 @@
 # dmge - DMG Emulator
 
-C++ / OpenSiv3D ‚ÅƒQ[ƒ€ƒ{[ƒC‚ÌƒGƒ~ƒ…ƒŒ[ƒ^‚ğì‚Á‚Ä‚¢‚Ü‚·B
+C++ / OpenSiv3D ã§ã‚²ãƒ¼ãƒ ãƒœãƒ¼ã‚¤ã®ã‚¨ãƒŸãƒ¥ãƒ¬ãƒ¼ã‚¿ã‚’ä½œã£ã¦ã„ã¾ã™ã€‚
 
 
-## ŠJ”­ŠÂ‹«
+## é–‹ç™ºç’°å¢ƒ
 
 - Windows 11
 - Visual Studio 2022
 - [OpenSiv3D](https://github.com/Siv3D/OpenSiv3D) v0.6.9
 
 
-## ƒXƒNƒŠ[ƒ“ƒVƒ‡ƒbƒg
+## ã‚¹ã‚¯ãƒªãƒ¼ãƒ³ã‚·ãƒ§ãƒƒãƒˆ
 
-hello-world.gb
+### hello-world
+
 ![hello-world](screenshot/hello-world.png)
 
-cpu_instrs.gb
+### cpu_instrs
+
 ![cpu_instrs](screenshot/cpu_instrs.png)
 
-dmg-acid2.gb
+### dmg-acid2
+
 ![dmg-acid2](screenshot/dmg-acid2.png)
 
-bgbtest.gb
+### bgbtest
+
 ![bgbtest](screenshot/bgbtest.png)

@@ -18,9 +18,9 @@ namespace dmge
 			.split(U',')
 			.map([](const String& s) { return ParseInt<uint16>(s, 16); });
 
-		config.enableBreakpoint = ParseOr<bool>(ini[U"enablebreakpoint"], false);
+		config.enableBreakpoint = ParseOr<int>(ini[U"enablebreakpoint"], false);
 
-		config.showFPS = ParseOr<bool>(ini[U"showfps"], U"");
+		config.showFPS = ParseOr<int>(ini[U"showfps"], true);
 
 		config.scale = ParseOr<int>(ini[U"scale"], 3);
 

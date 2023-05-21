@@ -166,9 +166,10 @@ namespace dmge
 		}
 
 		// Set STAT.1-0 (PPU Mode)
+		// LCDがOFFの場合は mode=0 をセットする
 
 		const uint8 stat = lcd_->stat();
-		mem_->write(Address::STAT, (stat & ~3) | (uint8)mode_);
+		mem_->write(Address::STAT, 0x80 | (stat & ~3) | (lcd_->isEnabled() ? (uint8)mode_ : 0));
 	}
 
 	void PPU::updateSTAT_()
@@ -183,7 +184,7 @@ namespace dmge
 		{
 			const uint8 ly = lcd_->ly();
 			const uint8 stat = lcd_->stat();
-			mem_->write(Address::STAT, (stat & ~4) | (ly == lyc ? 4 : 0));
+			mem_->write(Address::STAT, 0x80 | (stat & ~4) | (ly == lyc ? 4 : 0));
 		}
 
 		prevLYC_ = lyc;

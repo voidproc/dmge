@@ -70,6 +70,7 @@ namespace dmge
 		case CartridgeType::ROM_ONLY:
 		case CartridgeType::MBC1:
 		case CartridgeType::MBC1_RAM:
+		case CartridgeType::MBC1_RAM_BATTERY:
 			mem_.resize(0x10000);
 			reader.setPos(0);
 			reader.read(mem_.data(), 0x8000);

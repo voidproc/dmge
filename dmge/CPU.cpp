@@ -2169,12 +2169,12 @@ namespace dmge
 	{
 		const auto& inst = getInstruction(pc);
 
-		Console.writeln(U"pc:{:04X} {:5} {:10} af:{:04X} bc:{:04X} de:{:04X} hl:{:04X} sp:{:04X} ly:{:02X} div:{:02X} tima:{:02X} tma:{:02X} tac:{:02X} ie:{:02X} if:{:02X} rom:{:02X}"_fmt(
+		Console.writeln(U"pc:{:04X} {:5} {:10} af:{:04X} bc:{:04X} de:{:04X} hl:{:04X} sp:{:04X} ly:{:02X} stat:{:02X} tima:{:02X} tma:{:02X} tac:{:02X} ie:{:02X} if:{:02X} rom:{:02X}"_fmt(
 			pc,
 			inst.mnemonic, inst.operands,
 			af(), bc(), de(), hl(), sp,
-			lcd_->ly(),
-			mem_->read(Address::DIV), mem_->read(Address::TIMA), mem_->read(Address::TMA), mem_->read(Address::TAC),
+			lcd_->ly(), lcd_->stat(),
+			mem_->read(Address::TIMA), mem_->read(Address::TMA), mem_->read(Address::TAC),
 			mem_->read(Address::IE), mem_->read(Address::IF),
 			mem_->romBank()
 		));

@@ -188,6 +188,7 @@ void Main()
 			ppu.run();
 
 			// VBlankに移行した時のみ描画する
+			// TOOD: LCDがoffになっている場合はVBlankにならないので、他の方法でタイミングを取って描画する必要がある
 			if (ppu.modeChangedToVBlank())
 			{
 				toDraw = true;

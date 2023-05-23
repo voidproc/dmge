@@ -272,7 +272,7 @@ namespace dmge
 		// RAM Size
 
 		const uint8 ramSize = rom_[Address::RAMSize];
-		int ramSizeKB;
+		int ramSizeKB = 0;
 
 		switch (ramSize)
 		{

@@ -1,16 +1,52 @@
 ﻿#include "PPU.h"
+#include "Memory.h"
 #include "LCD.h"
 #include "TileData.h"
 #include "BitMask/InterruptFlag.h"
 
 namespace dmge
 {
+	// OAMバッファ
+	struct BufferedOAM
+	{
+		// OAMのY座標
+		// 実際の描画位置は-16される
+		uint8 y;
+
+		// OAMのX座標
+		// 実際の描画位置は-8される
+		uint8 x;
+
+		// タイルID
+		// 0x8000からの符号なしオフセット
+		uint8 tile;
+
+
+		// Flags
+
+		// BG and Window over OBJ
+		uint8 priority;
+
+		// 垂直反転
+		bool yFlip;
+
+		// 水平反転
+		bool xFlip;
+
+		// パレット（0=OBP0, 1=OBP1）
+		uint8 palette;
+
+		// CGB Only
+		uint8 cgbFlag;
+	};
+
+
 	PPU::PPU(Memory* mem)
 		: mem_{ mem }, lcd_{ std::make_unique<LCD>(mem) }
 	{
 		dot_ = 70224 - 52 + 4;
-
 		canvas_.resize(160 + 8, 144, Palette::White);
+		oamBuffer_.reserve(10);
 	}
 
 	PPU::~PPU()
@@ -119,6 +155,11 @@ namespace dmge
 		}
 	}
 
+	PPUMode PPU::mode() const
+	{
+		return mode_;
+	}
+
 	bool PPU::modeChangedToOAMScan() const
 	{
 		return (dot_ < 144 * 456) && ((dot_ % 456) == 0);
@@ -132,6 +173,11 @@ namespace dmge
 	bool PPU::modeChangedToVBlank() const
 	{
 		return dot_ == 144 * 456;
+	}
+
+	int PPU::dot() const
+	{
+		return dot_;
 	}
 
 	void PPU::updateLY_()

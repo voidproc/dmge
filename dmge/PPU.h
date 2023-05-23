@@ -1,47 +1,13 @@
 ﻿#pragma once
 
-#include "Memory.h"
 #include "PPUMode.h"
 #include "Colors.h"
 
 namespace dmge
 {
-	// OAMバッファ
-	struct BufferedOAM
-	{
-		// OAMのY座標
-		// 実際の描画位置は-16される
-		uint8 y;
-
-		// OAMのX座標
-		// 実際の描画位置は-8される
-		uint8 x;
-
-		// タイルID
-		// 0x8000からの符号なしオフセット
-		uint8 tile;
-
-
-		// Flags
-
-		// BG and Window over OBJ
-		uint8 priority;
-
-		// 垂直反転
-		bool yFlip;
-
-		// 水平反転
-		bool xFlip;
-
-		// パレット（0=OBP0, 1=OBP1）
-		uint8 palette;
-
-		// CGB Only
-		uint8 cgbFlag;
-	};
-
-
+	class Memory;
 	class LCD;
+	struct BufferedOAM;
 
 	class PPU
 	{
@@ -60,10 +26,7 @@ namespace dmge
 
 		// PPUのモード
 		// LYと、このフレームの描画ドット数により変化する
-		PPUMode mode() const
-		{
-			return mode_;
-		}
+		PPUMode mode() const;
 
 		// PPUのモードが OAM Scan に変化した
 		bool modeChangedToOAMScan() const;
@@ -75,10 +38,7 @@ namespace dmge
 		bool modeChangedToVBlank() const;
 
 		// このフレームの描画ドット数
-		int dot() const
-		{
-			return dot_;
-		}
+		int dot() const;
 
 	private:
 		Memory* mem_;

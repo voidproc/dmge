@@ -1,10 +1,9 @@
 ﻿#pragma once
 
-#include "Memory.h"
-
 namespace dmge
 {
 	class CPU;
+	class Memory;
 
 	struct Instruction
 	{

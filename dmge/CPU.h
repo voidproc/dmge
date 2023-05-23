@@ -163,7 +163,7 @@ namespace dmge
 
 
 		// 次に実行する命令のあるアドレス
-		uint16 addrNext;
+		uint16 pcNext;
 
 		// 実際に消費したサイクル数
 		int consumedCycles;

@@ -1346,7 +1346,7 @@ namespace dmge
 
 		void jp_(CPU* cpu, Memory* mem, const Instruction* inst)
 		{
-			const uint16 addrNext = mem->read16(cpu->pc + 1);
+			const uint16 pcNext = mem->read16(cpu->pc + 1);
 			bool toJump = false;
 
 			switch (inst->opcode)
@@ -1370,7 +1370,7 @@ namespace dmge
 
 			if (toJump)
 			{
-				cpu->addrNext = addrNext;
+				cpu->pcNext = pcNext;
 				return;
 			}
 
@@ -1380,7 +1380,7 @@ namespace dmge
 		void jp_hl_(CPU* cpu, Memory*, const Instruction*)
 		{
 			// opcode: 0xe9
-			cpu->addrNext = cpu->hl();
+			cpu->pcNext = cpu->hl();
 		}
 
 		void jr_(CPU* cpu, Memory* mem, const Instruction* inst)
@@ -1409,7 +1409,7 @@ namespace dmge
 
 			if (toJump)
 			{
-				cpu->addrNext = cpu->addrNext + n;
+				cpu->pcNext = cpu->pcNext + n;
 				return;
 			}
 
@@ -1447,7 +1447,7 @@ namespace dmge
 				const uint16 addr = mem->read16(cpu->pc + 1);
 				mem->write(--cpu->sp, (cpu->pc + 3) >> 8);
 				mem->write(--cpu->sp, (cpu->pc + 3) & 0xff);
-				cpu->addrNext = addr;
+				cpu->pcNext = addr;
 				return;
 			}
 
@@ -1476,7 +1476,7 @@ namespace dmge
 
 			mem->write(--cpu->sp, (cpu->pc + 1) >> 8);
 			mem->write(--cpu->sp, (cpu->pc + 1) & 0xff);
-			cpu->addrNext = addr;
+			cpu->pcNext = addr;
 		}
 
 
@@ -1508,7 +1508,7 @@ namespace dmge
 
 			if (toRet)
 			{
-				cpu->addrNext = mem->read16(cpu->sp);
+				cpu->pcNext = mem->read16(cpu->sp);
 				cpu->sp += 2;
 				return;
 			}
@@ -1519,7 +1519,7 @@ namespace dmge
 		void reti_(CPU* cpu, Memory* mem, const Instruction*)
 		{
 			// opcode: 0xd9
-			cpu->addrNext = mem->read16(cpu->sp);
+			cpu->pcNext = mem->read16(cpu->sp);
 			cpu->sp += 2;
 			cpu->ime = true;
 		}
@@ -2090,11 +2090,11 @@ namespace dmge
 		// 次のPCと消費サイクルを計算、
 		// フェッチした命令を実行
 		// ※実行した結果、消費サイクルが書き変わる場合は consumedCycles が変更されている（ジャンプ命令でジャンプしなかった場合など）
-		// ※実行した結果、次のPCが書き変わる場合は addrNext が変更されているので PC に反映する（JPやCALLなど）
+		// ※実行した結果、次のPCが書き変わる場合は pcNext が変更されているので PC に反映する（JPやCALLなど）
 
 		const auto& instruction = getInstruction(pc);
 
-		addrNext = pc + instruction.bytes;
+		pcNext = pc + instruction.bytes;
 		consumedCycles = instruction.cycles;
 
 		if (instruction.inst != nullptr)
@@ -2102,7 +2102,7 @@ namespace dmge
 			instruction.inst(this, mem_, &instruction);
 		}
 
-		pc = addrNext;
+		pc = pcNext;
 	}
 
 	void CPU::interrupt()

@@ -6,7 +6,7 @@ namespace dmge
 {
 	class Memory;
 
-	// LCD Register (0xff40-0xff4b)
+	// LCDレジスタ（0xff40-0xff4b）の表示・制御のためのユーティリティクラス
 
 	class LCD
 	{

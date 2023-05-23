@@ -19,13 +19,12 @@ namespace dmge
 
 
 	class PPU;
-	class LCD;
 	class Timer;
 
 	class CPU
 	{
 	public:
-		CPU(Memory* mem, PPU* ppu, LCD* lcd, dmge::Timer* timer);
+		CPU(Memory* mem, PPU* ppu, dmge::Timer* timer);
 
 		// レジスタを初期状態にする
 		void reset();
@@ -183,7 +182,6 @@ namespace dmge
 	private:
 		Memory* mem_;
 		PPU* ppu_;
-		LCD* lcd_;
 		dmge::Timer* timer_;
 	};
 }

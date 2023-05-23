@@ -5,12 +5,16 @@
 
 namespace dmge
 {
-	PPU::PPU(Memory* mem, LCD* lcd)
-		: mem_{ mem }, lcd_{ lcd }
+	PPU::PPU(Memory* mem)
+		: mem_{ mem }, lcd_{ std::make_unique<LCD>(mem) }
 	{
 		dot_ = 70224 - 52 + 4;
 
 		canvas_.resize(160 + 8, 144, Palette::White);
+	}
+
+	PPU::~PPU()
+	{
 	}
 
 	void PPU::run()

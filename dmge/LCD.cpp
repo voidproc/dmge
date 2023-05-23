@@ -9,7 +9,6 @@ namespace dmge
 	LCD::LCD(Memory* mem)
 		: mem_{ mem }
 	{
-
 	}
 
 	bool LCD::isEnabled() const

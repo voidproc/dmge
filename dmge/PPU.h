@@ -46,7 +46,9 @@ namespace dmge
 	class PPU
 	{
 	public:
-		PPU(Memory* mem, LCD* lcd);
+		PPU(Memory* mem);
+
+		~PPU();
 
 		// このフレームのレンダリングを1ドット進める
 		// LY・PPUモード・STATを更新する
@@ -80,7 +82,7 @@ namespace dmge
 
 	private:
 		Memory* mem_;
-		LCD* lcd_;
+		std::unique_ptr<LCD> lcd_;
 
 		// このフレームの描画ドット数
 		int dot_ = 0;

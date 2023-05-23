@@ -3,7 +3,6 @@
 #include "Memory.h"
 #include "CPU.h"
 #include "PPU.h"
-#include "LCD.h"
 #include "Timer.h"
 #include "Joypad.h"
 #include "Address.h"
@@ -50,13 +49,11 @@ void Main()
 
 	dmge::Memory mem;
 
-	dmge::LCD lcd{ &mem };
-
-	dmge::PPU ppu{ &mem, &lcd };
+	dmge::PPU ppu{ &mem };
 
 	dmge::Timer timer{ &mem };
 
-	dmge::CPU cpu{ &mem, &ppu, &lcd, &timer };
+	dmge::CPU cpu{ &mem, &ppu, &timer };
 
 	dmge::Joypad joypad{ &mem };
 

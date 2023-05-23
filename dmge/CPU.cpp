@@ -1,7 +1,6 @@
 ﻿#include "CPU.h"
 #include "Memory.h"
 #include "PPU.h"
-#include "LCD.h"
 #include "Timer.h"
 
 namespace dmge
@@ -2063,8 +2062,8 @@ namespace dmge
 		};
 	}
 
-	CPU::CPU(Memory* mem, PPU* ppu, LCD* lcd, dmge::Timer* timer)
-		: a{}, f{}, b{}, c{}, d{}, e{}, sp{}, pc{}, mem_{ mem }, ppu_{ ppu }, lcd_{ lcd }, timer_{ timer }
+	CPU::CPU(Memory* mem, PPU* ppu, dmge::Timer* timer)
+		: a{}, f{}, b{}, c{}, d{}, e{}, sp{}, pc{}, mem_{ mem }, ppu_{ ppu }, timer_{ timer }
 	{
 		reset();
 	}
@@ -2169,14 +2168,19 @@ namespace dmge
 	{
 		const auto& inst = getInstruction(pc);
 
+		const uint8 ly = mem_->read(Address::LY);
+		const uint8 stat = mem_->read(Address::STAT);
+		const uint8 tima = mem_->read(Address::TIMA);
+		const uint8 tma = mem_->read(Address::TMA);
+		const uint8 tac = mem_->read(Address::TAC);
+		const uint8 intEnable = mem_->read(Address::IE);
+		const uint8 intFlag = mem_->read(Address::IF);
+
 		Console.writeln(U"pc:{:04X} {:5} {:10} af:{:04X} bc:{:04X} de:{:04X} hl:{:04X} sp:{:04X} ly:{:02X} stat:{:02X} tima:{:02X} tma:{:02X} tac:{:02X} ie:{:02X} if:{:02X} rom:{:02X}"_fmt(
 			pc,
 			inst.mnemonic, inst.operands,
 			af(), bc(), de(), hl(), sp,
-			lcd_->ly(), lcd_->stat(),
-			mem_->read(Address::TIMA), mem_->read(Address::TMA), mem_->read(Address::TAC),
-			mem_->read(Address::IE), mem_->read(Address::IF),
-			mem_->romBank()
+			ly, stat, tima, tma, tac, intEnable, intFlag, mem_->romBank()
 		));
 	}
 

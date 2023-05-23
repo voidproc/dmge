@@ -328,7 +328,7 @@ namespace dmge
 				const int oamX = canvasX_ + 8 - oam.x;
 
 				// タイルデータのアドレスを得る
-				const uint16 oamTileDataAddr = TileData::GetAddress(0x8000, oam.tile, ly % 8, oam.yFlip);
+				const uint16 oamTileDataAddr = TileData::GetAddress(0x8000, oam.tile, (ly + 16 - oam.y) % 8, oam.yFlip);
 
 				// タイルデータを参照
 				const uint16 oamTileData = mem_->read16(oamTileDataAddr);

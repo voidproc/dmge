@@ -106,7 +106,7 @@ void Main()
 		}
 	};
 
-	int paletteIndex = 0;
+	int currentPalette = 0;
 	ppu.setDisplayColorPalette(paletteList[0]);
 	Scene::SetBackground(paletteList[0][0]);
 
@@ -123,7 +123,7 @@ void Main()
 
 			for (const auto& mem : config.breakpointsMemWrite)
 			{
-				if (addr == mem)
+				if (addr == mem && not trace)
 				{
 					trace = true;
 					Console.writeln(U"Break(Memory Write): pc={:04X} mem={:04X} val={:02X}"_fmt(cpu.currentPC(), addr, value));
@@ -234,9 +234,9 @@ void Main()
 			// パレット切り替え
 			if (KeyC.down())
 			{
-				paletteIndex = (paletteIndex + 1) % paletteList.size();
-				ppu.setDisplayColorPalette(paletteList[paletteIndex]);
-				Scene::SetBackground(paletteList[paletteIndex][0]);
+				currentPalette = (currentPalette + 1) % paletteList.size();
+				ppu.setDisplayColorPalette(paletteList[currentPalette]);
+				Scene::SetBackground(paletteList[currentPalette][0]);
 			}
 
 			joypad.update();

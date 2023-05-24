@@ -87,6 +87,10 @@ void Main()
 	// VBlankに変化したので描画する
 	bool toDraw = false;
 
+	// 前回の描画からの経過サイクル数
+	// ※基本的に描画タイミングはVBlank移行時だが、LCD=offの場合にはVBlankに移行しないので
+	//   画面の更新（System::Update()）がされない期間が長くなってしまうため、
+	//   経過サイクル数が一定数を超えた場合にも描画を行う
 	int cyclesFromPreviousDraw = 0;
 
 	// アプリケーションを終了する

@@ -40,6 +40,10 @@ namespace dmge
 		// このフレームの描画ドット数
 		int dot() const;
 
+		// カラーパレットを設定する
+		// （「色番号から実際の色への変換テーブル」を置き換える）
+		void setDisplayColorPalette(const std::array<Color, 4>& palette);
+
 	private:
 		Memory* mem_;
 		std::unique_ptr<LCD> lcd_;
@@ -83,7 +87,7 @@ namespace dmge
 		Array<BufferedOAM> oamBuffer_;
 
 		// 色番号から実際の色への変換テーブル
-		const std::array<Color, 4> displayColorPalette_{
+		std::array<Color, 4> displayColorPalette_{
 			Color{ 221, 255, 212 },
 			Palette::Lightgreen,
 			Color{ 29, 114, 61 },

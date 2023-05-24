@@ -180,6 +180,11 @@ namespace dmge
 		return dot_;
 	}
 
+	void PPU::setDisplayColorPalette(const std::array<Color, 4>& palette)
+	{
+		std::copy(palette.cbegin(), palette.cend(), displayColorPalette_.begin());
+	}
+
 	void PPU::updateLY_()
 	{
 		if (not lcd_->isEnabled())

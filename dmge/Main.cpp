@@ -92,6 +92,19 @@ void Main()
 	// アプリケーションを終了する
 	bool quitApp = false;
 
+	// パレット
+	const Array<std::array<Color, 4>> paletteList = {
+		{
+			{ Color{ 232 }, Color{ 160 }, Color{ 88 }, Color{ 16 }, },
+			{ Color{ 224,248,208 }, Color{ 136,192,112 }, Color{ 52,104,86 }, Color{ 8,24,32 }, },
+			{ Color{ 134,163,90 }, Color{ 111,137,79 }, Color{ 88,117,79 }, Color{ 50,84,79 }, },
+			{ Color{ 255,239,206 }, Color{ 222,148,74 }, Color{ 173,41,33 }, Color{ 49,24,82 }, },
+		}
+	};
+
+	int paletteIndex = 0;
+	ppu.setDisplayColorPalette(paletteList[0]);
+
 
 	// メモリ書き込み時にブレーク
 
@@ -205,9 +218,17 @@ void Main()
 				break;
 			}
 
+			// ステップ実行に移行
 			if (KeyP.down())
 			{
 				trace = true;
+			}
+
+			// パレット切り替え
+			if (KeyC.down())
+			{
+				paletteIndex = (paletteIndex + 1) % paletteList.size();
+				ppu.setDisplayColorPalette(paletteList[paletteIndex]);
 			}
 
 			joypad.update();

@@ -41,7 +41,7 @@ void Main()
 
 	Scene::Resize(SceneSize);
 	Window::Resize(SceneSize);
-	Scene::SetBackground(Palette::Green);
+	Scene::SetBackground(Palette::Whitesmoke);
 	Scene::SetTextureFilter(TextureFilter::Nearest);
 	const ScopedRenderStates2D renderState{ SamplerState::ClampNearest };
 
@@ -67,8 +67,6 @@ void Main()
 
 	Graphics::SetVSyncEnabled(true);
 
-	Scene::SetBackground(Palette::Black);
-
 	while (System::Update())
 	{
 		if (Scene::Time() > 0.5)
@@ -89,6 +87,8 @@ void Main()
 	// VBlankに変化したので描画する
 	bool toDraw = false;
 
+	int cyclesFromPreviousDraw = 0;
+
 	// アプリケーションを終了する
 	bool quitApp = false;
 
@@ -104,6 +104,7 @@ void Main()
 
 	int paletteIndex = 0;
 	ppu.setDisplayColorPalette(paletteList[0]);
+	Scene::SetBackground(paletteList[0][0]);
 
 
 	// メモリ書き込み時にブレーク
@@ -205,13 +206,15 @@ void Main()
 			}
 		}
 
+		cyclesFromPreviousDraw += cpu.consumedCycles();
+
 		// 割り込み
 
 		cpu.interrupt();
 
 		// 描画
 
-		if (toDraw)
+		if (toDraw || cyclesFromPreviousDraw > 70224 + 16)
 		{
 			if (not System::Update())
 			{
@@ -229,6 +232,7 @@ void Main()
 			{
 				paletteIndex = (paletteIndex + 1) % paletteList.size();
 				ppu.setDisplayColorPalette(paletteList[paletteIndex]);
+				Scene::SetBackground(paletteList[paletteIndex][0]);
 			}
 
 			joypad.update();
@@ -241,6 +245,7 @@ void Main()
 			}
 
 			toDraw = false;
+			cyclesFromPreviousDraw = 0;
 		}
 
 		++counter;

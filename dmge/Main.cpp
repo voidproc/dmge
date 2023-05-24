@@ -53,7 +53,7 @@ void Main()
 
 	dmge::Timer timer{ &mem };
 
-	dmge::CPU cpu{ &mem, &ppu, &timer };
+	dmge::CPU cpu{ &mem };
 
 	dmge::Joypad joypad{ &mem };
 
@@ -108,7 +108,7 @@ void Main()
 				if (addr == mem)
 				{
 					trace = true;
-					Console.writeln(U"Break(Memory Write): pc={:04X} mem={:04X} val={:02X}"_fmt(cpu.pc, addr, value));
+					Console.writeln(U"Break(Memory Write): pc={:04X} mem={:04X} val={:02X}"_fmt(cpu.currentPC(), addr, value));
 					cpu.dump();
 					break;
 				}
@@ -127,10 +127,10 @@ void Main()
 		{
 			for (const auto bp : config.breakpoints)
 			{
-				if (cpu.pc == bp)
+				if (cpu.currentPC() == bp)
 				{
 					trace = true;
-					Console.writeln(U"Break: pc={:04X}"_fmt(cpu.pc));
+					Console.writeln(U"Break: pc={:04X}"_fmt(cpu.currentPC()));
 					break;
 				}
 			}
@@ -173,14 +173,14 @@ void Main()
 
 		// タイマーを更新
 
-		for (int i : step(cpu.consumedCycles))
+		for (int i : step(cpu.consumedCycles()))
 		{
 			timer.update();
 		}
 
 		// PPU
 
-		for (int i : step(cpu.consumedCycles))
+		for (int i : step(cpu.consumedCycles()))
 		{
 			ppu.run();
 

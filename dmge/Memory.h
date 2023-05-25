@@ -30,6 +30,8 @@ namespace dmge
 
 		int romBank() const;
 
+		void dumpCartridgeInfo();
+
 		template <class F>
 		void setWriteHook(F f)
 		{

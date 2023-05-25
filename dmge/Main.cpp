@@ -26,7 +26,7 @@ void drawStatusText(StringView text)
 void Main()
 {
 	Console.open();
-	Console.writeln(U"Setup ...");
+	Console.writeln(U"* Setup ...");
 
 	dmge::AppConfig config = dmge::AppConfig::LoadConfig();
 	config.print();
@@ -60,10 +60,11 @@ void Main()
 	mem.init(&ppu, &timer, &joypad);
 	mem.loadCartridge(config.cartridgePath);
 
+	mem.dumpCartridgeInfo();
 
 	// ---- Wait ----
 
-	Console.writeln(U"Wait ...");
+	Console.writeln(U"* Wait ...");
 
 	Graphics::SetVSyncEnabled(true);
 
@@ -135,7 +136,7 @@ void Main()
 	}
 
 
-	Console.writeln(U"Start main loop");
+	Console.writeln(U"* Start main loop");
 
 	while (not quitApp)
 	{

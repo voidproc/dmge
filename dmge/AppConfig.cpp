@@ -29,6 +29,8 @@ namespace dmge
 
 	void AppConfig::print()
 	{
+		Console.writeln(U"* AppConfig:");
+
 		Console.writeln(U"cartridgePath={}"_fmt(cartridgePath));
 
 		if (not breakpoints.empty())

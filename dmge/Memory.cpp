@@ -2,6 +2,7 @@
 #include "PPU.h"
 #include "Timer.h"
 #include "Joypad.h"
+#include "lib/magic_enum/magic_enum.hpp"
 
 namespace dmge
 {
@@ -264,6 +265,15 @@ namespace dmge
 		}
 
 		return romBank_;
+	}
+
+	void Memory::dumpCartridgeInfo()
+	{
+		Console.writeln(U"* Cartridge Info:");
+		Console.writeln(U"Title={}"_fmt(cartridgeHeader_.title));
+
+		const auto typeStr = magic_enum::enum_name<CartridgeType>(cartridgeHeader_.type);
+		Console.writeln(U"Type={}"_fmt(Unicode::WidenAscii(typeStr)));
 	}
 
 	void Memory::readCartridgeHeader_()

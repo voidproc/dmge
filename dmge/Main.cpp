@@ -116,14 +116,14 @@ void Main()
 	if (config.enableBreakpoint)
 	{
 		mem.setWriteHook([&](uint16 addr, uint8 value) {
-			if (not config.enableBreakpoint)
+			if (not config.enableBreakpoint || trace)
 			{
 				return;
 			}
 
 			for (const auto& mem : config.breakpointsMemWrite)
 			{
-				if (addr == mem && not trace)
+				if (addr == mem)
 				{
 					trace = true;
 					Console.writeln(U"Break(Memory Write): pc={:04X} mem={:04X} val={:02X}"_fmt(cpu.currentPC(), addr, value));

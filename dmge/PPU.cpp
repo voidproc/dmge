@@ -323,6 +323,14 @@ namespace dmge
 		const uint8 wx = lcd_->wx();
 		const bool enabledWindow = lcd_->isEnabledWindow();
 
+		// ※スクロール処理
+		// BG描画中（ウィンドウ描画中でないとき）、SCXの端数分を読み飛ばす
+		if (not drawingWindow_ && (scx % 8) > 0 && fetcherX_ < (scx % 8))
+		{
+			fetcherX_++;
+			return;
+		}
+
 		// このフレームでウィンドウに到達したかどうかを toDrawWindow_ に記録する
 		if (ly == wy)
 		{

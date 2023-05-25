@@ -12,18 +12,14 @@ C++ / OpenSiv3D でゲームボーイのエミュレータを作っています�
 
 ## スクリーンショット
 
-### hello-world
+### HOSHINOK
 
-![hello-world](screenshot/hello-world.png)
-
-### cpu_instrs
-
-![cpu_instrs](screenshot/cpu_instrs.png)
+![HOSHINOK](screenshot/hoshinok.png)
 
 ### dmg-acid2
 
 ![dmg-acid2](screenshot/dmg-acid2.png)
 
-### bgbtest
+### cpu_instrs
 
-![bgbtest](screenshot/bgbtest.png)
+![cpu_instrs](screenshot/cpu_instrs.png)

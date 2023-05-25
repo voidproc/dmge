@@ -94,6 +94,8 @@ namespace dmge
 		}
 		else if (ADDRESS_IN_RANGE(addr, Address::MBC_ROMBank))
 		{
+			doWrite = false;
+
 			// ROM Bank
 			// set the ROM Bank Number
 

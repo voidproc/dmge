@@ -21,6 +21,7 @@ namespace dmge
 		write(0xff05, 0x00); // TIMA
 		write(0xff06, 0x00); // TMA
 		writeDirect(0xff07, 0xf8); // TAC, 0xff80 | (0x00 & ~0xff80)
+		writeDirect(0xff0f, 0xe0); // IF
 		write(0xff10, 0x80); // NR10
 		write(0xff11, 0xbf); // NR11
 		write(0xff12, 0xf3); // NR12
@@ -166,6 +167,13 @@ namespace dmge
 		else if (addr == Address::TAC)
 		{
 			value = 0xf8 | (value & 0x07);
+		}
+
+		// IF (Interrupt Flag)
+
+		else if (addr == Address::IF)
+		{
+			value |= 0b11100000;
 		}
 
 		// DMA

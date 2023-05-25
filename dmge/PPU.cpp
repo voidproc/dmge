@@ -72,17 +72,29 @@ namespace dmge
 			oamBuffer_.clear();
 			scanOAM_();
 		}
-		if (mode_ == PPUMode::Drawing && fetcherX_ < 160 && canvasX_ < 160)
+
+		if (mode_ == PPUMode::Drawing)
 		{
-			scanline_();
+			if (fetcherX_ < 160 && canvasX_ < 160)
+			{
+				scanline_();
+			}
 		}
+
 		if (modeChangedToHBlank())
 		{
+			// 右端の残りのドットを描画
+			while (canvasX_ < 160)
+			{
+				scanline_();
+			}
+
 			fetcherX_ = 0;
 			canvasX_ = 0;
 			if (drawingWindow_) windowLine_++;
 			drawingWindow_ = false;
 		}
+
 		if (modeChangedToVBlank())
 		{
 			toDrawWindow_ = false;

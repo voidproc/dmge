@@ -24,7 +24,6 @@ void InitScene(int scale)
 	Scene::SetBackground(Palette::Whitesmoke);
 
 	Scene::SetTextureFilter(TextureFilter::Nearest);
-	//const ScopedRenderStates2D renderState{ SamplerState::ClampNearest };
 
 	Graphics::SetVSyncEnabled(true);
 }
@@ -87,47 +86,6 @@ public:
 	}
 
 private:
-
-	void onMemoryWrite_(uint16 addr, uint8 value)
-	{
-		if (not config_.enableBreakpoint || trace_)
-		{
-			return;
-		}
-
-		for (const auto& mem : config_.breakpointsMemWrite)
-		{
-			if (addr == mem)
-			{
-				trace_ = true;
-				Console.writeln(U"Break(Memory Write): pc={:04X} mem={:04X} val={:02X}"_fmt(cpu_.currentPC(), addr, value));
-				cpu_.dump();
-				break;
-			}
-		}
-	}
-
-	void setPPUPalette_(int paletteIndex)
-	{
-		ppu_.setDisplayColorPalette(paletteList_[paletteIndex]);
-		Scene::SetBackground(paletteList_[paletteIndex][0]);
-	}
-
-	// ブレークポイントが有効かつブレークポイントに達したか
-	bool reachedBreakpoint()
-	{
-		if (not config_.enableBreakpoint) return false;
-
-		for (const auto bp : config_.breakpoints)
-		{
-			if (cpu_.currentPC() == bp)
-			{
-				return true;
-			}
-		}
-
-		return false;
-	}
 
 	void mainLoop_()
 	{
@@ -263,6 +221,48 @@ private:
 
 			DrawStatusText(U"TRACE");
 		}
+	}
+
+	// メモリ書き込み時フック
+	void onMemoryWrite_(uint16 addr, uint8 value)
+	{
+		if (not config_.enableBreakpoint || trace_)
+		{
+			return;
+		}
+
+		for (const auto& mem : config_.breakpointsMemWrite)
+		{
+			if (addr == mem)
+			{
+				trace_ = true;
+				Console.writeln(U"Break(Memory Write): pc={:04X} mem={:04X} val={:02X}"_fmt(cpu_.currentPC(), addr, value));
+				cpu_.dump();
+				break;
+			}
+		}
+	}
+
+	void setPPUPalette_(int paletteIndex)
+	{
+		ppu_.setDisplayColorPalette(paletteList_[paletteIndex]);
+		Scene::SetBackground(paletteList_[paletteIndex][0]);
+	}
+
+	// ブレークポイントが有効かつブレークポイントに達したか
+	bool reachedBreakpoint()
+	{
+		if (not config_.enableBreakpoint) return false;
+
+		for (const auto bp : config_.breakpoints)
+		{
+			if (cpu_.currentPC() == bp)
+			{
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	dmge::AppConfig config_ = dmge::AppConfig::LoadConfig();

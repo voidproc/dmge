@@ -56,6 +56,16 @@ public:
 
 		config_.print();
 
+		mem_.init(&ppu_, &timer_, &joypad_);
+
+		// メモリ書き込み時フックを設定
+		if (config_.enableBreakpoint && not config_.breakpointsMemWrite.empty())
+		{
+			mem_.setWriteHook([&](uint16 addr, uint8 value) {
+				onMemoryWrite_(addr, value);
+			});
+		}
+
 		// フォントなどのアセット読み込み
 		LoadAssets();
 
@@ -77,17 +87,9 @@ public:
 		}
 
 		// カートリッジを読み込み
-		mem_.init(&ppu_, &timer_, &joypad_);
 		mem_.loadCartridge(config_.cartridgePath);
 		mem_.dumpCartridgeInfo();
 
-		// メモリ書き込み時フック
-		if (config_.enableBreakpoint && not config_.breakpointsMemWrite.empty())
-		{
-			mem_.setWriteHook([&](uint16 addr, uint8 value) {
-				onMemoryWrite_(addr, value);
-			});
-		}
 
 		mainLoop_();
 	}

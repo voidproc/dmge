@@ -130,7 +130,12 @@ private:
 			cpu_.applyScheduledIME();
 			cpu_.run();
 
+			// 描画されないまま一定のサイクル数が経過した場合に強制的に描画する
 			cyclesFromPreviousDraw += cpu_.consumedCycles();
+			if (cyclesFromPreviousDraw > 70224 + 16)
+			{
+				toDraw = true;
+			}
 
 			// タイマーを更新
 
@@ -157,7 +162,7 @@ private:
 
 			// キー入力と描画
 
-			if (toDraw || cyclesFromPreviousDraw > 70224 + 16)
+			if (toDraw)
 			{
 				if (not System::Update())
 				{

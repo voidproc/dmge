@@ -177,6 +177,9 @@
     <ClCompile Include="TileData.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="DebugPrint.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Image Include="App\icon.ico">
@@ -856,6 +859,9 @@
       <Filter>Header Files\BitMask</Filter>
     </ClInclude>
     <ClInclude Include="TileData.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DebugPrint.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

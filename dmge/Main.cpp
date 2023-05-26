@@ -7,6 +7,7 @@
 #include "Joypad.h"
 #include "Address.h"
 #include "AppConfig.h"
+#include "DebugPrint.h"
 
 
 void LoadAssets()
@@ -50,7 +51,7 @@ public:
 	{
 		if (config_.showConsole)
 		{
-			Console.open();
+			dmge::DebugPrint::EnableConsole();
 		}
 
 		config_.print();
@@ -71,7 +72,7 @@ public:
 		// カートリッジが指定されていない：
 		if (not FileSystem::Exists(config_.cartridgePath))
 		{
-			Console.writeln(U"Cartridge not found");
+			dmge::DebugPrint::Writeln(U"Cartridge not found");
 			return;
 		}
 
@@ -109,10 +110,10 @@ private:
 			// ブレークポイントが有効で、ブレークポイントに達していたら
 			// トレースモードに切り替える
 
-			if (reachedBreakpoint())
+			if (reachedBreakpoint_())
 			{
 				mode_ = Mode::Trace;
-				Console.writeln(U"Break: pc={:04X}"_fmt(cpu_.currentPC()));
+				dmge::DebugPrint::Writeln(U"Break: pc={:04X}"_fmt(cpu_.currentPC()));
 			}
 
 			// トレースモードなら、専用のループへ
@@ -154,7 +155,7 @@ private:
 
 			cpu_.interrupt();
 
-			// 描画
+			// キー入力と描画
 
 			if (toDraw || cyclesFromPreviousDraw > 70224 + 16)
 			{
@@ -236,7 +237,7 @@ private:
 			if (addr == mem)
 			{
 				mode_ = Mode::Trace;
-				Console.writeln(U"Break(Memory Write): pc={:04X} mem={:04X} val={:02X}"_fmt(cpu_.currentPC(), addr, value));
+				dmge::DebugPrint::Writeln(U"Break(Memory Write): pc={:04X} mem={:04X} val={:02X}"_fmt(cpu_.currentPC(), addr, value));
 				cpu_.dump();
 				break;
 			}
@@ -251,7 +252,7 @@ private:
 	}
 
 	// ブレークポイントが有効かつブレークポイントに達したか
-	bool reachedBreakpoint()
+	bool reachedBreakpoint_()
 	{
 		if (not config_.enableBreakpoint) return false;
 

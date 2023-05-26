@@ -1,4 +1,5 @@
 ﻿#include "AppConfig.h"
+#include "DebugPrint.h"
 
 namespace dmge
 {
@@ -31,16 +32,16 @@ namespace dmge
 
 	void AppConfig::print()
 	{
-		Console.writeln(U"* AppConfig:");
+		DebugPrint::Writeln(U"* AppConfig:");
 
-		Console.writeln(U"cartridgePath={}"_fmt(cartridgePath));
+		DebugPrint::Writeln(U"cartridgePath={}"_fmt(cartridgePath));
 
 		if (not breakpoints.empty())
 		{
 			const auto breakpointsText = breakpoints
 				.map([](auto x) { return U"{:04X}"_fmt(x); })
 				.join(U","_sv, U""_sv, U""_sv);
-			Console.writeln(U"breakpoints={}"_fmt(breakpointsText));
+			DebugPrint::Writeln(U"breakpoints={}"_fmt(breakpointsText));
 		}
 
 		if (not breakpointsMemWrite.empty())
@@ -48,10 +49,10 @@ namespace dmge
 			const auto breakpointsText = breakpointsMemWrite
 				.map([](auto x) { return U"{:04X}"_fmt(x); })
 				.join(U","_sv, U""_sv, U""_sv);
-			Console.writeln(U"breakpointsMemWrite={}"_fmt(breakpointsText));
+			DebugPrint::Writeln(U"breakpointsMemWrite={}"_fmt(breakpointsText));
 		}
 
-		Console.writeln(U"enableBreakpoint={}"_fmt(enableBreakpoint));
-		Console.writeln(U"showFPS={}"_fmt(showFPS));
+		DebugPrint::Writeln(U"enableBreakpoint={}"_fmt(enableBreakpoint));
+		DebugPrint::Writeln(U"showFPS={}"_fmt(showFPS));
 	}
 }

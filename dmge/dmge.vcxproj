@@ -133,6 +133,7 @@
     </ClCompile>
     <ClCompile Include="TileData.cpp" />
     <ClCompile Include="Timer.cpp" />
+    <ClCompile Include="DebugPrint.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="App\engine\texture\box-shadow\128.png" />
@@ -337,6 +338,7 @@
     <ClInclude Include="Cartridge.h" />
     <ClInclude Include="Colors.h" />
     <ClInclude Include="CPU.h" />
+    <ClInclude Include="DebugPrint.h" />
     <ClInclude Include="Joypad.h" />
     <ClInclude Include="LCD.h" />
     <ClInclude Include="Memory.h" />

@@ -1,5 +1,6 @@
 ﻿#include "CPU.h"
 #include "Memory.h"
+#include "DebugPrint.h"
 
 namespace dmge
 {
@@ -133,7 +134,7 @@ namespace dmge
 			const uint8 intEnable = mem_->read(Address::IE);
 			const uint8 intFlag = mem_->read(Address::IF);
 
-			Console.writeln(U"pc:{:04X} {:5} {:10} af:{:04X} bc:{:04X} de:{:04X} hl:{:04X} sp:{:04X} ly:{:02X} stat:{:02X} tima:{:02X} tma:{:02X} tac:{:02X} ie:{:02X} if:{:02X} rom:{:02X}"_fmt(
+			DebugPrint::Writeln(U"pc:{:04X} {:5} {:10} af:{:04X} bc:{:04X} de:{:04X} hl:{:04X} sp:{:04X} ly:{:02X} stat:{:02X} tima:{:02X} tma:{:02X} tac:{:02X} ie:{:02X} if:{:02X} rom:{:02X}"_fmt(
 				pc,
 				inst.mnemonic, inst.operands,
 				af(), bc(), de(), hl(), sp,

@@ -39,6 +39,12 @@ void DrawStatusText(StringView text)
 
 class DmgeApp
 {
+	enum class Mode
+	{
+		Default,
+		Trace,
+	};
+
 public:
 	DmgeApp()
 	{
@@ -101,17 +107,18 @@ private:
 		while (not quitApp_)
 		{
 			// ブレークポイントが有効で、ブレークポイントに達していたら
-			// ステップ実行モードに切り替える
+			// トレースモードに切り替える
 
 			if (reachedBreakpoint())
 			{
-				trace_ = true;
+				mode_ = Mode::Trace;
 				Console.writeln(U"Break: pc={:04X}"_fmt(cpu_.currentPC()));
 			}
 
-			if (trace_)
+			// トレースモードなら、専用のループへ
+
+			if (mode_ == Mode::Trace)
 			{
-				// トレース中、次に実行する命令とレジスタの内容などを出力する
 				cpu_.dump();
 
 				traceLoop_();
@@ -171,7 +178,7 @@ private:
 		// ステップ実行に移行
 		if (KeyP.down())
 		{
-			trace_ = true;
+			mode_ = Mode::Trace;
 		}
 
 		// パレット切り替え
@@ -196,7 +203,7 @@ private:
 
 	void traceLoop_()
 	{
-		while (trace_)
+		while (mode_ == Mode::Trace)
 		{
 			if (not System::Update())
 			{
@@ -213,7 +220,7 @@ private:
 			// トレースモード終了
 			if (KeyF5.down())
 			{
-				trace_ = false;
+				mode_ = Mode::Default;
 				break;
 			}
 
@@ -226,7 +233,7 @@ private:
 	// メモリ書き込み時フック
 	void onMemoryWrite_(uint16 addr, uint8 value)
 	{
-		if (not config_.enableBreakpoint || trace_)
+		if (not config_.enableBreakpoint || mode_ == Mode::Trace)
 		{
 			return;
 		}
@@ -235,7 +242,7 @@ private:
 		{
 			if (addr == mem)
 			{
-				trace_ = true;
+				mode_ = Mode::Trace;
 				Console.writeln(U"Break(Memory Write): pc={:04X} mem={:04X} val={:02X}"_fmt(cpu_.currentPC(), addr, value));
 				cpu_.dump();
 				break;
@@ -243,6 +250,7 @@ private:
 		}
 	}
 
+	// 画面表示用パレットを設定する
 	void setPPUPalette_(int paletteIndex)
 	{
 		ppu_.setDisplayColorPalette(paletteList_[paletteIndex]);
@@ -265,9 +273,10 @@ private:
 		return false;
 	}
 
+
 	dmge::AppConfig config_ = dmge::AppConfig::LoadConfig();
 
-	dmge::Memory mem_;
+	dmge::Memory mem_{};
 
 	dmge::PPU ppu_{ &mem_ };
 
@@ -277,8 +286,8 @@ private:
 
 	dmge::Joypad joypad_{ &mem_ };
 
-	// トレース中
-	bool trace_ = false;
+	// モード（通常 or トレース）
+	Mode mode_ = Mode::Default;
 
 	// アプリケーションを終了する
 	bool quitApp_ = false;

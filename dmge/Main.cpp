@@ -9,13 +9,27 @@
 #include "AppConfig.h"
 
 
-void loadAssets()
+void LoadAssets()
 {
 	FontAsset::Register(U"debug", 8, U"fonts/PressStart2P-Regular.ttf", FontStyle::Bitmap);
 	FontAsset::Load(U"debug", U"0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ=-~^|@`[{;+:*]},<.>/?_");
 }
 
-void drawStatusText(StringView text)
+void InitScene(int scale)
+{
+	const auto SceneSize = Size{ 160, 144 } * scale;
+	Scene::Resize(SceneSize);
+	Window::Resize(SceneSize);
+
+	Scene::SetBackground(Palette::Whitesmoke);
+
+	Scene::SetTextureFilter(TextureFilter::Nearest);
+	const ScopedRenderStates2D renderState{ SamplerState::ClampNearest };
+
+	Graphics::SetVSyncEnabled(true);
+}
+
+void DrawStatusText(StringView text)
 {
 	const Size size{ 8 * text.length(), 8 };
 	const Rect region{ Scene::Rect().tr().movedBy(-size.x, 1), size };
@@ -23,82 +37,249 @@ void drawStatusText(StringView text)
 	FontAsset(U"debug")(text).draw(region.pos);
 }
 
-void Main()
+
+class DmgeApp
 {
-	Console.open();
-	Console.writeln(U"* Setup ...");
-
-	dmge::AppConfig config = dmge::AppConfig::LoadConfig();
-	config.print();
-
-	if (not FileSystem::Exists(config.cartridgePath))
+public:
+	DmgeApp()
 	{
-		Console.writeln(U"Cartridge not found");
-		return;
+		Console.open();
+
+		config_.print();
+
+		// フォントなどのアセット読み込み
+		LoadAssets();
+
+		// Siv3Dのシーン・ウィンドウなどの初期化
+		InitScene(config_.scale);
+
+		// 画面表示用パレット初期化
+		setPPUPalette_(0);
+
 	}
 
-	const auto SceneSize = Size{ 160, 144 } * config.scale;
-
-	Scene::Resize(SceneSize);
-	Window::Resize(SceneSize);
-	Scene::SetBackground(Palette::Whitesmoke);
-	Scene::SetTextureFilter(TextureFilter::Nearest);
-	const ScopedRenderStates2D renderState{ SamplerState::ClampNearest };
-
-	loadAssets();
-
-	dmge::Memory mem;
-
-	dmge::PPU ppu{ &mem };
-
-	dmge::Timer timer{ &mem };
-
-	dmge::CPU cpu{ &mem };
-
-	dmge::Joypad joypad{ &mem };
-
-	mem.init(&ppu, &timer, &joypad);
-	mem.loadCartridge(config.cartridgePath);
-
-	mem.dumpCartridgeInfo();
-
-	// ---- Wait ----
-
-	Console.writeln(U"* Wait ...");
-
-	Graphics::SetVSyncEnabled(true);
-
-	while (System::Update())
+	void run()
 	{
-		if (Scene::Time() > 0.5)
+		// カートリッジが指定されていない：
+		if (not FileSystem::Exists(config_.cartridgePath))
 		{
-			break;
+			Console.writeln(U"Cartridge not found");
+			return;
+		}
+
+		// カートリッジを読み込み
+		mem_.init(&ppu_, &timer_, &joypad_);
+		mem_.loadCartridge(config_.cartridgePath);
+		mem_.dumpCartridgeInfo();
+
+		// メモリ書き込み時フック
+		if (config_.enableBreakpoint && not config_.breakpointsMemWrite.empty())
+		{
+			mem_.setWriteHook([&](uint16 addr, uint8 value) {
+				onMemoryWrite_(addr, value);
+			});
+		}
+
+		mainLoop_();
+	}
+
+private:
+
+	void onMemoryWrite_(uint16 addr, uint8 value)
+	{
+		if (not config_.enableBreakpoint || trace_)
+		{
+			return;
+		}
+
+		for (const auto& mem : config_.breakpointsMemWrite)
+		{
+			if (addr == mem)
+			{
+				trace_ = true;
+				Console.writeln(U"Break(Memory Write): pc={:04X} mem={:04X} val={:02X}"_fmt(cpu_.currentPC(), addr, value));
+				cpu_.dump();
+				break;
+			}
 		}
 	}
 
+	void setPPUPalette_(int paletteIndex)
+	{
+		ppu_.setDisplayColorPalette(paletteList_[paletteIndex]);
+		Scene::SetBackground(paletteList_[paletteIndex][0]);
+	}
 
-	// ---- Start emulation ----
+	// ブレークポイントが有効かつブレークポイントに達したか
+	bool reachedBreakpoint()
+	{
+		if (not config_.enableBreakpoint) return false;
 
-	// メインループのループ回数
-	int counter = 0;
+		for (const auto bp : config_.breakpoints)
+		{
+			if (cpu_.currentPC() == bp)
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	void mainLoop_()
+	{
+		// VBlankに変化したら描画する
+		bool toDraw = false;
+
+		// 前回の描画からの経過サイクル数
+		// ※基本的に描画タイミングはVBlank移行時だが、LCD=offの場合にはVBlankに移行しないので
+		//   画面の更新（System::Update()）がされない期間が長くなってしまうため、
+		//   経過サイクル数が一定数を超えた場合にも描画を行う
+		int cyclesFromPreviousDraw = 0;
+
+		while (not quitApp_)
+		{
+			// ブレークポイントが有効で、ブレークポイントに達していたら
+			// ステップ実行モードに切り替える
+
+			if (reachedBreakpoint())
+			{
+				trace_ = true;
+				Console.writeln(U"Break: pc={:04X}"_fmt(cpu_.currentPC()));
+			}
+
+			if (trace_)
+			{
+				// トレース中、次に実行する命令とレジスタの内容などを出力する
+				cpu_.dump();
+
+				traceLoop_();
+			}
+
+			// CPUコマンドを1回実行する
+
+			cpu_.applyScheduledIME();
+			cpu_.run();
+
+			cyclesFromPreviousDraw += cpu_.consumedCycles();
+
+			// タイマーを更新
+
+			for (int i : step(cpu_.consumedCycles()))
+			{
+				timer_.update();
+			}
+
+			// PPU
+
+			for (int i : step(cpu_.consumedCycles()))
+			{
+				ppu_.run();
+
+				// VBlankに移行した時のみ描画する
+				if (ppu_.modeChangedToVBlank())
+				{
+					toDraw = true;
+				}
+			}
+
+			// 割り込み
+
+			cpu_.interrupt();
+
+			// 描画
+
+			if (toDraw || cyclesFromPreviousDraw > 70224 + 16)
+			{
+				mainDraw_();
+
+				toDraw = false;
+				cyclesFromPreviousDraw = 0;
+			}
+		}
+	}
+
+	void mainDraw_()
+	{
+		if (not System::Update())
+		{
+			quitApp_ = true;
+			return;
+		}
+
+		// ステップ実行に移行
+		if (KeyP.down())
+		{
+			trace_ = true;
+		}
+
+		// パレット切り替え
+		if (KeyC.down())
+		{
+			currentPalette_ = (currentPalette_ + 1) % paletteList_.size();
+			setPPUPalette_(currentPalette_);
+		}
+
+		// ボタン入力の更新
+		joypad_.update();
+
+		// PPUのレンダリング結果を画面表示
+		ppu_.draw(Point{ 0, 0 }, config_.scale);
+
+		if (config_.showFPS)
+		{
+			DrawStatusText(U"FPS:{:3d}"_fmt(Profiler::FPS()));
+		}
+
+	}
+
+	void traceLoop_()
+	{
+		while (trace_)
+		{
+			if (not System::Update())
+			{
+				quitApp_ = true;
+				break;
+			}
+
+			// ステップ実行
+			if (KeyF7.down())
+			{
+				break;
+			}
+
+			// トレースモード終了
+			if (KeyF5.down())
+			{
+				trace_ = false;
+				break;
+			}
+
+			DrawStatusText(U"TRACE");
+		}
+	}
+
+	dmge::AppConfig config_ = dmge::AppConfig::LoadConfig();
+
+	dmge::Memory mem_;
+
+	dmge::PPU ppu_{ &mem_ };
+
+	dmge::Timer timer_{ &mem_ };
+
+	dmge::CPU cpu_{ &mem_ };
+
+	dmge::Joypad joypad_{ &mem_ };
 
 	// トレース中
-	bool trace = false;
-
-	// VBlankに変化したので描画する
-	bool toDraw = false;
-
-	// 前回の描画からの経過サイクル数
-	// ※基本的に描画タイミングはVBlank移行時だが、LCD=offの場合にはVBlankに移行しないので
-	//   画面の更新（System::Update()）がされない期間が長くなってしまうため、
-	//   経過サイクル数が一定数を超えた場合にも描画を行う
-	int cyclesFromPreviousDraw = 0;
+	bool trace_ = false;
 
 	// アプリケーションを終了する
-	bool quitApp = false;
+	bool quitApp_ = false;
 
-	// パレット
-	const Array<std::array<Color, 4>> paletteList = {
+	// 画面表示用パレット
+	const Array<std::array<Color, 4>> paletteList_ = {
 		{
 			{ Color{ 232 }, Color{ 160 }, Color{ 88 }, Color{ 16 }, },
 			{ Color{ 224,248,208 }, Color{ 136,192,112 }, Color{ 52,104,86 }, Color{ 8,24,32 }, },
@@ -107,152 +288,13 @@ void Main()
 		}
 	};
 
-	int currentPalette = 0;
-	ppu.setDisplayColorPalette(paletteList[0]);
-	Scene::SetBackground(paletteList[0][0]);
+	// 現在の画面表示用パレット番号
+	int currentPalette_ = 0;
 
+};
 
-	// メモリ書き込み時にブレーク
-
-	if (config.enableBreakpoint)
-	{
-		mem.setWriteHook([&](uint16 addr, uint8 value) {
-			if (not config.enableBreakpoint || trace)
-			{
-				return;
-			}
-
-			for (const auto& mem : config.breakpointsMemWrite)
-			{
-				if (addr == mem)
-				{
-					trace = true;
-					Console.writeln(U"Break(Memory Write): pc={:04X} mem={:04X} val={:02X}"_fmt(cpu.currentPC(), addr, value));
-					cpu.dump();
-					break;
-				}
-			}
-		});
-	}
-
-
-	Console.writeln(U"* Start main loop");
-
-	while (not quitApp)
-	{
-		// ブレークポイントに到達したらトレースモードに移行
-
-		if (config.enableBreakpoint)
-		{
-			for (const auto bp : config.breakpoints)
-			{
-				if (cpu.currentPC() == bp)
-				{
-					trace = true;
-					Console.writeln(U"Break: pc={:04X}"_fmt(cpu.currentPC()));
-					break;
-				}
-			}
-		}
-
-		// トレース中、次に実行する命令とレジスタの内容などを出力する
-
-		if (trace)
-		{
-			cpu.dump();
-		}
-
-		while (trace)
-		{
-			if (not System::Update())
-			{
-				quitApp = true;
-				break;
-			}
-
-			if (KeyF7.down())
-			{
-				// ステップ実行
-				break;
-			}
-			else if (KeyF5.down())
-			{
-				// トレースモード終了
-				trace = false;
-				break;
-			}
-
-			drawStatusText(U"TRACE");
-		}
-
-		// CPUコマンドを1回実行する
-
-		cpu.applyScheduledIME();
-		cpu.run();
-
-		// タイマーを更新
-
-		for (int i : step(cpu.consumedCycles()))
-		{
-			timer.update();
-		}
-
-		// PPU
-
-		for (int i : step(cpu.consumedCycles()))
-		{
-			ppu.run();
-
-			// VBlankに移行した時のみ描画する
-			// TOOD: LCDがoffになっている場合はVBlankにならないので、他の方法でタイミングを取って描画する必要がある
-			if (ppu.modeChangedToVBlank())
-			{
-				toDraw = true;
-			}
-		}
-
-		cyclesFromPreviousDraw += cpu.consumedCycles();
-
-		// 割り込み
-
-		cpu.interrupt();
-
-		// 描画
-
-		if (toDraw || cyclesFromPreviousDraw > 70224 + 16)
-		{
-			if (not System::Update())
-			{
-				break;
-			}
-
-			// ステップ実行に移行
-			if (KeyP.down())
-			{
-				trace = true;
-			}
-
-			// パレット切り替え
-			if (KeyC.down())
-			{
-				currentPalette = (currentPalette + 1) % paletteList.size();
-				ppu.setDisplayColorPalette(paletteList[currentPalette]);
-				Scene::SetBackground(paletteList[currentPalette][0]);
-			}
-
-			joypad.update();
-
-			ppu.draw(Point{ 0, 0 }, config.scale);
-
-			if (config.showFPS)
-			{
-				drawStatusText(U"FPS:{:3d}"_fmt(Profiler::FPS()));
-			}
-
-			toDraw = false;
-			cyclesFromPreviousDraw = 0;
-		}
-
-		++counter;
-	}
+void Main()
+{
+	DmgeApp app{};
+	app.run();
 }

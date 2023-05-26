@@ -339,6 +339,8 @@ namespace dmge
 		// BGとWindowが無効なので、ピクセルを1つ進めて終了
 		if (not lcd_->isEnabledBgAndWindow())
 		{
+			canvas_.at(lcd_->ly(), canvasX_) = displayColorPalette_[0];
+
 			fetcherX_++;
 			canvasX_++;
 			return;

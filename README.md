@@ -12,14 +12,16 @@ C++ / OpenSiv3D でゲームボーイのエミュレータを作っています�
 
 ## スクリーンショット
 
-### HOSHINOK
+![HOSHINOKA-BI](screenshot/hoshinok.png)
 
-![HOSHINOK](screenshot/hoshinok.png)
+### Tobu Tobu Girl
 
-### dmg-acid2
+https://tangramgames.dk/tobutobugirl/
+
+![Tobu Tobu Girl](screenshot/tobu.png)
+
+### Test ROMs
 
 ![dmg-acid2](screenshot/dmg-acid2.png)
-
-### cpu_instrs
 
 ![cpu_instrs](screenshot/cpu_instrs.png)

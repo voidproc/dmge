@@ -24,6 +24,8 @@ namespace dmge
 		// PPUによるレンダリング結果をシーンに描画する
 		void draw(const Point pos, int scale);
 
+		void drawCache(const Point pos, int scale);
+
 		// PPUのモード
 		// LYと、このフレームの描画ドット数により変化する
 		PPUMode mode() const;
@@ -93,6 +95,8 @@ namespace dmge
 			Color{ 29, 114, 61 },
 			Color{ 0, 51, 0 },
 		};
+
+		RenderTexture renderTexture_;
 
 		void updateLY_();
 		void updateMode_();

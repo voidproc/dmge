@@ -42,7 +42,7 @@ namespace dmge
 
 
 	PPU::PPU(Memory* mem)
-		: mem_{ mem }, lcd_{ std::make_unique<LCD>(mem) }
+		: mem_{ mem }, lcd_{ std::make_unique<LCD>(mem) }, renderTexture_{ 160, 144 }
 	{
 		dot_ = 70224 - 52 + 4;
 		canvas_.resize(160 + 8, 144, Palette::White);
@@ -148,14 +148,10 @@ namespace dmge
 	{
 		if (not lcd_->isEnabled()) return;
 
+		renderTexture_.clear(Scene::GetBackground());
+
 		{
-			Graphics2D::SetScissorRect(Rect{ pos, Size{ 160, 144 } * scale });
-
-			RasterizerState rs = RasterizerState::Default2D;
-			rs.scissorEnable = true;
-			const ScopedRenderStates2D renderStates{ rs };
-
-			const Transformer2D transformer{ Mat3x2::Scale(scale).translated(pos) };
+			const ScopedRenderTarget2D target{ renderTexture_ };
 
 			for (int y : step(144))
 			{
@@ -164,6 +160,27 @@ namespace dmge
 					Rect{ x, y, 1, 1 }.draw(canvas_.at(y, x));
 				}
 			}
+		}
+
+		{
+			const ScopedRenderStates2D renderState{ SamplerState::ClampNearest };
+
+			const Transformer2D transformer{ Mat3x2::Scale(scale).translated(pos) };
+
+			renderTexture_.draw();
+		}
+	}
+
+	void PPU::drawCache(const Point pos, int scale)
+	{
+		if (not lcd_->isEnabled()) return;
+
+		{
+			const ScopedRenderStates2D renderState{ SamplerState::ClampNearest };
+
+			const Transformer2D transformer{ Mat3x2::Scale(scale).translated(pos) };
+
+			renderTexture_.draw();
 		}
 	}
 

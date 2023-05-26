@@ -24,7 +24,7 @@ void InitScene(int scale)
 	Scene::SetBackground(Palette::Whitesmoke);
 
 	Scene::SetTextureFilter(TextureFilter::Nearest);
-	const ScopedRenderStates2D renderState{ SamplerState::ClampNearest };
+	//const ScopedRenderStates2D renderState{ SamplerState::ClampNearest };
 
 	Graphics::SetVSyncEnabled(true);
 }
@@ -258,6 +258,8 @@ private:
 				trace_ = false;
 				break;
 			}
+
+			ppu_.drawCache(Point{ 0, 0 }, config_.scale);
 
 			DrawStatusText(U"TRACE");
 		}

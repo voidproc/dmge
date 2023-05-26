@@ -144,7 +144,6 @@ private:
 			{
 				ppu_.run();
 
-				// VBlankに移行した時のみ描画する
 				if (ppu_.modeChangedToVBlank())
 				{
 					toDraw = true;
@@ -159,46 +158,40 @@ private:
 
 			if (toDraw || cyclesFromPreviousDraw > 70224 + 16)
 			{
-				mainDraw_();
+				if (not System::Update())
+				{
+					quitApp_ = true;
+					return;
+				}
+
+				// ステップ実行に移行
+				if (KeyP.down())
+				{
+					mode_ = Mode::Trace;
+				}
+
+				// パレット切り替え
+				if (KeyC.down())
+				{
+					currentPalette_ = (currentPalette_ + 1) % paletteList_.size();
+					setPPUPalette_(currentPalette_);
+				}
+
+				// ボタン入力の更新
+				joypad_.update();
+
+				// PPUのレンダリング結果を画面表示
+				ppu_.draw(Point{ 0, 0 }, config_.scale);
+
+				if (config_.showFPS)
+				{
+					DrawStatusText(U"FPS:{:3d}"_fmt(Profiler::FPS()));
+				}
 
 				toDraw = false;
 				cyclesFromPreviousDraw = 0;
 			}
 		}
-	}
-
-	void mainDraw_()
-	{
-		if (not System::Update())
-		{
-			quitApp_ = true;
-			return;
-		}
-
-		// ステップ実行に移行
-		if (KeyP.down())
-		{
-			mode_ = Mode::Trace;
-		}
-
-		// パレット切り替え
-		if (KeyC.down())
-		{
-			currentPalette_ = (currentPalette_ + 1) % paletteList_.size();
-			setPPUPalette_(currentPalette_);
-		}
-
-		// ボタン入力の更新
-		joypad_.update();
-
-		// PPUのレンダリング結果を画面表示
-		ppu_.draw(Point{ 0, 0 }, config_.scale);
-
-		if (config_.showFPS)
-		{
-			DrawStatusText(U"FPS:{:3d}"_fmt(Profiler::FPS()));
-		}
-
 	}
 
 	void traceLoop_()

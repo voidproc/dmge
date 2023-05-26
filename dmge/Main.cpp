@@ -43,7 +43,10 @@ class DmgeApp
 public:
 	DmgeApp()
 	{
-		Console.open();
+		if (config_.showConsole)
+		{
+			Console.open();
+		}
 
 		config_.print();
 

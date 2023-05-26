@@ -24,6 +24,8 @@ namespace dmge
 
 		config.scale = ParseOr<int>(ini[U"scale"], 3);
 
+		config.showConsole = ParseOr<int>(ini[U"showconsole"], true);
+
 		return config;
 	}
 

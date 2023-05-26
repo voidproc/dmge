@@ -24,6 +24,9 @@ namespace dmge
 		// 表示倍率
 		int scale = 3;
 
+		// コンソールを表示する
+		bool showConsole = true;
+
 		// config.ini のパース結果を返す
 		static AppConfig LoadConfig();
 

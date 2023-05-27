@@ -12,8 +12,13 @@
 
 void LoadAssets()
 {
-	FontAsset::Register(U"debug", 8, U"fonts/PressStart2P-Regular.ttf", FontStyle::Bitmap);
-	FontAsset::Load(U"debug", U"0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ=-~^|@`[{;+:*]},<.>/?_");
+	const auto preloadText = U"0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ=-~^|@`[{;+:*]},<.>/?_";
+
+	FontAsset::Register(U"status", 8, U"fonts/PressStart2P-Regular.ttf", FontStyle::Bitmap);
+	FontAsset::Load(U"status", preloadText);
+
+	FontAsset::Register(U"monitor", 8, U"fonts/misaki_gothic_2nd.ttf", FontStyle::Bitmap);
+	FontAsset::Load(U"monitor", preloadText);
 }
 
 void InitScene(int scale)
@@ -34,7 +39,7 @@ void DrawStatusText(StringView text)
 	const Size size{ 8 * text.length(), 8 };
 	const Rect region{ Scene::Rect().tr().movedBy(-size.x, 1), size };
 	region.stretched(1, 1).draw(Color{0, 128});
-	FontAsset(U"debug")(text).draw(region.pos);
+	FontAsset(U"status")(text).draw(region.pos);
 }
 
 

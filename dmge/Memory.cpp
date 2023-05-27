@@ -93,14 +93,17 @@ namespace dmge
 		{
 			// Enable RAM
 			// enables external RAM if the lower 4 bits of the written value are 0xA
+
+			doWrite = false;
+
 			ramEnabled_ = (value & 0xf) == 0xa;
 		}
 		else if (ADDRESS_IN_RANGE(addr, Address::MBC_ROMBank))
 		{
-			doWrite = false;
-
 			// ROM Bank
 			// set the ROM Bank Number
+
+			doWrite = false;
 
 			switch (cartridgeHeader_.romSizeKB)
 			{
@@ -124,12 +127,18 @@ namespace dmge
 		{
 			// RAM Bank
 			// set the 2 bits of the RAM bank number to the lowest 2 bits of the written value
+
+			doWrite = false;
+
 			ramBank_ = value & 0b11;
 		}
 		else if (ADDRESS_IN_RANGE(addr, Address::MBC_BankingMode))
 		{
 			// Mode Select
 			// set the Mode Flag to the lowest bit of the written value
+
+			doWrite = false;
+
 			bankingMode_ = value & 1;
 		}
 		else if (ADDRESS_IN_RANGE(addr, Address::SRAM))

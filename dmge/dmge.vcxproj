@@ -121,6 +121,7 @@
     <ClCompile Include="AppConfig.cpp" />
     <ClCompile Include="Cartridge.cpp" />
     <ClCompile Include="CPU.cpp" />
+    <ClCompile Include="DebugMonitor.cpp" />
     <ClCompile Include="Joypad.cpp" />
     <ClCompile Include="LCD.cpp" />
     <ClCompile Include="Main.cpp" />
@@ -338,6 +339,7 @@
     <ClInclude Include="Cartridge.h" />
     <ClInclude Include="Colors.h" />
     <ClInclude Include="CPU.h" />
+    <ClInclude Include="DebugMonitor.h" />
     <ClInclude Include="DebugPrint.h" />
     <ClInclude Include="Joypad.h" />
     <ClInclude Include="LCD.h" />

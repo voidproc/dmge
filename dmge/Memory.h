@@ -30,6 +30,8 @@ namespace dmge
 
 		int romBank() const;
 
+		int ramBank() const;
+
 		void dumpCartridgeInfo();
 
 		void dump(uint16 addrBegin, uint16 addrEnd);

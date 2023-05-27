@@ -2297,4 +2297,16 @@ namespace dmge
 	{
 		return cpuDetail_->consumedCycles_;
 	}
+
+	RegisterValues CPU::getRegisterValues()
+	{
+		return {
+			cpuDetail_->af(),
+			cpuDetail_->bc(),
+			cpuDetail_->de(),
+			cpuDetail_->hl(),
+			cpuDetail_->sp,
+			cpuDetail_->pc,
+		};
+	}
 }

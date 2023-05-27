@@ -5,6 +5,16 @@ namespace dmge
 	class Memory;
 	class CPU_detail;
 
+	struct RegisterValues
+	{
+		uint16 af;
+		uint16 bc;
+		uint16 de;
+		uint16 hl;
+		uint16 sp;
+		uint16 pc;
+	};
+
 	class CPU
 	{
 	public:
@@ -32,6 +42,9 @@ namespace dmge
 
 		// run()により実行された命令が消費したクロック数
 		int consumedCycles() const;
+
+		// 現在のレジスタの値を取得（デバッグ用）
+		RegisterValues getRegisterValues();
 
 	private:
 		Memory* mem_;

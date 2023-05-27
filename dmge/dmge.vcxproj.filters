@@ -180,6 +180,9 @@
     <ClCompile Include="DebugPrint.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="DebugMonitor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Image Include="App\icon.ico">
@@ -862,6 +865,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DebugPrint.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DebugMonitor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

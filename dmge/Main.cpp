@@ -8,38 +8,46 @@
 #include "Address.h"
 #include "AppConfig.h"
 #include "DebugPrint.h"
+#include "DebugMonitor.h"
 
 
 void LoadAssets()
 {
 	const auto preloadText = U"0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ=-~^|@`[{;+:*]},<.>/?_";
 
-	FontAsset::Register(U"status", 8, U"fonts/PressStart2P-Regular.ttf", FontStyle::Bitmap);
-	FontAsset::Load(U"status", preloadText);
-
-	FontAsset::Register(U"monitor", 8, U"fonts/misaki_gothic_2nd.ttf", FontStyle::Bitmap);
-	FontAsset::Load(U"monitor", preloadText);
+	FontAsset::Register(U"debug", 10, U"fonts/JF-Dot-MPlus10.ttf", FontStyle::Bitmap);
+	FontAsset::Load(U"debug", preloadText);
 }
 
-void InitScene(int scale)
+void SetWindowSize(int scale, bool showDebugMonitor)
 {
-	const auto SceneSize = Size{ 160, 144 } * scale;
+	const int width = 160 * scale + (showDebugMonitor ? 5 * 58 : 0);
+	const int height = Max(144 * scale, showDebugMonitor ? 10 * 32 : 144 * scale);
+
+	const auto SceneSize = Size{ width, height };
 	Scene::Resize(SceneSize);
 	Window::Resize(SceneSize);
+}
+
+void InitScene(int scale, bool showDebugMonitor)
+{
+	SetWindowSize(scale, showDebugMonitor);
 
 	Scene::SetBackground(Palette::Whitesmoke);
 
 	Scene::SetTextureFilter(TextureFilter::Nearest);
 
 	Graphics::SetVSyncEnabled(true);
+
+	System::SetTerminationTriggers(UserAction::CloseButtonClicked);
 }
 
 void DrawStatusText(StringView text)
 {
-	const Size size{ 8 * text.length(), 8 };
-	const Rect region{ Scene::Rect().tr().movedBy(-size.x, 1), size };
+	const Size size{ 5 * text.length(), 10 };
+	const Rect region{ Scene::Rect().tr().movedBy(-size.x, 0), size };
 	region.stretched(1, 1).draw(Color{0, 128});
-	FontAsset(U"status")(text).draw(region.pos);
+	FontAsset(U"debug")(text).draw(region.pos);
 }
 
 
@@ -75,7 +83,7 @@ public:
 		LoadAssets();
 
 		// Siv3Dのシーン・ウィンドウなどの初期化
-		InitScene(config_.scale);
+		InitScene(config_.scale, showDebugMonitor_);
 
 		// 画面表示用パレット初期化
 		setPPUPalette_(0);
@@ -182,24 +190,29 @@ private:
 					return;
 				}
 
-				// ステップ実行に移行
+				commonInput_();
+
+				// トレースモードに移行
 				if (KeyP.down())
 				{
 					mode_ = Mode::Trace;
 				}
 
-				// パレット切り替え
-				if (KeyC.down())
-				{
-					currentPalette_ = (currentPalette_ + 1) % paletteList_.size();
-					setPPUPalette_(currentPalette_);
-				}
-
 				// ボタン入力の更新
-				joypad_.update();
+				// ※デバッグモニタのテキストボックス入力中は更新しない
+				if (not (showDebugMonitor_ && debugMonitor_.isVisibleTextbox()))
+				{
+					joypad_.update();
+				}
 
 				// PPUのレンダリング結果を画面表示
 				ppu_.draw(Point{ 0, 0 }, config_.scale);
+
+				// デバッグ用モニタ表示
+				if (showDebugMonitor_)
+				{
+					debugMonitor_.draw(Point{ 160 * config_.scale, 0 });
+				}
 
 				if (config_.showFPS)
 				{
@@ -222,6 +235,8 @@ private:
 				break;
 			}
 
+			commonInput_();
+
 			// ステップ実行
 			if (KeyF7.down())
 			{
@@ -237,7 +252,30 @@ private:
 
 			ppu_.drawCache(Point{ 0, 0 }, config_.scale);
 
+			// デバッグ用モニタ表示
+			if (showDebugMonitor_)
+			{
+				debugMonitor_.draw(Point{ 160 * config_.scale, 0 });
+			}
+
 			DrawStatusText(U"TRACE");
+		}
+	}
+
+	void commonInput_()
+	{
+		// デバッグモニタ表示切り替え
+		if (KeyF10.down())
+		{
+			showDebugMonitor_ = not showDebugMonitor_;
+			SetWindowSize(config_.scale, showDebugMonitor_);
+		}
+
+		// パレット切り替え
+		if (KeyL.down())
+		{
+			currentPalette_ = (currentPalette_ + 1) % paletteList_.size();
+			setPPUPalette_(currentPalette_);
 		}
 	}
 
@@ -297,6 +335,8 @@ private:
 
 	dmge::Joypad joypad_{ &mem_ };
 
+	dmge::DebugMonitor debugMonitor_{ &mem_, &cpu_ };
+
 	// モード（通常 or トレース）
 	Mode mode_ = Mode::Default;
 
@@ -315,6 +355,12 @@ private:
 
 	// 現在の画面表示用パレット番号
 	int currentPalette_ = 0;
+
+	// デバッグ用モニタを表示する
+	bool showDebugMonitor_ = true;
+
+	// メモリダンプするアドレス設定用
+	uint16 dumpAddress_ = 0;
 
 };
 

@@ -277,6 +277,11 @@ namespace dmge
 		return romBank_;
 	}
 
+	int Memory::ramBank() const
+	{
+		return bankingMode_ == 0 ? 0 : ramBank_;
+	}
+
 	void Memory::dumpCartridgeInfo()
 	{
 		DebugPrint::Writeln(U"* Cartridge Info:");

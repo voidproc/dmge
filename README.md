@@ -12,6 +12,8 @@ C++ / OpenSiv3D でゲームボーイのエミュレータを作っています�
 
 ## スクリーンショット
 
+![ZELDA](screenshot/zelda.png)
+
 ![HOSHINOKA-BI](screenshot/hoshinok.png)
 
 ### Tobu Tobu Girl

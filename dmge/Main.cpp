@@ -122,6 +122,11 @@ private:
 
 			if (mode_ == Mode::Trace)
 			{
+				for (const uint16 addr : config_.dumpAddress)
+				{
+					mem_.dump(addr, addr + 15);
+				}
+
 				cpu_.dump();
 
 				traceLoop_();

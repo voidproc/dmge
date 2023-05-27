@@ -5,7 +5,7 @@ namespace dmge
 {
 	AppConfig AppConfig::LoadConfig()
 	{
-		AppConfig config{ U"", {}, {}, false };
+		AppConfig config;
 
 		INI ini{ U"config.ini" };
 
@@ -16,6 +16,10 @@ namespace dmge
 			.map([](const String& s) { return ParseInt<uint16>(s, 16); });
 
 		config.breakpointsMemWrite = ParseOr<String>(ini[U"breakpointmemw"], U"")
+			.split(U',')
+			.map([](const String& s) { return ParseInt<uint16>(s, 16); });
+
+		config.dumpAddress = ParseOr<String>(ini[U"dumpaddress"], U"")
 			.split(U',')
 			.map([](const String& s) { return ParseInt<uint16>(s, 16); });
 
@@ -50,6 +54,14 @@ namespace dmge
 				.map([](auto x) { return U"{:04X}"_fmt(x); })
 				.join(U","_sv, U""_sv, U""_sv);
 			DebugPrint::Writeln(U"breakpointsMemWrite={}"_fmt(breakpointsText));
+		}
+
+		if (not dumpAddress.empty())
+		{
+			const auto addrText = dumpAddress
+				.map([](auto x) { return U"{:04X}"_fmt(x); })
+				.join(U","_sv, U""_sv, U""_sv);
+			DebugPrint::Writeln(U"dumpAddress={}"_fmt(addrText));
 		}
 
 		DebugPrint::Writeln(U"enableBreakpoint={}"_fmt(enableBreakpoint));

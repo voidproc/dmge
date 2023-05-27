@@ -289,6 +289,18 @@ namespace dmge
 		DebugPrint::Writeln(U"RamSize={}"_fmt(cartridgeHeader_.ramSizeKB));
 	}
 
+	void Memory::dump(uint16 addrBegin, uint16 addrEnd)
+	{
+		String dumped = U"mem({:04X}): "_fmt(addrBegin);
+
+		for (uint16 addr = addrBegin; addr <= addrEnd; addr++)
+		{
+			dumped.append(U"{:02X} "_fmt(read(addr)));
+		}
+
+		DebugPrint::Writeln(dumped);
+	}
+
 	void Memory::readCartridgeHeader_()
 	{
 		// Title

@@ -5,15 +5,19 @@ namespace dmge
 	struct AppConfig
 	{
 		// 読み込むカートリッジのパス
-		String cartridgePath;
+		String cartridgePath{};
 
 		// ブレークポイントを設定するアドレス
 		// 16進表記、コンマ区切りで複数指定可能
-		Array<uint16> breakpoints;
+		Array<uint16> breakpoints{};
 
 		// メモリ書き込み時ブレークポイントを設定するアドレス
 		// 16進表記、コンマ区切りで複数指定可能
-		Array<uint16> breakpointsMemWrite;
+		Array<uint16> breakpointsMemWrite{};
+
+		// メモリダンプ箇所
+		// 指定されたアドレスから16バイト分をダンプする
+		Array<uint16> dumpAddress{};
 
 		// ブレークポイントを使用する
 		bool enableBreakpoint = false;

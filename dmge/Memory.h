@@ -32,6 +32,8 @@ namespace dmge
 
 		void dumpCartridgeInfo();
 
+		void dump(uint16 addrBegin, uint16 addrEnd);
+
 		template <class F>
 		void setWriteHook(F f)
 		{

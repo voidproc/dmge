@@ -3,6 +3,7 @@
 #include "Memory.h"
 #include "CPU.h"
 #include "PPU.h"
+#include "APU.h"
 #include "Timer.h"
 #include "Joypad.h"
 #include "Address.h"
@@ -40,6 +41,8 @@ void InitScene(int scale, bool showDebugMonitor)
 	Graphics::SetVSyncEnabled(true);
 
 	System::SetTerminationTriggers(UserAction::CloseButtonClicked);
+
+	Profiler::EnableAssetCreationWarning(false);
 }
 
 void DrawStatusText(StringView text)
@@ -87,6 +90,7 @@ public:
 
 		// 画面表示用パレット初期化
 		setPPUPalette_(0);
+
 
 	}
 
@@ -174,6 +178,14 @@ private:
 				{
 					toDraw = true;
 				}
+			}
+
+			// APU
+			
+			// Test
+			for (int i : step(cpu_.consumedCycles()))
+			{
+				apu_.update();
 			}
 
 			// 割り込み
@@ -328,6 +340,8 @@ private:
 	dmge::Memory mem_{};
 
 	dmge::PPU ppu_{ &mem_ };
+
+	dmge::APU apu_{ &mem_ };
 
 	dmge::Timer timer_{ &mem_ };
 

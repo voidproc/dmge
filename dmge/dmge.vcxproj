@@ -119,6 +119,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="AppConfig.cpp" />
+    <ClCompile Include="APU.cpp" />
     <ClCompile Include="Cartridge.cpp" />
     <ClCompile Include="CPU.cpp" />
     <ClCompile Include="DebugMonitor.cpp" />
@@ -332,6 +333,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AppConfig.h" />
+    <ClInclude Include="APU.h" />
     <ClInclude Include="BitMask\InterruptFlag.h" />
     <ClInclude Include="BitMask\LCDC.h" />
     <ClInclude Include="BitMask\STAT.h" />

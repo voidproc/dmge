@@ -161,6 +161,9 @@ private:
 				toDraw = true;
 			}
 
+			//[DEBUG]
+			totalCycles_ += cpu_.consumedCycles();
+
 			// タイマーを更新
 
 			for (int i : step(cpu_.consumedCycles()))
@@ -375,6 +378,8 @@ private:
 
 	// メモリダンプするアドレス設定用
 	uint16 dumpAddress_ = 0;
+
+	uint64 totalCycles_ = 0;
 
 };
 

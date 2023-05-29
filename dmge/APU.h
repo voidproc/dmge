@@ -4,18 +4,97 @@ namespace dmge
 {
 	class Memory;
 
-	struct Channel
+	struct ChannelData
 	{
+		bool enable;
+		int outputLevel;
+
+		int sweepPeriod;
+		int sweepDir;
+		int sweepShift;
+
 		int duty;
 		int lengthTimer;
 		int envVol;
 		int envDir;
-		int envSweepPace;
+		int envPeriod;
 		bool trigger;
 		bool enableLength;
 		int freq;
+
+		int divisorShift;
+		int counterWidth;
+		int divisor;
 	};
 
+	enum class Channels
+	{
+		Ch1,
+		Ch2,
+		Ch3,
+		Ch4,
+	};
+
+	class Channel
+	{
+	public:
+		Channel(Memory* mem, Channels ch);
+
+		void fetch();
+
+		void updateFrequencyTimer();
+
+		void doTrigger();
+
+		void doEnvelope();
+
+		void doSweep();
+
+		void doLength();
+
+		bool onTrigger() const;
+
+		int amplitude() const;
+
+	private:
+		Memory* mem_;
+
+		Channels ch_;
+
+		ChannelData data_{};
+
+		// Frequency timer
+		int freqTimer_ = 0;
+
+		// Duty position
+		int dutyPos_ = 0;
+
+		// Wave RAM offset (0-31)
+		int waveRAMOffset_ = 0;
+
+		// Waveform frequency
+		int freq_ = 0;
+
+		// Envelope
+		int currentVolume_ = 0;
+		int periodTimer_ = 0;
+
+		// Sweep
+		int sweepTimer_ = 0;
+		bool sweepEnabled_ = 0;
+		int shadowFreq_ = 0;
+
+		// Length
+		int lengthTimer_ = 0;
+		int chEnabledByLength_ = 1;
+
+		// Noise
+		uint16 lfsr_ = 0;
+
+		int calcSweepFrequency_();
+	};
+
+	/*
 	struct WaveChannel
 	{
 		// NR30
@@ -39,7 +118,7 @@ namespace dmge
 		// bit 7
 		bool trigger;
 	};
-
+	*/
 
 	class APU
 	{
@@ -48,27 +127,28 @@ namespace dmge
 
 		void update();
 
+		void dump();
+
 	private:
 		Memory* mem_;
 
-		Audio audio_[2];
-		int audioIndex_ = 0;
+		Audio audio_;
 
 		Wave wave_;
 
-		int clock_ = 0;
-		uint64 clock2_ = 0;
-
 		int samples_ = 0;
-		double lastSample = 0;
-		int waveOffset_ = 0;
 
-		Channel prevCh1_{};
-		Channel prevCh2_{};
-		WaveChannel prevCh3_{};
+		Channel ch1_;
+		Channel ch2_;
+		Channel ch3_;
+		Channel ch4_;
 
-		bool ch1On_ = false;
-		bool ch2On_ = false;
-		bool ch3On_ = false;
+		// Frame Seq. Clock
+		int fsClock_ = 0;
+
+		// Count T-cycles
+		int cycles_ = 0;
+
+		uint8 prevDiv_ = 0;
 	};
 }

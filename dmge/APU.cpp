@@ -4,6 +4,63 @@
 
 namespace dmge
 {
+	Channel GetChannel1(Memory* mem)
+	{
+		const uint8 NR11 = mem->read(Address::NR11);
+		const uint8 NR12 = mem->read(Address::NR12);
+		const uint8 NR13 = mem->read(Address::NR13);
+		const uint8 NR14 = mem->read(Address::NR14);
+
+		return Channel{
+			NR11 >> 6,
+			NR11 & 63,
+			NR12 >> 4,
+			(NR12 >> 3) & 1,
+			NR12 & 0b111,
+			(NR14 >> 7) == 1,
+			((NR14 >> 6) & 1) == 1,
+			NR13 | ((NR14 & 0b111) << 8),
+		};
+	}
+
+	Channel GetChannel2(Memory* mem)
+	{
+		const uint8 NR21 = mem->read(Address::NR21);
+		const uint8 NR22 = mem->read(Address::NR22);
+		const uint8 NR23 = mem->read(Address::NR23);
+		const uint8 NR24 = mem->read(Address::NR24);
+
+		return Channel{
+			NR21 >> 6,
+			NR21 & 63,
+			NR22 >> 4,
+			(NR22 >> 3) & 1,
+			NR22 & 0b111,
+			(NR24 >> 7) == 1,
+			((NR24 >> 6) & 1) == 1,
+			NR23 | ((NR24 & 0b111) << 8),
+		};
+	}
+
+	WaveChannel GetChannel3(Memory* mem)
+	{
+		const uint8 NR30 = mem->read(Address::NR30);
+		const uint8 NR31 = mem->read(Address::NR31);
+		const uint8 NR32 = mem->read(Address::NR32);
+		const uint8 NR33 = mem->read(Address::NR33);
+		const uint8 NR34 = mem->read(Address::NR34);
+
+		return WaveChannel{
+			.enable = (NR30 >> 7) == 1,
+			.lengthTimer = NR31,
+			.outputLevel = (NR32 >> 5) & 0b11,
+			.freq = NR33 | ((NR34 & 0b111) << 8),
+			.enableLength = ((NR34 >> 6) & 1) == 1,
+			.trigger = (NR34 >> 7) == 1,
+		};
+	}
+
+
 	APU::APU(Memory* mem)
 		: mem_{ mem }
 	{
@@ -14,57 +71,12 @@ namespace dmge
 	{
 		if ((clock_++ % 95) > 0) return;
 
-
 		// CH1
 
 		{
-			const uint8 NR11 = mem_->read(Address::NR11);
-			const uint8 NR12 = mem_->read(Address::NR12);
-			const uint8 NR13 = mem_->read(Address::NR13);
-			const uint8 NR14 = mem_->read(Address::NR14);
-
-			const uint8 NR21 = mem_->read(Address::NR21);
-			const uint8 NR22 = mem_->read(Address::NR22);
-			const uint8 NR23 = mem_->read(Address::NR23);
-			const uint8 NR24 = mem_->read(Address::NR24);
-
-			const uint8 NR30 = mem_->read(Address::NR30);
-			const uint8 NR31 = mem_->read(Address::NR31);
-			const uint8 NR32 = mem_->read(Address::NR32);
-			const uint8 NR33 = mem_->read(Address::NR33);
-			const uint8 NR34 = mem_->read(Address::NR34);
-
-			Channel ch1{
-				NR11 >> 6,
-				NR11 & 63,
-				NR12 >> 4,
-				(NR12 >> 3) & 1,
-				NR12 & 0b111,
-				NR14 >> 7,
-				(NR14 >> 6) & 1,
-				NR13 | ((NR14 & 0b111) << 8),
-			};
-
-			Channel ch2{
-				NR21 >> 6,
-				NR21 & 63,
-				NR22 >> 4,
-				(NR22 >> 3) & 1,
-				NR22 & 0b111,
-				NR24 >> 7,
-				(NR24 >> 6) & 1,
-				NR23 | ((NR24 & 0b111) << 8),
-			};
-
-			WaveChannel ch3{
-				.enable = static_cast<bool>(NR30 >> 7),
-				.lengthTimer = NR31,
-				.outputLevel = (NR32 >> 5) & 0b11,
-				.freq = NR33 | ((NR34 &0b111) << 8),
-				.enableLength = static_cast<bool>((NR34 >> 6) & 1),
-				.trigger = static_cast<bool>(NR34 >> 7),
-			};
-
+			Channel ch1 = GetChannel1(mem_);
+			Channel ch2 = GetChannel2(mem_);
+			WaveChannel ch3 = GetChannel3(mem_);
 
 			if (not ch1On_ && ch1.trigger)
 			{

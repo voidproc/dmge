@@ -189,7 +189,44 @@ namespace dmge
 			value |= 0b11100000;
 		}
 
-		// APU - Channel Trigger
+		// APU - Reload Length Timer
+
+		else if (addr == Address::NR11)
+		{
+			apu_->setLengthTimer(Channels::Ch1, value);
+		}
+		else if (addr == Address::NR21)
+		{
+			apu_->setLengthTimer(Channels::Ch2, value);
+		}
+		else if (addr == Address::NR31)
+		{
+			apu_->setLengthTimer(Channels::Ch3, value);
+		}
+		else if (addr == Address::NR41)
+		{
+			apu_->setLengthTimer(Channels::Ch4, value);
+		}
+
+		// APU - Update Frequency
+
+		else if (addr == Address::NR13)
+		{
+			const int freq = value | ((read(Address::NR14) & 0b111) << 8);
+			apu_->setFrequency(Channels::Ch1, freq);
+		}
+		else if (addr == Address::NR23)
+		{
+			const int freq = value | ((read(Address::NR24) & 0b111) << 8);
+			apu_->setFrequency(Channels::Ch2, freq);
+		}
+		else if (addr == Address::NR33)
+		{
+			const int freq = value | ((read(Address::NR34) & 0b111) << 8);
+			apu_->setFrequency(Channels::Ch3, freq);
+		}
+
+		// APU - Channel Trigger (Update Frequency)
 
 		else if (addr == Address::NR14)
 		{

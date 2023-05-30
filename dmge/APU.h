@@ -66,6 +66,11 @@ namespace dmge
 
 		void setEnable(bool enable);
 
+		void setLengthTimer(uint8 reg);
+
+		void setFrequency(int freq);
+
+
 	private:
 		Memory* mem_;
 
@@ -99,7 +104,6 @@ namespace dmge
 
 		// Length
 		int lengthTimer_ = 0;
-		//int chEnabledByLength_ = 1;
 
 		// Noise
 		uint16 lfsr_ = 0;
@@ -140,7 +144,9 @@ namespace dmge
 
 		void update();
 
+		void setFrequency(Channels ch, int freq);
 		void trigger(Channels ch);
+		void setLengthTimer(Channels ch, uint8 reg);
 
 	private:
 		Memory* mem_;

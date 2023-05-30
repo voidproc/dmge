@@ -176,36 +176,45 @@ namespace dmge
 		switch (ch_)
 		{
 		case Channels::Ch1:
+			dutyPos_ = 0;
 			freq_ = data_.freq;
 			currentVolume_ = data_.envVol;
+			periodTimer_ = data_.envPeriod;
 
 			shadowFreq_ = freq_;
 			sweepTimer_ = (data_.sweepPeriod > 0) ? data_.sweepPeriod : 8;
 			sweepEnabled_ = data_.sweepPeriod != 0 || data_.sweepShift != 0;
 			if (data_.sweepShift != 0) calcSweepFrequency_();
 
-			lengthTimer_ = 64 - data_.lengthTimer;
+			if (lengthTimer_ == 0)
+				lengthTimer_ = 64 - data_.lengthTimer;
+			//Console.writeln(U"freq:{} envVol:{} envPeriod:{} lengthTimer:{}"_fmt(freq_, data_.envVol, data_.envPeriod, lengthTimer_));
 			break;
 
 		case Channels::Ch2:
+			dutyPos_ = 0;
 			freq_ = data_.freq;
 			currentVolume_ = data_.envVol;
 
-			lengthTimer_ = 64 - data_.lengthTimer;
+			if (lengthTimer_ == 0)
+				lengthTimer_ = 64 - data_.lengthTimer;
 			break;
 
 		case Channels::Ch3:
 			freq_ = data_.freq;
 
-			lengthTimer_ = 256 - data_.lengthTimer;  //???
+			if (lengthTimer_ == 0)
+				lengthTimer_ = 256 - data_.lengthTimer;
 
 			waveRAMOffset_ = 0;
 			break;
 
 		case Channels::Ch4:
 			currentVolume_ = data_.envVol;
+			periodTimer_ = data_.envPeriod;
 
-			lengthTimer_ = 64 - data_.lengthTimer;
+			if (lengthTimer_ == 0)
+				lengthTimer_ = 64 - data_.lengthTimer;
 
 			lfsr_ = 0xffff;
 			break;
@@ -260,12 +269,11 @@ namespace dmge
 	{
 		if (data_.enableLength)
 		{
-			if (lengthTimer_ > 0)
+			if (lengthTimer_ > 0) --lengthTimer_;
+
+			if (lengthTimer_ == 0)
 			{
-				if (--lengthTimer_ == 0)
-				{
-					setEnable(false);
-				}
+				setEnable(false);
 			}
 		}
 	}
@@ -376,6 +384,27 @@ namespace dmge
 		mem_->write(Address::NR52, NR52);
 	}
 
+	void Channel::setLengthTimer(uint8 reg)
+	{
+		switch (ch_)
+		{
+		case Channels::Ch1:
+		case Channels::Ch2:
+		case Channels::Ch4:
+			lengthTimer_ = 64 - (reg & 0b111111);
+			break;
+
+		case Channels::Ch3:
+			lengthTimer_ = 256 - reg;
+			break;
+		}
+	}
+
+	void Channel::setFrequency(int freq)
+	{
+		freq_ = freq;
+	}
+
 	int Channel::calcSweepFrequency_()
 	{
 		int newFreq = shadowFreq_ >> data_.sweepShift;
@@ -420,11 +449,11 @@ namespace dmge
 
 		if ((prevDiv_ & 0b100000) && (div & 0b100000) == 0)
 		{
+			fsClock_++;
+
 			if ((fsClock_ % 8) == 7) onVolumeClock = true;
 			if (((fsClock_ - 2) % 4) == 0) onSweepClock = true;
 			if ((fsClock_ % 2) == 0) onLengthClock = true;
-
-			fsClock_++;
 		}
 
 		// トリガー
@@ -442,15 +471,6 @@ namespace dmge
 		if (ch4_.onTrigger())
 			ch4_.doTrigger();
 
-		// エンベロープ
-
-		if (onVolumeClock)
-		{
-			ch1_.doEnvelope();
-			ch2_.doEnvelope();
-			ch4_.doEnvelope();
-		}
-
 		// スイープ
 
 		if (onSweepClock)
@@ -466,6 +486,15 @@ namespace dmge
 			ch2_.doLength();
 			ch3_.doLength();
 			ch4_.doLength();
+		}
+
+		// エンベロープ
+
+		if (onVolumeClock)
+		{
+			ch1_.doEnvelope();
+			ch2_.doEnvelope();
+			ch4_.doEnvelope();
 		}
 
 		// もしDACがoffならチャンネルをoffにする
@@ -515,6 +544,17 @@ namespace dmge
 		cycles_ = (cycles_ + 1) % 95;
 	}
 
+	void APU::setFrequency(Channels ch, int freq)
+	{
+		switch (ch)
+		{
+		case Channels::Ch1: ch1_.setFrequency(freq); return;
+		case Channels::Ch2: ch2_.setFrequency(freq); return;
+		case Channels::Ch3: ch3_.setFrequency(freq); return;
+		case Channels::Ch4: ch4_.setFrequency(freq); return;
+		}
+	}
+
 	void APU::trigger(Channels ch)
 	{
 		switch (ch)
@@ -523,6 +563,17 @@ namespace dmge
 		case Channels::Ch2: ch2_.setTriggerFlag(); return;
 		case Channels::Ch3: ch3_.setTriggerFlag(); return;
 		case Channels::Ch4: ch4_.setTriggerFlag(); return;
+		}
+	}
+
+	void APU::setLengthTimer(Channels ch, uint8 reg)
+	{
+		switch (ch)
+		{
+		case Channels::Ch1: ch1_.setLengthTimer(reg); return;
+		case Channels::Ch2: ch2_.setLengthTimer(reg); return;
+		case Channels::Ch3: ch3_.setLengthTimer(reg); return;
+		case Channels::Ch4: ch4_.setLengthTimer(reg); return;
 		}
 	}
 }

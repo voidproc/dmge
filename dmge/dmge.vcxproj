@@ -121,6 +121,7 @@
     <ClCompile Include="AppConfig.cpp" />
     <ClCompile Include="APU.cpp" />
     <ClCompile Include="Cartridge.cpp" />
+    <ClCompile Include="Channel.cpp" />
     <ClCompile Include="CPU.cpp" />
     <ClCompile Include="DebugMonitor.cpp" />
     <ClCompile Include="Joypad.cpp" />
@@ -339,6 +340,7 @@
     <ClInclude Include="BitMask\STAT.h" />
     <ClInclude Include="BitMask\TAC.h" />
     <ClInclude Include="Cartridge.h" />
+    <ClInclude Include="Channel.h" />
     <ClInclude Include="Colors.h" />
     <ClInclude Include="CPU.h" />
     <ClInclude Include="DebugMonitor.h" />

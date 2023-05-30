@@ -1,141 +1,42 @@
 ﻿#pragma once
 
+#include "Channel.h"
+
+
 namespace dmge
 {
 	class Memory;
 
-	struct ChannelData
-	{
-		bool enable;
-		int outputLevel;
 
-		int sweepPeriod;
-		int sweepDir;
-		int sweepShift;
-
-		int duty;
-		int lengthTimer;
-		int envVol;
-		int envDir;
-		int envPeriod;
-		bool trigger;
-		bool enableLength;
-		int freq;
-
-		int divisorShift;
-		int counterWidth;
-		int divisor;
-	};
-
-	enum class Channels
-	{
-		Ch1,
-		Ch2,
-		Ch3,
-		Ch4,
-	};
-
-	class Channel
+	class APUStream : public IAudioStream
 	{
 	public:
-		Channel(Memory* mem, Channels ch);
+		APUStream();
 
-		void fetch();
+		virtual ~APUStream();
 
-		void updateFrequencyTimer();
+		void pushSample(float left, float right);
 
-		void doTrigger();
-
-		void doEnvelope();
-
-		void doSweep();
-
-		void doLength();
-
-		void setTriggerFlag();
-
-		bool onTrigger() const;
-
-		int amplitude() const;
-
-		void checkDAC();
-
-		bool getDACEnable() const;
-
-		bool getEnable() const;
-
-		void setEnable(bool enable);
-
-		void setLengthTimer(uint8 reg);
-
-		void setFrequency(int freq);
-
+		int bufferSize() const;
 
 	private:
-		Memory* mem_;
+		virtual void getAudio(float* left, float* right, size_t samplesToWrite) override;
 
-		Channels ch_;
+		virtual bool hasEnded() override;
 
-		ChannelData data_{};
+		virtual void rewind() override;
 
-		// Trigger Flag
-		bool trigger_ = false;
+	private:
+		Wave wave_;
 
-		// Frequency timer
-		int freqTimer_ = 0;
+		int posPushed_ = 0;
 
-		// Duty position
-		int dutyPos_ = 0;
+		int posRead_ = 0;
 
-		// Wave RAM offset (0-31)
-		int waveRAMOffset_ = 0;
+		int bufferSize_ = 0;
 
-		// Waveform frequency
-		int freq_ = 0;
-
-		// Envelope
-		int currentVolume_ = 0;
-		int periodTimer_ = 0;
-
-		// Sweep
-		int sweepTimer_ = 0;
-		bool sweepEnabled_ = 0;
-		int shadowFreq_ = 0;
-
-		// Length
-		int lengthTimer_ = 0;
-
-		// Noise
-		uint16 lfsr_ = 0;
-
-		int calcSweepFrequency_();
 	};
 
-	/*
-	struct WaveChannel
-	{
-		// NR30
-		bool enable;
-
-		// NR31
-		int lengthTimer;
-
-		// NR32
-		// bit 5-6 : 0=なし、1以上=その数だけ音量をシフト
-		int outputLevel;
-
-		// NR33 & NR34.0-2
-		int freq;
-
-		// NR34
-		// bit 6
-		bool enableLength;
-
-		// NR34
-		// bit 7
-		bool trigger;
-	};
-	*/
 
 	class APU
 	{
@@ -151,11 +52,9 @@ namespace dmge
 	private:
 		Memory* mem_;
 
+		std::shared_ptr<APUStream> apuStream_;
+
 		Audio audio_;
-
-		Wave wave_;
-
-		int samples_ = 0;
 
 		Channel ch1_;
 		Channel ch2_;

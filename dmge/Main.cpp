@@ -109,6 +109,8 @@ public:
 
 
 		mainLoop_();
+
+		mem_.saveSRAM();
 	}
 
 private:

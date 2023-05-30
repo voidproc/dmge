@@ -60,6 +60,8 @@ namespace dmge
 
 	void Memory::loadCartridge(FilePath cartridgePath)
 	{
+		cartridgePath_ = cartridgePath;
+
 		BinaryReader reader{ cartridgePath };
 		rom_.resize(reader.size());
 		reader.read(rom_.data(), rom_.size());
@@ -69,6 +71,16 @@ namespace dmge
 
 		// SRAM (32KiB)
 		sram_.resize(0x8000);
+
+		if (cartridgeHeader_.ramSizeKB)
+		{
+			const auto savPath = FileSystem::PathAppend(FileSystem::ParentPath(cartridgePath), FileSystem::BaseName(cartridgePath)) + U".sav";
+			if (FileSystem::Exists(savPath))
+			{
+				BinaryReader savReader{ savPath };
+				savReader.read(sram_.data(), Min<size_t>(sram_.size(), savReader.size()));
+			}
+		}
 
 		switch (cartridgeHeader_.type)
 		{
@@ -83,6 +95,17 @@ namespace dmge
 		}
 
 		reset();
+	}
+
+	void Memory::saveSRAM()
+	{
+		const auto savPath = FileSystem::PathAppend(FileSystem::ParentPath(cartridgePath_), FileSystem::BaseName(cartridgePath_)) + U".sav";
+
+		if (cartridgeHeader_.ramSizeKB)
+		{
+			BinaryWriter writer{ savPath };
+			writer.write(sram_.data(), cartridgeHeader_.ramSizeKB * 1024);
+		}
 	}
 
 	void Memory::write(uint16 addr, uint8 value)

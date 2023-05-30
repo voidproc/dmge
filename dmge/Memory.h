@@ -21,6 +21,8 @@ namespace dmge
 
 		void loadCartridge(FilePath cartridgePath);
 
+		void saveSRAM();
+
 		void write(uint16 addr, uint8 value);
 
 		void writeDirect(uint16 addr, uint8 value);
@@ -48,6 +50,8 @@ namespace dmge
 		APU* apu_ = nullptr;
 		Timer* timer_ = nullptr;
 		Joypad* joypad_ = nullptr;
+
+		String cartridgePath_;
 
 		// カートリッジの内容
 		Array<uint8> rom_;

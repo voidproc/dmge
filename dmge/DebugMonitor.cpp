@@ -134,7 +134,7 @@ namespace dmge
 
 			// Memory dump
 
-			for (uint16 row : step(4u))
+			for (uint16 row = 0; row < 4u; row++)
 			{
 				FontAsset(U"debug")(U"{:04X}: {:02X} {:02X} {:02X} {:02X} {:02X} {:02X} {:02X} {:02X} | {:02X} {:02X} {:02X} {:02X} {:02X} {:02X} {:02X} {:02X}"_fmt(
 					dumpAddress_ + 0x10 * row,

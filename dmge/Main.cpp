@@ -72,7 +72,7 @@ public:
 
 		config_.print();
 
-		mem_.init(&ppu_, &timer_, &joypad_);
+		mem_.init(&ppu_, &apu_, &timer_, &joypad_);
 
 		// メモリ書き込み時フックを設定
 		if (config_.enableBreakpoint && not config_.breakpointsMemWrite.empty())

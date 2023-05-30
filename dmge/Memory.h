@@ -6,6 +6,7 @@
 namespace dmge
 {
 	class PPU;
+	class APU;
 	class Timer;
 	class Joypad;
 
@@ -14,7 +15,7 @@ namespace dmge
 	public:
 		Memory();
 
-		void init(PPU* ppu, dmge::Timer* timer, dmge::Joypad* joypad);
+		void init(PPU* ppu, APU* apu, dmge::Timer* timer, dmge::Joypad* joypad);
 
 		void reset();
 
@@ -44,6 +45,7 @@ namespace dmge
 
 	private:
 		PPU* ppu_ = nullptr;
+		APU* apu_ = nullptr;
 		Timer* timer_ = nullptr;
 		Joypad* joypad_ = nullptr;
 

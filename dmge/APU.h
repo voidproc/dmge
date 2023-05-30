@@ -52,9 +52,19 @@ namespace dmge
 
 		void doLength();
 
+		void setTriggerFlag();
+
 		bool onTrigger() const;
 
 		int amplitude() const;
+
+		void checkDAC();
+
+		bool getDACEnable() const;
+
+		bool getEnable() const;
+
+		void setEnable(bool enable);
 
 	private:
 		Memory* mem_;
@@ -62,6 +72,9 @@ namespace dmge
 		Channels ch_;
 
 		ChannelData data_{};
+
+		// Trigger Flag
+		bool trigger_ = false;
 
 		// Frequency timer
 		int freqTimer_ = 0;
@@ -86,7 +99,7 @@ namespace dmge
 
 		// Length
 		int lengthTimer_ = 0;
-		int chEnabledByLength_ = 1;
+		//int chEnabledByLength_ = 1;
 
 		// Noise
 		uint16 lfsr_ = 0;
@@ -127,7 +140,7 @@ namespace dmge
 
 		void update();
 
-		void dump();
+		void trigger(Channels ch);
 
 	private:
 		Memory* mem_;

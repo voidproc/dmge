@@ -103,10 +103,21 @@ namespace dmge
 	{
 		switch (ch_)
 		{
-		case Channels::Ch1: data_ = GetChannel1Data(mem_); break;
-		case Channels::Ch2: data_ = GetChannel2Data(mem_); break;
-		case Channels::Ch3: data_ = GetChannel3Data(mem_); break;
-		case Channels::Ch4: data_ = GetChannel4Data(mem_); break;
+		case Channels::Ch1:
+			data_ = GetChannel1Data(mem_);
+			break;
+
+		case Channels::Ch2:
+			data_ = GetChannel2Data(mem_);
+			break;
+
+		case Channels::Ch3:
+			data_ = GetChannel3Data(mem_);
+			break;
+
+		case Channels::Ch4:
+			data_ = GetChannel4Data(mem_);
+			break;
 
 		default:
 			break;
@@ -133,17 +144,19 @@ namespace dmge
 			case Channels::Ch4:
 			{
 				freqTimer_ = (data_.divisor > 0 ? (data_.divisor * 16) : 8) << data_.divisorShift;
-				//uint16 xorResult = (lfsr_ & 0b01) ^ ((lfsr_ & 0b10) >> 1);
-				//lfsr_ = (lfsr_ >> 1) | (xorResult << 14);
-				//if (data_.counterWidth == 1)
-				//{
-				//	lfsr_ &= !(1 << 6);
-				//	lfsr_ |= xorResult << 6;
-				//}
-				bool isShort = data_.counterWidth == 1;
-				if (lfsr_ == 0) lfsr_ = 1;
-				lfsr_ += lfsr_ + (((lfsr_ >> (isShort ? 6 : 14)) ^ (lfsr_ >> (isShort ? 5 : 13))) & 1);
-				//Console.writeln(lfsr_);
+
+				uint16 xorResult = (lfsr_ & 0b01) ^ ((lfsr_ & 0b10) >> 1);
+				lfsr_ = (lfsr_ >> 1) | (xorResult << 14);
+				if (data_.counterWidth == 1)
+				{
+					lfsr_ &= ~(1 << 6);
+					lfsr_ |= xorResult << 6;
+				}
+
+				//bool isShort = data_.counterWidth == 1;
+				//if (lfsr_ == 0) lfsr_ = 1;
+				//lfsr_ += lfsr_ + (((lfsr_ >> (isShort ? 6 : 14)) ^ (lfsr_ >> (isShort ? 5 : 13))) & 1);
+
 				break;
 			}
 
@@ -156,6 +169,10 @@ namespace dmge
 
 	void Channel::doTrigger()
 	{
+		setEnable(true);
+
+		trigger_ = false;
+
 		switch (ch_)
 		{
 		case Channels::Ch1:
@@ -168,7 +185,6 @@ namespace dmge
 			if (data_.sweepShift != 0) calcSweepFrequency_();
 
 			lengthTimer_ = 64 - data_.lengthTimer;
-			chEnabledByLength_ = 1;
 			break;
 
 		case Channels::Ch2:
@@ -176,23 +192,22 @@ namespace dmge
 			currentVolume_ = data_.envVol;
 
 			lengthTimer_ = 64 - data_.lengthTimer;
-			chEnabledByLength_ = 1;
 			break;
 
 		case Channels::Ch3:
 			freq_ = data_.freq;
 
 			lengthTimer_ = 256 - data_.lengthTimer;  //???
-			chEnabledByLength_ = 1;
+
+			waveRAMOffset_ = 0;
 			break;
 
 		case Channels::Ch4:
 			currentVolume_ = data_.envVol;
 
 			lengthTimer_ = 64 - data_.lengthTimer;
-			chEnabledByLength_ = 1;
 
-			//lfsr_ = 0xffff;
+			lfsr_ = 0xffff;
 			break;
 
 		default:
@@ -247,17 +262,22 @@ namespace dmge
 		{
 			if (lengthTimer_ > 0)
 			{
-				if (--lengthTimer_)
+				if (--lengthTimer_ == 0)
 				{
-					chEnabledByLength_ = 0;
+					setEnable(false);
 				}
 			}
 		}
 	}
 
+	void Channel::setTriggerFlag()
+	{
+		trigger_ = true;
+	}
+
 	bool Channel::onTrigger() const
 	{
-		return data_.trigger;
+		return trigger_ && data_.trigger && getDACEnable();
 	}
 
 	int Channel::amplitude() const
@@ -266,22 +286,24 @@ namespace dmge
 		{
 		case Channels::Ch1:
 		case Channels::Ch2:
-			return SquareWaveAmplitude(data_.duty, dutyPos_) * currentVolume_ * chEnabledByLength_;
+			return SquareWaveAmplitude(data_.duty, dutyPos_) * currentVolume_;// *chEnabledByLength_;
 
 		case Channels::Ch3:
 		{
+			if (not data_.enable) return 0;
+
 			uint8 wave = mem_->read(Address::WaveRAM + waveRAMOffset_ / 2);
 			uint8 amp3 = (wave >> ((1 - (waveRAMOffset_ % 2)) * 4)) & 0xf;
-			if (not data_.enable) amp3 = 0;
 			const int shift[4] = { 4, 0, 1, 2 };
-			amp3 = (amp3 >> shift[data_.outputLevel]) * chEnabledByLength_;
+			amp3 = (amp3 >> shift[data_.outputLevel]);// *chEnabledByLength_;
 			return amp3;
 		}
 
 		case Channels::Ch4:
 		{
 			auto amp4 = ~lfsr_ & 0x01;
-			return amp4 * currentVolume_ * chEnabledByLength_;
+			if (data_.envVol == 0) amp4 = 0;
+			return amp4 * currentVolume_;// *chEnabledByLength_;
 		}
 
 		default:
@@ -291,11 +313,74 @@ namespace dmge
 		return 0;
 	}
 
+	void Channel::checkDAC()
+	{
+		if (not getDACEnable())
+		{
+			setEnable(false);
+		}
+	}
+
+	bool Channel::getDACEnable() const
+	{
+		switch (ch_)
+		{
+		case Channels::Ch1:
+			return (mem_->read(Address::NR12) & 0xf8) != 0;
+
+		case Channels::Ch2:
+			return (mem_->read(Address::NR22) & 0xf8) != 0;
+
+		case Channels::Ch3:
+			return data_.enable;
+
+		case Channels::Ch4:
+			return (mem_->read(Address::NR42) & 0xf8) != 0;
+
+		default:
+			break;
+		}
+	}
+
+	bool Channel::getEnable() const
+	{
+		const uint8 NR52 = mem_->read(Address::NR52);
+
+		switch (ch_)
+		{
+		case Channels::Ch1: return ((NR52 >> 0) & 1) == 1;
+		case Channels::Ch2: return ((NR52 >> 1) & 1) == 1;
+		case Channels::Ch3: return ((NR52 >> 2) & 1) == 1;
+		case Channels::Ch4: return ((NR52 >> 3) & 1) == 1;
+		}
+
+		return false;
+	}
+
+	void Channel::setEnable(bool enable)
+	{
+		uint8 NR52 = mem_->read(Address::NR52);
+
+		int shift = 0;
+
+		switch (ch_)
+		{
+		case Channels::Ch1: shift = 0; break;
+		case Channels::Ch2: shift = 1; break;
+		case Channels::Ch3: shift = 2; break;
+		case Channels::Ch4: shift = 3; break;
+		}
+
+		NR52 &= ~(1 << shift);
+		NR52 |= (enable ? 1 : 0) << shift;
+		mem_->write(Address::NR52, NR52);
+	}
+
 	int Channel::calcSweepFrequency_()
 	{
 		int newFreq = shadowFreq_ >> data_.sweepShift;
 		newFreq = shadowFreq_ + (data_.sweepDir == 0) ? -newFreq : newFreq;
-		if (newFreq > 2047) sweepEnabled_ = false;
+		if (newFreq > 2047) setEnable(false);
 		return newFreq;
 	}
 
@@ -383,6 +468,12 @@ namespace dmge
 			ch4_.doLength();
 		}
 
+		// もしDACがoffならチャンネルをoffにする
+		//ch1_.checkDAC();
+		//ch2_.checkDAC();
+		//ch3_.checkDAC();
+		//ch4_.checkDAC();
+
 		// Save previous state
 		prevDiv_ = div;
 
@@ -391,10 +482,17 @@ namespace dmge
 
 		if (cycles_ == 0)
 		{
-			const auto dacInput1 = ch1_.amplitude();
-			const auto dacInput2 = ch2_.amplitude();
-			const auto dacInput3 = ch3_.amplitude();
-			const auto dacInput4 = ch4_.amplitude();
+			const uint8 NR52 = mem_->read(Address::NR52);
+			const uint8 masterSwitch = NR52 >> 7;
+			const uint8 ch1Enabled = (NR52 >> 0) & 1;
+			const uint8 ch2Enabled = (NR52 >> 1) & 1;
+			const uint8 ch3Enabled = (NR52 >> 2) & 1;
+			const uint8 ch4Enabled = (NR52 >> 3) & 1;
+
+			const auto dacInput1 = ch1_.amplitude() * masterSwitch * ch1Enabled;
+			const auto dacInput2 = ch2_.amplitude() * masterSwitch * ch2Enabled;
+			const auto dacInput3 = ch3_.amplitude() * masterSwitch * ch3Enabled;
+			const auto dacInput4 = ch4_.amplitude() * masterSwitch * ch4Enabled;
 
 			const auto dacOutput1 = (dacInput1 / 7.5) - 1.0;  // -1.0 ～ +1.0
 			const auto dacOutput2 = (dacInput2 / 7.5) - 1.0;  // -1.0 ～ +1.0
@@ -402,6 +500,7 @@ namespace dmge
 			const auto dacOutput4 = (dacInput4 / 7.5) - 1.0;  // -1.0 ～ +1.0
 
 			double sample = (dacOutput1 + dacOutput2 + dacOutput3 + dacOutput4) / 4.0;
+			//double sample = (dacOutput1);
 
 			wave_[samples_++].set(sample, sample);
 
@@ -416,8 +515,14 @@ namespace dmge
 		cycles_ = (cycles_ + 1) % 95;
 	}
 
-	void APU::dump()
+	void APU::trigger(Channels ch)
 	{
-		//Console.writeln(U"div={}, fsClock={}"_fmt(mem_->read(Address::DIV), fsClock_));
+		switch (ch)
+		{
+		case Channels::Ch1: ch1_.setTriggerFlag(); return;
+		case Channels::Ch2: ch2_.setTriggerFlag(); return;
+		case Channels::Ch3: ch3_.setTriggerFlag(); return;
+		case Channels::Ch4: ch4_.setTriggerFlag(); return;
+		}
 	}
 }

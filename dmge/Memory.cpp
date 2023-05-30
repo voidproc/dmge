@@ -1,5 +1,6 @@
 ﻿#include "Memory.h"
 #include "PPU.h"
+#include "APU.h"
 #include "Timer.h"
 #include "Joypad.h"
 #include "DebugPrint.h"
@@ -11,9 +12,10 @@ namespace dmge
 	{
 	}
 
-	void Memory::init(PPU* ppu, dmge::Timer* timer, dmge::Joypad* joypad)
+	void Memory::init(PPU* ppu, APU* apu, dmge::Timer* timer, dmge::Joypad* joypad)
 	{
 		ppu_ = ppu;
+		apu_ = apu;
 		timer_ = timer;
 		joypad_ = joypad;
 	}
@@ -187,6 +189,25 @@ namespace dmge
 			value |= 0b11100000;
 		}
 
+		// APU - Channel Trigger
+
+		else if (addr == Address::NR14)
+		{
+			apu_->trigger(Channels::Ch1);
+		}
+		else if (addr == Address::NR24)
+		{
+			apu_->trigger(Channels::Ch2);
+		}
+		else if (addr == Address::NR34)
+		{
+			apu_->trigger(Channels::Ch3);
+		}
+		else if (addr == Address::NR44)
+		{
+			apu_->trigger(Channels::Ch4);
+		}
+
 		// DMA
 
 		else if (addr == Address::DMA)
@@ -211,13 +232,13 @@ namespace dmge
 
 		// フック
 
-		if (not writeHooks_.empty())
-		{
-			for (const auto& hook : writeHooks_)
-			{
-				hook(addr, value);
-			}
-		}
+		//if (not writeHooks_.empty())
+		//{
+		//	for (const auto& hook : writeHooks_)
+		//	{
+		//		hook(addr, value);
+		//	}
+		//}
 
 		if (doWrite)
 		{

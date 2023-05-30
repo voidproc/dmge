@@ -165,12 +165,12 @@ namespace dmge
 
 			apuStream_->pushSample(sample, sample);
 
-			if (apuStream_->bufferSize() > 300)
+			if (apuStream_->bufferSize() > 100 && not audio_.isPlaying())
 			{
 				audio_.play();
 			}
 
-			if (apuStream_->bufferSize() < 30)
+			if (apuStream_->bufferSize() <= 100)
 			{
 				audio_.pause();
 			}

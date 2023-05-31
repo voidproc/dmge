@@ -187,7 +187,6 @@ private:
 
 			// APU
 			
-			// Test
 			for (int i : step(cpu_.consumedCycles()))
 			{
 				apu_.update();
@@ -213,6 +212,8 @@ private:
 				if (KeyP.down())
 				{
 					mode_ = Mode::Trace;
+
+					apu_.pause();
 				}
 
 				// ボタン入力の更新
@@ -354,7 +355,7 @@ private:
 
 	dmge::Joypad joypad_{ &mem_ };
 
-	dmge::DebugMonitor debugMonitor_{ &mem_, &cpu_ };
+	dmge::DebugMonitor debugMonitor_{ &mem_, &cpu_, &apu_ };
 
 	// モード（通常 or トレース）
 	Mode mode_ = Mode::Default;

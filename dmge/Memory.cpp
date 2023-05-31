@@ -292,13 +292,13 @@ namespace dmge
 
 		// フック
 
-		//if (not writeHooks_.empty())
-		//{
-		//	for (const auto& hook : writeHooks_)
-		//	{
-		//		hook(addr, value);
-		//	}
-		//}
+		if (not writeHooks_.empty())
+		{
+			for (const auto& hook : writeHooks_)
+			{
+				hook(addr, value);
+			}
+		}
 
 		if (doWrite)
 		{

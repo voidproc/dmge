@@ -17,7 +17,12 @@ namespace dmge
 
 		void pushSample(float left, float right);
 
-		int bufferSize() const;
+		int bufferRemain() const;
+
+		int bufferTotalSize() const;
+
+		// [DEBUG]
+		std::pair<int, int> getSamplePos();
 
 	private:
 		virtual void getAudio(float* left, float* right, size_t samplesToWrite) override;
@@ -45,9 +50,14 @@ namespace dmge
 
 		void update();
 
+		void pause();
+
 		void setFrequency(Channels ch, int freq);
 		void trigger(Channels ch);
 		void setLengthTimer(Channels ch, uint8 reg);
+
+		// [DEBUG]
+		void draw(const Point& pos);
 
 	private:
 		Memory* mem_;

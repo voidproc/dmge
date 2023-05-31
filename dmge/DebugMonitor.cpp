@@ -1,6 +1,7 @@
 ﻿#include "DebugMonitor.h"
 #include "Memory.h"
 #include "CPU.h"
+#include "APU.h"
 #include "Address.h"
 
 namespace dmge
@@ -11,8 +12,8 @@ namespace dmge
 			FontAsset(U"debug")(U"{:04X} {:4}={:02X}"_fmt(addr, name, value)).draw(10, x, y, Palette::Whitesmoke);
 	}
 
-	DebugMonitor::DebugMonitor(Memory* mem, CPU* cpu)
-		: mem_{ mem }, cpu_{ cpu }
+	DebugMonitor::DebugMonitor(Memory* mem, CPU* cpu, APU* apu)
+		: mem_{ mem }, cpu_{ cpu }, apu_{ apu }
 	{
 		textStateDumpAddress_.text = U"0000";
 	}
@@ -156,6 +157,10 @@ namespace dmge
 					mem_->read(dumpAddress_ + row * 16 + 15)))
 					.draw(10, 1, 1 + 11 * (23 + 1) + 11 * row, Palette::Whitesmoke);
 			}
+
+			// APU Stream Buffer
+
+			apu_->draw({ 1, 264 + 11 * 5 });
 		}
 
 		if (showDumpAddressTextbox_)

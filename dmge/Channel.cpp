@@ -151,11 +151,6 @@ namespace dmge
 					lfsr_ &= ~(1 << 6);
 					lfsr_ |= xorResult << 6;
 				}
-
-				//bool isShort = data_.counterWidth == 1;
-				//if (lfsr_ == 0) lfsr_ = 1;
-				//lfsr_ += lfsr_ + (((lfsr_ >> (isShort ? 6 : 14)) ^ (lfsr_ >> (isShort ? 5 : 13))) & 1);
-
 				break;
 			}
 
@@ -187,7 +182,6 @@ namespace dmge
 
 			if (lengthTimer_ == 0)
 				lengthTimer_ = 64 - data_.lengthTimer;
-			//Console.writeln(U"freq:{} envVol:{} envPeriod:{} lengthTimer:{}"_fmt(freq_, data_.envVol, data_.envPeriod, lengthTimer_));
 			break;
 
 		case Channels::Ch2:
@@ -293,7 +287,7 @@ namespace dmge
 		{
 		case Channels::Ch1:
 		case Channels::Ch2:
-			return SquareWaveAmplitude(data_.duty, dutyPos_) * currentVolume_;// *chEnabledByLength_;
+			return SquareWaveAmplitude(data_.duty, dutyPos_) * currentVolume_;
 
 		case Channels::Ch3:
 		{
@@ -302,7 +296,7 @@ namespace dmge
 			uint8 wave = mem_->read(Address::WaveRAM + waveRAMOffset_ / 2);
 			uint8 amp3 = (wave >> ((1 - (waveRAMOffset_ % 2)) * 4)) & 0xf;
 			const int shift[4] = { 4, 0, 1, 2 };
-			amp3 = (amp3 >> shift[data_.outputLevel]);// *chEnabledByLength_;
+			amp3 = (amp3 >> shift[data_.outputLevel]);
 			return amp3;
 		}
 
@@ -310,7 +304,7 @@ namespace dmge
 		{
 			auto amp4 = ~lfsr_ & 0x01;
 			if (data_.envVol == 0) amp4 = 0;
-			return amp4 * currentVolume_;// *chEnabledByLength_;
+			return amp4 * currentVolume_;
 		}
 
 		default:

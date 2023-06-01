@@ -38,10 +38,10 @@ namespace dmge
 
 	void APUStream::pushSample(float left, float right)
 	{
-		wave_[posPushed_].left = left;
-		wave_[posPushed_].right = right;
+		wave_[posWrite_].left = left;
+		wave_[posWrite_].right = right;
 
-		posPushed_ = (posPushed_ + 1) % wave_.size();
+		posWrite_ = (posWrite_ + 1) % wave_.size();
 
 		bufferSize_++;
 	}
@@ -51,14 +51,14 @@ namespace dmge
 		return bufferSize_;
 	}
 
-	int APUStream::bufferTotalSize() const
+	int APUStream::bufferMaxSize() const
 	{
 		return wave_.size();
 	}
 
 	std::pair<int, int> APUStream::getSamplePos()
 	{
-		return std::pair<int, int>(posPushed_, posRead_);
+		return std::pair<int, int>(posWrite_, posRead_);
 	}
 
 
@@ -74,11 +74,15 @@ namespace dmge
 	{
 	}
 
-	void APU::update()
+	void APU::run()
 	{
 		const uint8 NR52 = mem_->read(Address::NR52);
 		const uint8 masterSwitch = NR52 >> 7;
-		if (masterSwitch == 0) return;
+		if (masterSwitch == 0)
+		{
+			audio_.pause();
+			return;
+		}
 
 		ch1_.fetch();
 		ch2_.fetch();
@@ -156,7 +160,7 @@ namespace dmge
 		// Output audio
 		// (CPUFreq / SampleRate) ==> 4194304 / 44100 ==> Every 95.1 T-cycles
 
-		if (cycles_ == 0/* && apuStream_->bufferRemain() < 8000*/)
+		if (cycles_ == 0)
 		{
 			const std::array<int, 4> chAmp = {
 				ch1_.amplitude() * ch1_.getEnable(),
@@ -199,17 +203,30 @@ namespace dmge
 			apuStream_->pushSample(left * leftVolume / 4.0, right * rightVolume / 4.0);
 		}
 
-		if (apuStream_->bufferRemain() > 8000 && not audio_.isPlaying())
+		static int m = 95;
+		if (apuStream_->bufferRemain() > 12000)
+		{
+			m = 96;
+		}
+		else if (apuStream_->bufferRemain() < 7000)
+		{
+			m = 95;
+		}
+
+		cycles_ = (cycles_ + 1) % m;
+	}
+
+	void APU::updatePlaybackState()
+	{
+		if (apuStream_->bufferRemain() > 10000 && not audio_.isPlaying())
 		{
 			audio_.play();
 		}
 
-		if (apuStream_->bufferRemain() <= 3000 && audio_.isPlaying())
+		if (apuStream_->bufferRemain() <= 5000 && audio_.isPlaying())
 		{
 			audio_.pause();
 		}
-
-		cycles_ = (cycles_ + 1) % 95;
 	}
 
 	void APU::pause()
@@ -253,19 +270,18 @@ namespace dmge
 	{
 		const Size GaugeSize{ 240, 12 };
 
-		const auto [pushedPos, readPos] = apuStream_->getSamplePos();
-		const auto w = (pushedPos >= readPos) ? pushedPos - readPos : pushedPos + apuStream_->bufferTotalSize() - readPos;
+		const auto buffer = apuStream_->bufferRemain();
 
-		if (apuStream_->bufferRemain() > 0)
+		if (buffer > 0)
 		{
-			RectF{ pos, SizeF{ 1.0 * GaugeSize.x * w / apuStream_->bufferTotalSize(), 12} }.draw(Palette::Green);
+			RectF{ pos, SizeF{ 1.0 * GaugeSize.x * buffer / apuStream_->bufferMaxSize(), 12} }.draw(Palette::Green);
 		}
 		else
 		{
 			RectF{ pos, GaugeSize }.draw(Palette::Red);
 		}
 
-		Rect{ pos, GaugeSize }.drawFrame(1.0);
-
+		const auto area = RectF{ pos.movedBy(0.5, 0.5), GaugeSize}.drawFrame(1.0, 0.0);
+		FontAsset(U"debug")(U"{:5} / 44100"_fmt(apuStream_->bufferRemain())).drawAt(area.center());
 	}
 }

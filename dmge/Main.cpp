@@ -192,8 +192,10 @@ private:
 			
 			for (int i : step(cpu_.consumedCycles()))
 			{
-				apu_.update();
+				apu_.run();
 			}
+
+			apu_.updatePlaybackState();
 
 			// 割り込み
 

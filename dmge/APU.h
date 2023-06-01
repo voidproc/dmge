@@ -19,7 +19,7 @@ namespace dmge
 
 		int bufferRemain() const;
 
-		int bufferTotalSize() const;
+		int bufferMaxSize() const;
 
 		// [DEBUG]
 		std::pair<int, int> getSamplePos();
@@ -34,7 +34,7 @@ namespace dmge
 	private:
 		Wave wave_;
 
-		int posPushed_ = 0;
+		int posWrite_ = 0;
 
 		int posRead_ = 0;
 
@@ -48,9 +48,18 @@ namespace dmge
 	public:
 		APU(Memory* mem);
 
-		void update();
+		// サウンド処理を1クロック分実行し、
+		// サンプリングレートの周期にある場合はオーディオストリームにサンプルを書き込む
+		void run();
 
+		// オーディオストリームが十分にバッファリングされている場合は再生を開始し、
+		// そうでない場合は再生を一時停止する
+		void updatePlaybackState();
+
+		// オーディオストリームの再生を一時停止する
 		void pause();
+
+		// チャンネル操作
 
 		void setFrequency(Channels ch, int freq);
 		void trigger(Channels ch);

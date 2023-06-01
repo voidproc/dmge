@@ -100,7 +100,7 @@ namespace dmge
 		bool onSweepClock = false;
 		bool onLengthClock = false;
 
-		if ((prevDiv_ & 0b100000) && (div & 0b100000) == 0)
+		if ((prevDiv_ & 0b10000) && (div & 0b10000) == 0)
 		{
 			fsClock_++;
 

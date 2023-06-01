@@ -72,7 +72,7 @@ namespace dmge
 		Channel ch4_;
 
 		// Frame Seq. Clock
-		int fsClock_ = 0;
+		uint64 fsClock_ = 0;
 
 		// Count T-cycles
 		int cycles_ = 0;

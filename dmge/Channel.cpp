@@ -251,7 +251,6 @@ namespace dmge
 				{
 					freq_ = shadowFreq_ = newFreq;
 
-					// ????
 					mem_->writeDirect(Address::NR13, newFreq & 0xff);
 					mem_->writeDirect(Address::NR14, (mem_->read(Address::NR14) & 0b1111000) | ((newFreq >> 8) & 0b111));
 
@@ -345,6 +344,8 @@ namespace dmge
 		default:
 			break;
 		}
+
+		return false;
 	}
 
 	bool Channel::getEnable() const

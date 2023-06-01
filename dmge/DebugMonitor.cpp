@@ -161,6 +161,19 @@ namespace dmge
 			// APU Stream Buffer
 
 			apu_->draw({ 1, 264 + 11 * 5 });
+
+			// Joycon
+
+			const auto joyconL = JoyConL(0);
+			const auto joyconR = JoyConR(0);
+
+			if (joyconL.isConnected() && joyconR.isConnected())
+			{
+				FontAsset(U"debug")(U"JOYCONL=L{:d} D{:d} U{:d} R{:d}, JOYCONR=A{:d} X{:d} B{:d} Y{:d}"_fmt(
+					joyconL.button0.pressed(), joyconL.button1.pressed(), joyconL.button2.pressed(), joyconL.button3.pressed(),
+					joyconR.button0.pressed(), joyconR.button1.pressed(), joyconR.button2.pressed(), joyconR.button3.pressed()))
+					.draw(10, 1, 341, Palette::Whitesmoke);
+			}
 		}
 
 		if (showDumpAddressTextbox_)

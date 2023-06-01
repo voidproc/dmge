@@ -101,7 +101,7 @@ namespace dmge
 			fsClock_++;
 
 			if ((fsClock_ % 8) == 7) onVolumeClock = true;
-			if (((fsClock_ - 2) % 4) == 0) onSweepClock = true;
+			if ((fsClock_ & 3) == 2) onSweepClock = true;
 			if ((fsClock_ % 2) == 0) onLengthClock = true;
 		}
 
@@ -152,7 +152,7 @@ namespace dmge
 		// Output audio
 		// (CPUFreq / SampleRate) ==> 4194304 / 44100 ==> Every 95.1 T-cycles
 
-		if (cycles_ == 0 && apuStream_->bufferRemain() < 15000)
+		if (cycles_ == 0/* && apuStream_->bufferRemain() < 8000*/)
 		{
 			const uint8 NR52 = mem_->read(Address::NR52);
 			const uint8 masterSwitch = NR52 >> 7;
@@ -172,16 +172,18 @@ namespace dmge
 			const auto dacOutput4 = (dacInput4 / 7.5) - 1.0;  // -1.0 ～ +1.0
 
 			double sample = (dacOutput1 + dacOutput2 + dacOutput3 + dacOutput4) / 4.0;
+			//double sample = dacOutput1;
+
 
 			apuStream_->pushSample(sample, sample);
 		}
 
-		if (apuStream_->bufferRemain() > 5000 && not audio_.isPlaying())
+		if (apuStream_->bufferRemain() > 8000 && not audio_.isPlaying())
 		{
 			audio_.play();
 		}
 
-		if (apuStream_->bufferRemain() <= 2500 && audio_.isPlaying())
+		if (apuStream_->bufferRemain() <= 3000 && audio_.isPlaying())
 		{
 			audio_.pause();
 		}
@@ -243,11 +245,6 @@ namespace dmge
 		}
 
 		Rect{ pos, GaugeSize }.drawFrame(1.0);
-
-		//const auto xp = 1.0 * GaugeSize.x * pushedPos / apuStream_->bufferTotalSize();
-		//const auto xr = 1.0 * GaugeSize.x * readPos / apuStream_->bufferTotalSize();
-		//rect.left().movedBy(xp, 0).draw(1.0, Palette::Lime);
-		//rect.left().movedBy(xr, 0).draw(1.0, Palette::Red);
 
 	}
 }

@@ -100,7 +100,7 @@ namespace dmge
 
 		// Sweep
 		int sweepTimer_ = 0;
-		bool sweepEnabled_ = 0;
+		bool sweepEnabled_ = false;
 		int shadowFreq_ = 0;
 
 		// Length

@@ -251,6 +251,10 @@ namespace dmge
 				{
 					freq_ = shadowFreq_ = newFreq;
 
+					// ????
+					mem_->writeDirect(Address::NR13, newFreq & 0xff);
+					mem_->writeDirect(Address::NR14, (mem_->read(Address::NR14) & 0b1111000) | ((newFreq >> 8) & 0b111));
+
 					// Check sweepEnabled
 					calcSweepFrequency_();
 				}
@@ -401,7 +405,12 @@ namespace dmge
 	int Channel::calcSweepFrequency_()
 	{
 		int newFreq = shadowFreq_ >> data_.sweepShift;
-		newFreq = shadowFreq_ + (data_.sweepDir == 0) ? -newFreq : newFreq;
+
+		if (data_.sweepDir == 0)
+			newFreq = shadowFreq_ + newFreq;
+		else
+			newFreq = shadowFreq_ - newFreq;
+
 		if (newFreq > 2047) setEnable(false);
 		return newFreq;
 	}

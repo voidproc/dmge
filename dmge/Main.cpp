@@ -134,6 +134,9 @@ private:
 			if (reachedBreakpoint_())
 			{
 				mode_ = Mode::Trace;
+
+				apu_.pause();
+
 				dmge::DebugPrint::Writeln(U"Break: pc={:04X}"_fmt(cpu_.currentPC()));
 			}
 
@@ -310,6 +313,9 @@ private:
 			if (addr == mem)
 			{
 				mode_ = Mode::Trace;
+
+				apu_.pause();
+
 				dmge::DebugPrint::Writeln(U"Break(Memory Write): pc={:04X} mem={:04X} val={:02X}"_fmt(cpu_.currentPC(), addr, value));
 				cpu_.dump();
 				break;

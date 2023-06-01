@@ -414,5 +414,4 @@ namespace dmge
 		if (newFreq > 2047) setEnable(false);
 		return newFreq;
 	}
-
 }

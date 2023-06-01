@@ -76,6 +76,10 @@ namespace dmge
 
 	void APU::update()
 	{
+		const uint8 NR52 = mem_->read(Address::NR52);
+		const uint8 masterSwitch = NR52 >> 7;
+		if (masterSwitch == 0) return;
+
 		ch1_.fetch();
 		ch2_.fetch();
 		ch3_.fetch();
@@ -154,28 +158,45 @@ namespace dmge
 
 		if (cycles_ == 0/* && apuStream_->bufferRemain() < 8000*/)
 		{
-			const uint8 NR52 = mem_->read(Address::NR52);
-			const uint8 masterSwitch = NR52 >> 7;
-			const uint8 ch1Enabled = (NR52 >> 0) & 1;
-			const uint8 ch2Enabled = (NR52 >> 1) & 1;
-			const uint8 ch3Enabled = (NR52 >> 2) & 1;
-			const uint8 ch4Enabled = (NR52 >> 3) & 1;
+			const std::array<int, 4> chAmp = {
+				ch1_.amplitude() * ch1_.getEnable(),
+				ch2_.amplitude() * ch2_.getEnable(),
+				ch3_.amplitude() * ch3_.getEnable(),
+				ch4_.amplitude() * ch4_.getEnable(),
+			};
 
-			const auto dacInput1 = ch1_.amplitude() * masterSwitch * ch1Enabled;
-			const auto dacInput2 = ch2_.amplitude() * masterSwitch * ch2Enabled;
-			const auto dacInput3 = ch3_.amplitude() * masterSwitch * ch3Enabled;
-			const auto dacInput4 = ch4_.amplitude() * masterSwitch * ch4Enabled;
+			// Input / Panning
 
-			const auto dacOutput1 = (dacInput1 / 7.5) - 1.0;  // -1.0 ～ +1.0
-			const auto dacOutput2 = (dacInput2 / 7.5) - 1.0;  // -1.0 ～ +1.0
-			const auto dacOutput3 = (dacInput3 / 7.5) - 1.0;  // -1.0 ～ +1.0
-			const auto dacOutput4 = (dacInput4 / 7.5) - 1.0;  // -1.0 ～ +1.0
+			std::array<int, 4> leftInput = { 0, 0, 0, 0 };
+			std::array<int, 4> rightInput = { 0, 0, 0, 0 };
 
-			double sample = (dacOutput1 + dacOutput2 + dacOutput3 + dacOutput4) / 4.0;
-			//double sample = dacOutput1;
+			const uint8 NR51 = mem_->read(Address::NR51);
 
+			for (int i : step(4))
+			{
+				if ((NR51 >> i) & 1) rightInput[i] = chAmp[i];
+				if ((NR51 >> (i + 4)) & 1) leftInput[i] = chAmp[i];
+			}
 
-			apuStream_->pushSample(sample, sample);
+			// DAC Output
+
+			double left = 0;
+			double right = 0;
+
+			for (int i : step(4))
+			{
+				left += (leftInput[i] / 7.5) - 1.0;
+				right += (rightInput[i] / 7.5) - 1.0;
+			}
+
+			// Master Volume
+
+			const uint8 NR50 = mem_->read(Address::NR50);
+
+			const double leftVolume = (((NR50 >> 4) & 0b111) + 1) / 8.0;
+			const double rightVolume = (((NR50 >> 0) & 0b111) + 1) / 8.0;
+
+			apuStream_->pushSample(left * leftVolume / 4.0, right * rightVolume / 4.0);
 		}
 
 		if (apuStream_->bufferRemain() > 8000 && not audio_.isPlaying())

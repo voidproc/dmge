@@ -126,6 +126,8 @@ private:
 		//   経過サイクル数が一定数を超えた場合にも描画を行う
 		int cyclesFromPreviousDraw = 0;
 
+		bool alwaysDump = false;
+
 		while (not quitApp_)
 		{
 			// ブレークポイントが有効で、ブレークポイントに達していたら
@@ -139,6 +141,9 @@ private:
 
 				dmge::DebugPrint::Writeln(U"Break: pc={:04X}"_fmt(cpu_.currentPC()));
 			}
+
+			if (alwaysDump)
+				cpu_.dump();
 
 			// トレースモードなら、専用のループへ
 
@@ -219,6 +224,12 @@ private:
 					mode_ = Mode::Trace;
 
 					apu_.pause();
+				}
+
+				// [DEBUG]常にダンプ
+				if (KeyD.down())
+				{
+					alwaysDump = not alwaysDump;
 				}
 
 				// ボタン入力の更新

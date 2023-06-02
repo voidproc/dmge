@@ -8,6 +8,51 @@
 
 namespace dmge
 {
+	bool IsNoMBC(CartridgeType type)
+	{
+		return type == CartridgeType::ROM_ONLY;
+	}
+
+	bool IsMBC1(CartridgeType type)
+	{
+		switch (type)
+		{
+			case CartridgeType::MBC1:
+			case CartridgeType::MBC1_RAM:
+			case CartridgeType::MBC1_RAM_BATTERY:
+				return true;
+		}
+
+		return false;
+	}
+
+	bool IsMBC2(CartridgeType type)
+	{
+		switch (type)
+		{
+		case CartridgeType::MBC2:
+		case CartridgeType::MBC2_BATTERY:
+			return true;
+		}
+
+		return false;
+	}
+
+	bool IsMBC3(CartridgeType type)
+	{
+		switch (type)
+		{
+		case CartridgeType::MBC3_TIMER_BATTERY:
+		case CartridgeType::MBC3_TIMER_RAM_BATTERY_2:
+		case CartridgeType::MBC3:
+		case CartridgeType::MBC3_RAM_2:
+		case CartridgeType::MBC3_RAM_BATTERY_2:
+			return true;
+		}
+
+		return false;
+	}
+
 	Memory::Memory()
 	{
 	}
@@ -62,9 +107,16 @@ namespace dmge
 	{
 		cartridgePath_ = cartridgePath;
 
+		// ROMをロード
 		BinaryReader reader{ cartridgePath };
 		rom_.resize(reader.size());
 		reader.read(rom_.data(), rom_.size());
+
+		// メモリにROMデータ書き込み
+		mem_.resize(0x10000);
+		std::copy_n(rom_.cbegin(), 0x8000, mem_.begin());
+		//reader.setPos(0);
+		//reader.read(mem_.data(), 0x8000);
 
 		// ヘッダ読み込み
 		readCartridgeHeader_();
@@ -72,6 +124,7 @@ namespace dmge
 		// SRAM (32KiB)
 		sram_.resize(0x8000);
 
+		// SRAMをファイルからロード
 		if (cartridgeHeader_.ramSizeKB)
 		{
 			const auto savPath = FileSystem::PathAppend(FileSystem::ParentPath(cartridgePath), FileSystem::BaseName(cartridgePath)) + U".sav";
@@ -82,18 +135,7 @@ namespace dmge
 			}
 		}
 
-		switch (cartridgeHeader_.type)
-		{
-		case CartridgeType::ROM_ONLY:
-		case CartridgeType::MBC1:
-		case CartridgeType::MBC1_RAM:
-		case CartridgeType::MBC1_RAM_BATTERY:
-			mem_.resize(0x10000);
-			reader.setPos(0);
-			reader.read(mem_.data(), 0x8000);
-			break;
-		}
-
+		// メモリを初期状態にリセット
 		reset();
 	}
 
@@ -130,15 +172,22 @@ namespace dmge
 
 			doWrite = false;
 
-			switch (cartridgeHeader_.romSizeKB)
+			if (IsMBC1(cartridgeHeader_.type))
 			{
-			case 32:   value &= 0b00000001; break;
-			case 64:   value &= 0b00000011; break;
-			case 128:  value &= 0b00000111; break;
-			case 256:  value &= 0b00001111; break;
-			case 512:  value &= 0b00011111; break;
-			case 1024: value &= 0b00011111; break;
-			case 2048: value &= 0b00011111; break;
+				switch (cartridgeHeader_.romSizeKB)
+				{
+				case 32:   value &= 0b00000001; break;
+				case 64:   value &= 0b00000011; break;
+				case 128:  value &= 0b00000111; break;
+				case 256:  value &= 0b00001111; break;
+				case 512:  value &= 0b00011111; break;
+				case 1024: value &= 0b00011111; break;
+				case 2048: value &= 0b00011111; break;
+				}
+			}
+			else if (IsMBC3(cartridgeHeader_.type))
+			{
+				value &= 0b01111111;
 			}
 
 			if (value == 0)
@@ -159,12 +208,16 @@ namespace dmge
 		}
 		else if (ADDRESS_IN_RANGE(addr, Address::MBC_BankingMode))
 		{
+			doWrite = false;
+
+			// MBC1:
 			// Mode Select
 			// set the Mode Flag to the lowest bit of the written value
 
-			doWrite = false;
-
-			bankingMode_ = value & 1;
+			if (IsMBC1(cartridgeHeader_.type))
+			{
+				bankingMode_ = value & 1;
+			}
 		}
 		else if (ADDRESS_IN_RANGE(addr, Address::SRAM))
 		{
@@ -178,7 +231,15 @@ namespace dmge
 			}
 
 			const uint16 offset = addr - Address::SRAM;
-			sram_[bankingMode_ == 0 ? offset : ramBank_ * 0x2000 + offset] = value;
+
+			if (IsMBC1(cartridgeHeader_.type))
+			{
+				sram_[bankingMode_ == 0 ? offset : ramBank_ * 0x2000 + offset] = value;
+			}
+			else
+			{
+				sram_[ramBank_ * 0x2000 + offset] = value;
+			}
 		}
 
 		// Joypad
@@ -320,10 +381,15 @@ namespace dmge
 		if (ADDRESS_IN_RANGE(addr, Address::ROMBank0))
 		{
 			// ROM Bank 0
+
+			// MBC1
 			// 大容量ROMのとき、モード1の場合、ROMバンク番号の上位2bitがセカンダリバンクの影響を受ける
-			if (cartridgeHeader_.romSizeKB >= 1024)
+			if (IsMBC1(cartridgeHeader_.type))
 			{
-				value = rom_[0x4000 * (romBank() | (ramBank_ << 5)) + addr];
+				if (cartridgeHeader_.romSizeKB >= 1024)
+				{
+					value = rom_[0x4000 * (romBank() | (ramBank_ << 5)) + addr];
+				}
 			}
 		}
 		else if (ADDRESS_IN_RANGE(addr, Address::SwitchableROMBank))
@@ -335,9 +401,20 @@ namespace dmge
 		else if (ADDRESS_IN_RANGE(addr, Address::SRAM))
 		{
 			// External RAM
+
+			// MBC1:
 			// 大容量RAMのとき、モード1の場合、セカンダリバンクで指定されたバンクに切り替わる
+
 			const uint16 offset = addr - Address::SRAM;
-			value = sram_[bankingMode_ == 0 ? offset : ramBank_ * 0x2000 + offset];
+
+			if (IsMBC1(cartridgeHeader_.type))
+			{
+				value = sram_[bankingMode_ == 0 ? offset : ramBank_ * 0x2000 + offset];
+			}
+			else
+			{
+				value = sram_[ramBank_ * 0x2000 + offset];
+			}
 		}
 
 		return value;
@@ -350,9 +427,12 @@ namespace dmge
 
 	int Memory::romBank() const
 	{
-		if (cartridgeHeader_.romSizeKB >= 1024)
+		if (IsMBC1(cartridgeHeader_.type))
 		{
-			return romBank_ + (ramBank_ << 5);
+			if (cartridgeHeader_.romSizeKB >= 1024)
+			{
+				return romBank_ + (ramBank_ << 5);
+			}
 		}
 
 		return romBank_;
@@ -360,7 +440,12 @@ namespace dmge
 
 	int Memory::ramBank() const
 	{
-		return bankingMode_ == 0 ? 0 : ramBank_;
+		if (IsMBC1(cartridgeHeader_.type))
+		{
+			return bankingMode_ == 0 ? 0 : ramBank_;
+		}
+
+		return ramBank_;
 	}
 
 	void Memory::dumpCartridgeInfo()

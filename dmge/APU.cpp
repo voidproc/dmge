@@ -18,13 +18,21 @@ namespace dmge
 	{
 		for (const auto i : step(samplesToWrite))
 		{
-			*(left++) = wave_[posRead_].left;
-			*(right++) = wave_[posRead_].right;
+			if (bufferSize_ > 0)
+			{
+				*(left++) = wave_[posRead_].left;
+				*(right++) = wave_[posRead_].right;
 
-			posRead_ = (posRead_ + 1) % wave_.size();
+				posRead_ = (posRead_ + 1) % wave_.size();
+
+				bufferSize_--;
+			}
+			else
+			{
+				*(left++) = 0;
+				*(right++) = 0;
+			}
 		}
-
-		bufferSize_ -= samplesToWrite;
 	}
 
 	bool APUStream::hasEnded()

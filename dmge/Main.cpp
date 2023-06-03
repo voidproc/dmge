@@ -96,15 +96,25 @@ public:
 
 	void run()
 	{
+		String cartridgePath = config_.cartridgePath;
+
 		// カートリッジが指定されていない：
-		if (not FileSystem::Exists(config_.cartridgePath))
+		if (not FileSystem::Exists(cartridgePath))
 		{
-			dmge::DebugPrint::Writeln(U"Cartridge not found");
-			return;
+			const auto cartDir = FileSystem::PathAppend(FileSystem::InitialDirectory(), U"cartridges");
+			const auto openPath = Dialog::OpenFile({ FileFilter{ .name = U"GAMEBOY Cartridge", .patterns = {U"gb?"} } }, cartDir, U"ファイルを開く");
+
+			if (not openPath)
+			{
+				dmge::DebugPrint::Writeln(U"Cartridge not found");
+				return;
+			}
+
+			cartridgePath = *openPath;
 		}
 
 		// カートリッジを読み込み
-		mem_.loadCartridge(config_.cartridgePath);
+		mem_.loadCartridge(cartridgePath);
 		mem_.dumpCartridgeInfo();
 
 

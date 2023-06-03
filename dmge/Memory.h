@@ -5,6 +5,7 @@
 
 namespace dmge
 {
+	class MBC;
 	class PPU;
 	class APU;
 	class Timer;
@@ -14,6 +15,8 @@ namespace dmge
 	{
 	public:
 		Memory();
+
+		~Memory();
 
 		void init(PPU* ppu, APU* apu, dmge::Timer* timer, dmge::Joypad* joypad);
 
@@ -51,29 +54,13 @@ namespace dmge
 		Timer* timer_ = nullptr;
 		Joypad* joypad_ = nullptr;
 
-		String cartridgePath_;
-
-		// カートリッジの内容
-		Array<uint8> rom_;
+		// MBC
+		std::unique_ptr<MBC> mbc_;
 
 		// メモリ全体
 		Array<uint8> mem_;
 
-		// RAM
-		Array<uint8> sram_;
-
-		// カートリッジのヘッダ情報
-		CartridgeHeader cartridgeHeader_;
-
-		// ROM / RAM バンク
-		int romBank_ = 1;
-		int ramBank_ = 0;
-		int ramEnabled_ = false;
-		int bankingMode_ = 0;
-
 		// メモリ書き込み時フック
 		Array<std::function<void(uint16, uint8)>> writeHooks_;
-
-		void readCartridgeHeader_();
 	};
 }

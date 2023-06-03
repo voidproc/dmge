@@ -1,59 +1,18 @@
 ﻿#include "Memory.h"
+#include "MBC.h"
 #include "PPU.h"
 #include "APU.h"
 #include "Timer.h"
 #include "Joypad.h"
 #include "DebugPrint.h"
-#include "lib/magic_enum/magic_enum.hpp"
 
 namespace dmge
 {
-	bool IsNoMBC(CartridgeType type)
-	{
-		return type == CartridgeType::ROM_ONLY;
-	}
-
-	bool IsMBC1(CartridgeType type)
-	{
-		switch (type)
-		{
-			case CartridgeType::MBC1:
-			case CartridgeType::MBC1_RAM:
-			case CartridgeType::MBC1_RAM_BATTERY:
-				return true;
-		}
-
-		return false;
-	}
-
-	bool IsMBC2(CartridgeType type)
-	{
-		switch (type)
-		{
-		case CartridgeType::MBC2:
-		case CartridgeType::MBC2_BATTERY:
-			return true;
-		}
-
-		return false;
-	}
-
-	bool IsMBC3(CartridgeType type)
-	{
-		switch (type)
-		{
-		case CartridgeType::MBC3_TIMER_BATTERY:
-		case CartridgeType::MBC3_TIMER_RAM_BATTERY_2:
-		case CartridgeType::MBC3:
-		case CartridgeType::MBC3_RAM_2:
-		case CartridgeType::MBC3_RAM_BATTERY_2:
-			return true;
-		}
-
-		return false;
-	}
-
 	Memory::Memory()
+	{
+	}
+
+	Memory::~Memory()
 	{
 	}
 
@@ -105,35 +64,10 @@ namespace dmge
 
 	void Memory::loadCartridge(FilePath cartridgePath)
 	{
-		cartridgePath_ = cartridgePath;
+		mbc_ = MBC::LoadCartridge(cartridgePath);
 
-		// ROMをロード
-		BinaryReader reader{ cartridgePath };
-		rom_.resize(reader.size());
-		reader.read(rom_.data(), rom_.size());
-
-		// メモリにROMデータ書き込み
+		// メモリ
 		mem_.resize(0x10000);
-		std::copy_n(rom_.cbegin(), 0x8000, mem_.begin());
-		//reader.setPos(0);
-		//reader.read(mem_.data(), 0x8000);
-
-		// ヘッダ読み込み
-		readCartridgeHeader_();
-
-		// SRAM (32KiB)
-		sram_.resize(0x8000);
-
-		// SRAMをファイルからロード
-		if (cartridgeHeader_.ramSizeKB)
-		{
-			const auto savPath = FileSystem::PathAppend(FileSystem::ParentPath(cartridgePath), FileSystem::BaseName(cartridgePath)) + U".sav";
-			if (FileSystem::Exists(savPath))
-			{
-				BinaryReader savReader{ savPath };
-				savReader.read(sram_.data(), Min<size_t>(sram_.size(), savReader.size()));
-			}
-		}
 
 		// メモリを初期状態にリセット
 		reset();
@@ -141,13 +75,7 @@ namespace dmge
 
 	void Memory::saveSRAM()
 	{
-		const auto savPath = FileSystem::PathAppend(FileSystem::ParentPath(cartridgePath_), FileSystem::BaseName(cartridgePath_)) + U".sav";
-
-		if (cartridgeHeader_.ramSizeKB)
-		{
-			BinaryWriter writer{ savPath };
-			writer.write(sram_.data(), cartridgeHeader_.ramSizeKB * 1024);
-		}
+		mbc_->saveSRAM();
 	}
 
 	void Memory::write(uint16 addr, uint8 value)
@@ -158,88 +86,28 @@ namespace dmge
 
 		if (ADDRESS_IN_RANGE(addr, Address::MBC_RAMEnable))
 		{
-			// Enable RAM
-			// enables external RAM if the lower 4 bits of the written value are 0xA
-
 			doWrite = false;
-
-			ramEnabled_ = (value & 0xf) == 0xa;
+			mbc_->write(addr, value);
 		}
 		else if (ADDRESS_IN_RANGE(addr, Address::MBC_ROMBank))
 		{
-			// ROM Bank
-			// set the ROM Bank Number
-
 			doWrite = false;
-
-			if (IsMBC1(cartridgeHeader_.type))
-			{
-				switch (cartridgeHeader_.romSizeKB)
-				{
-				case 32:   value &= 0b00000001; break;
-				case 64:   value &= 0b00000011; break;
-				case 128:  value &= 0b00000111; break;
-				case 256:  value &= 0b00001111; break;
-				case 512:  value &= 0b00011111; break;
-				case 1024: value &= 0b00011111; break;
-				case 2048: value &= 0b00011111; break;
-				}
-			}
-			else if (IsMBC3(cartridgeHeader_.type))
-			{
-				value &= 0b01111111;
-			}
-
-			if (value == 0)
-			{
-				value = 1;
-			}
-
-			romBank_ = value;
+			mbc_->write(addr, value);
 		}
 		else if (ADDRESS_IN_RANGE(addr, Address::MBC_RAMBank))
 		{
-			// RAM Bank
-			// set the 2 bits of the RAM bank number to the lowest 2 bits of the written value
-
 			doWrite = false;
-
-			ramBank_ = value & 0b11;
+			mbc_->write(addr, value);
 		}
 		else if (ADDRESS_IN_RANGE(addr, Address::MBC_BankingMode))
 		{
 			doWrite = false;
-
-			// MBC1:
-			// Mode Select
-			// set the Mode Flag to the lowest bit of the written value
-
-			if (IsMBC1(cartridgeHeader_.type))
-			{
-				bankingMode_ = value & 1;
-			}
+			mbc_->write(addr, value);
 		}
 		else if (ADDRESS_IN_RANGE(addr, Address::SRAM))
 		{
 			doWrite = false;
-
-			// External RAM
-			// write to external RAM if it is enabled. If it is not,  >>> the write is ignored <<<
-			if (not ramEnabled_)
-			{
-				goto HOOK;
-			}
-
-			const uint16 offset = addr - Address::SRAM;
-
-			if (IsMBC1(cartridgeHeader_.type))
-			{
-				sram_[bankingMode_ == 0 ? offset : ramBank_ * 0x2000 + offset] = value;
-			}
-			else
-			{
-				sram_[ramBank_ * 0x2000 + offset] = value;
-			}
+			mbc_->write(addr, value);
 		}
 
 		// Joypad
@@ -353,13 +221,13 @@ namespace dmge
 
 		// フック
 
-		if (not writeHooks_.empty())
-		{
-			for (const auto& hook : writeHooks_)
-			{
-				hook(addr, value);
-			}
-		}
+		//if (not writeHooks_.empty())
+		//{
+		//	for (const auto& hook : writeHooks_)
+		//	{
+		//		hook(addr, value);
+		//	}
+		//}
 
 		if (doWrite)
 		{
@@ -374,47 +242,26 @@ namespace dmge
 
 	uint8 Memory::read(uint16 addr) const
 	{
-		uint8 value = mem_[addr];
-
-		// MBC
+		uint8 value;
 
 		if (ADDRESS_IN_RANGE(addr, Address::ROMBank0))
 		{
 			// ROM Bank 0
-
-			// MBC1
-			// 大容量ROMのとき、モード1の場合、ROMバンク番号の上位2bitがセカンダリバンクの影響を受ける
-			if (IsMBC1(cartridgeHeader_.type))
-			{
-				if (cartridgeHeader_.romSizeKB >= 1024)
-				{
-					value = rom_[0x4000 * (romBank() | (ramBank_ << 5)) + addr];
-				}
-			}
+			value = mbc_->read(addr);
 		}
 		else if (ADDRESS_IN_RANGE(addr, Address::SwitchableROMBank))
 		{
 			// ROM Bank 1-
-			const uint16 offset = addr - Address::SwitchableROMBank;
-			value = rom_[romBank() * 0x4000 + offset];
+			value = mbc_->read(addr);
 		}
 		else if (ADDRESS_IN_RANGE(addr, Address::SRAM))
 		{
 			// External RAM
-
-			// MBC1:
-			// 大容量RAMのとき、モード1の場合、セカンダリバンクで指定されたバンクに切り替わる
-
-			const uint16 offset = addr - Address::SRAM;
-
-			if (IsMBC1(cartridgeHeader_.type))
-			{
-				value = sram_[bankingMode_ == 0 ? offset : ramBank_ * 0x2000 + offset];
-			}
-			else
-			{
-				value = sram_[ramBank_ * 0x2000 + offset];
-			}
+			value = mbc_->read(addr);
+		}
+		else
+		{
+			value = mem_[addr];
 		}
 
 		return value;
@@ -427,37 +274,17 @@ namespace dmge
 
 	int Memory::romBank() const
 	{
-		if (IsMBC1(cartridgeHeader_.type))
-		{
-			if (cartridgeHeader_.romSizeKB >= 1024)
-			{
-				return romBank_ + (ramBank_ << 5);
-			}
-		}
-
-		return romBank_;
+		return mbc_->romBank();
 	}
 
 	int Memory::ramBank() const
 	{
-		if (IsMBC1(cartridgeHeader_.type))
-		{
-			return bankingMode_ == 0 ? 0 : ramBank_;
-		}
-
-		return ramBank_;
+		return mbc_->ramBank();
 	}
 
 	void Memory::dumpCartridgeInfo()
 	{
-		DebugPrint::Writeln(U"* Cartridge Info:");
-		DebugPrint::Writeln(U"Title={}"_fmt(cartridgeHeader_.title));
-
-		const auto typeStr = magic_enum::enum_name<CartridgeType>(cartridgeHeader_.type);
-		DebugPrint::Writeln(U"Type={}"_fmt(Unicode::WidenAscii(typeStr)));
-
-		DebugPrint::Writeln(U"RomSize={}"_fmt(cartridgeHeader_.romSizeKB));
-		DebugPrint::Writeln(U"RamSize={}"_fmt(cartridgeHeader_.ramSizeKB));
+		mbc_->dumpCartridgeInfo();
 	}
 
 	void Memory::dump(uint16 addrBegin, uint16 addrEnd)
@@ -470,36 +297,5 @@ namespace dmge
 		}
 
 		DebugPrint::Writeln(dumped);
-	}
-
-	void Memory::readCartridgeHeader_()
-	{
-		// Title
-		cartridgeHeader_.title = rom_.slice(Address::Title, 15).map([](uint8 x) { return static_cast<char32_t>(x); }).join(U""_sv, U""_sv, U""_sv);
-
-		// Type
-		cartridgeHeader_.type = static_cast<CartridgeType>(rom_[Address::CartridgeType]);
-
-		// ROM Size
-
-		const uint8 romSize = rom_[Address::ROMSize];
-		cartridgeHeader_.romSizeKB = 32 * (1 << romSize);
-
-		// RAM Size
-
-		const uint8 ramSize = rom_[Address::RAMSize];
-		int ramSizeKB = 0;
-
-		switch (ramSize)
-		{
-		case 0: ramSizeKB = 0; break;
-		case 1: ramSizeKB = 0; break;
-		case 2: ramSizeKB = 8; break;
-		case 3: ramSizeKB = 32; break;
-		case 4: ramSizeKB = 128; break;
-		case 5: ramSizeKB = 64; break;
-		}
-
-		cartridgeHeader_.ramSizeKB = ramSizeKB;
 	}
 }

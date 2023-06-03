@@ -36,9 +36,13 @@ namespace dmge
 
 	struct CartridgeHeader
 	{
-		String title;
-		CartridgeType type;
-		int romSizeKB;
-		int ramSizeKB;
+		String title{};
+		CartridgeType type{};
+		int romSizeKB{};
+		int ramSizeKB{};
+
+		CartridgeHeader() = default;
+
+		CartridgeHeader(FilePath cartridgePath);
 	};
 }

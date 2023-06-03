@@ -10,6 +10,8 @@
 
 ![Mario Land](screenshot/mario.png)
 
+![Mario Land 2](screenshot/marioland2.png)
+
 ![Kirby](screenshot/hoshinok.png)
 
 ![Kirby 2](screenshot/kirby2.png)

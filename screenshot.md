@@ -1,15 +1,22 @@
 # スクリーンショット
 
-![ZELDA](screenshot/zelda.png)
+
+## No MBC
+
+![DRMARIO](screenshot/drmario.png)
+
+
+## MBC1
+
+![MARIO](screenshot/mario.png)
 
 ![HOSHINOKA-BI](screenshot/hoshinok.png)
 
 ![kirby2](screenshot/kirby2.png)
 
-![MARIO](screenshot/mario.png)
+![ZELDA](screenshot/zelda.png)
 
-![DRMARIO](screenshot/drmario.png)
-
+![PUYOPUYO](screenshot/puyopuyo.png)
 
 ### Tobu Tobu Girl
 
@@ -17,7 +24,18 @@ https://tangramgames.dk/tobutobugirl/
 
 ![Tobu Tobu Girl](screenshot/tobu.png)
 
-### Test ROMs
+
+## MBC2
+
+![KIRBY'S PINBALL](screenshot/kirbyspi.png)
+
+
+## MBC3
+
+![POKEMONY](screenshot/pokemony.png)
+
+
+## Test ROMs
 
 ![cpu_instrs](screenshot/cpu_instrs.png)
 

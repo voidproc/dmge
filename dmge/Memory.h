@@ -22,7 +22,7 @@ namespace dmge
 
 		void reset();
 
-		void loadCartridge(FilePath cartridgePath);
+		bool loadCartridge(FilePath cartridgePath);
 
 		void saveSRAM();
 

@@ -34,5 +34,7 @@ namespace dmge
 			case 4: ramSizeKB = 128; break;
 			case 5: ramSizeKB = 64; break;
 		}
+
+
 	}
 }

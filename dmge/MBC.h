@@ -25,6 +25,8 @@ namespace dmge
 
 		int ramBank() const;
 
+		int ramSizeBytes() const;
+
 		// [DEBUG]
 		void dumpCartridgeInfo();
 
@@ -64,6 +66,16 @@ namespace dmge
 	{
 	public:
 		using MBC::MBC;
+
+		virtual void write(uint16 addr, uint8 value) override;
+
+		virtual uint8 read(uint16 addr) override;
+	};
+
+	class MBC2 : public MBC1
+	{
+	public:
+		using MBC1::MBC1;
 
 		virtual void write(uint16 addr, uint8 value) override;
 

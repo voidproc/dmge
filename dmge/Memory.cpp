@@ -62,15 +62,22 @@ namespace dmge
 		write(0xff50, 0x01); // Boot ROM enable/disable
 	}
 
-	void Memory::loadCartridge(FilePath cartridgePath)
+	bool Memory::loadCartridge(FilePath cartridgePath)
 	{
 		mbc_ = MBC::LoadCartridge(cartridgePath);
+
+		if (not mbc_)
+		{
+			return false;
+		}
 
 		// メモリ
 		mem_.resize(0x10000);
 
 		// メモリを初期状態にリセット
 		reset();
+
+		return true;
 	}
 
 	void Memory::saveSRAM()

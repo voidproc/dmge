@@ -68,6 +68,10 @@ namespace dmge
 		{
 			return std::make_unique<MBC1>(cartridgePath);
 		}
+		else if (IsMBC2(header.type))
+		{
+			return std::make_unique<MBC2>(cartridgePath);
+		}
 		else if (IsMBC3(header.type))
 		{
 			return std::make_unique<MBC3>(cartridgePath);
@@ -91,7 +95,7 @@ namespace dmge
 		sram_.resize(0x8000);
 
 		// SRAMをファイルからロード
-		if (cartridgeHeader_.ramSizeKB)
+		if (ramSizeBytes())
 		{
 			loadSRAM();
 		}
@@ -111,10 +115,10 @@ namespace dmge
 	{
 		const auto savPath = FileSystem::PathAppend(FileSystem::ParentPath(cartridgePath_), FileSystem::BaseName(cartridgePath_)) + U".sav";
 
-		if (cartridgeHeader_.ramSizeKB)
+		if (ramSizeBytes())
 		{
 			BinaryWriter writer{ savPath };
-			writer.write(sram_.data(), cartridgeHeader_.ramSizeKB * 1024);
+			writer.write(sram_.data(), ramSizeBytes());
 		}
 	}
 
@@ -139,6 +143,20 @@ namespace dmge
 		}
 
 		return ramBank_;
+	}
+
+	int MBC::ramSizeBytes() const
+	{
+		if (IsMBC2(cartridgeHeader_.type))
+		{
+			return 512;
+		}
+		else
+		{
+			return cartridgeHeader_.ramSizeKB * 1024;
+		}
+
+		return 0;
 	}
 
 	void MBC::dumpCartridgeInfo()
@@ -271,6 +289,69 @@ namespace dmge
 	}
 
 	// ------------------------------------------------
+	// MBC2
+	// ------------------------------------------------
+
+	void MBC2::write(uint16 addr, uint8 value)
+	{
+		if (addr >= 0x0000 && addr <= 0x3fff)
+		{
+			if ((addr & 0x0100) == 0)
+			{
+				ramEnabled_ = value == 0xa;
+			}
+			else
+			{
+				value &= 0b1111;
+
+				if (value == 0)
+				{
+					value = 1;
+				}
+
+				romBank_ = value;
+			}
+		}
+		else if (ADDRESS_IN_RANGE(addr, Address::SRAM))
+		{
+			// External RAM
+			// write to external RAM if it is enabled. If it is not,  >>> the write is ignored <<<
+			if (not ramEnabled_)
+			{
+				return;
+			}
+
+			sram_[addr - Address::SRAM] = value;
+		}
+	}
+
+	uint8 MBC2::read(uint16 addr)
+	{
+		uint8 value = 0;
+
+		// MBC
+
+		if (ADDRESS_IN_RANGE(addr, Address::ROMBank0))
+		{
+			// ROM Bank 0
+			value = rom_[addr];
+		}
+		else if (ADDRESS_IN_RANGE(addr, Address::SwitchableROMBank))
+		{
+			// ROM Bank 1-
+			const uint16 offset = addr - Address::SwitchableROMBank;
+			value = rom_[romBank() * 0x4000 + offset];
+		}
+		else if (ADDRESS_IN_RANGE(addr, Address::SRAM))
+		{
+			// Built in RAM
+			value = sram_[(addr - Address::SRAM) & 0x1ff];
+		}
+
+		return value;
+	}
+
+	// ------------------------------------------------
 	// MBC3
 	// ------------------------------------------------
 
@@ -297,9 +378,6 @@ namespace dmge
 		else if (ADDRESS_IN_RANGE(addr, Address::MBC_RAMBank))
 		{
 			MBC1::write(addr, value);
-		}
-		else if (ADDRESS_IN_RANGE(addr, Address::MBC_BankingMode))
-		{
 		}
 		else if (ADDRESS_IN_RANGE(addr, Address::SRAM))
 		{

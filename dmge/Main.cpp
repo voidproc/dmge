@@ -113,10 +113,12 @@ public:
 			cartridgePath = *openPath;
 		}
 
-		// カートリッジを読み込み
-		mem_.loadCartridge(cartridgePath);
-		mem_.dumpCartridgeInfo();
+		if (not mem_.loadCartridge(cartridgePath))
+		{
+			return;
+		}
 
+		mem_.dumpCartridgeInfo();
 
 		mainLoop_();
 

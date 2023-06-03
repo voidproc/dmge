@@ -211,17 +211,16 @@ namespace dmge
 			apuStream_->pushSample(left * leftVolume / 4.0, right * rightVolume / 4.0);
 		}
 
-		static int m = 95;
 		if (apuStream_->bufferRemain() > 12000)
 		{
-			m = 96;
+			cyclesMod_ = 96;
 		}
 		else if (apuStream_->bufferRemain() < 7000)
 		{
-			m = 95;
+			cyclesMod_ = 95;
 		}
 
-		cycles_ = (cycles_ + 1) % m;
+		cycles_ = (cycles_ + 1) % cyclesMod_;
 	}
 
 	void APU::updatePlaybackState()
@@ -231,7 +230,7 @@ namespace dmge
 			audio_.play();
 		}
 
-		if (apuStream_->bufferRemain() <= 5000 && audio_.isPlaying())
+		if (apuStream_->bufferRemain() <= 3000 && audio_.isPlaying())
 		{
 			audio_.pause();
 		}

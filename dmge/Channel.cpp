@@ -3,7 +3,7 @@
 
 namespace dmge
 {
-	ChannelData GetChannel1Data(Memory* mem)
+	void GetChannel1Data(Memory* mem, ChannelData& ch)
 	{
 		const uint8 NR10 = mem->read(Address::NR10);
 		const uint8 NR11 = mem->read(Address::NR11);
@@ -11,41 +11,37 @@ namespace dmge
 		const uint8 NR13 = mem->read(Address::NR13);
 		const uint8 NR14 = mem->read(Address::NR14);
 
-		return ChannelData{
-			.sweepPeriod = (NR10 >> 4) & 0b111,
-			.sweepDir = (NR10 >> 3) & 1,
-			.sweepShift = NR10 & 0b111,
-			.duty = NR11 >> 6,
-			.lengthTimer = NR11 & 63,
-			.envVol = NR12 >> 4,
-			.envDir = (NR12 >> 3) & 1,
-			.envPeriod = NR12 & 0b111,
-			.trigger = (NR14 >> 7) == 1,
-			.enableLength = ((NR14 >> 6) & 1) == 1,
-			.freq = NR13 | ((NR14 & 0b111) << 8),
-		};
+		ch.sweepPeriod = (NR10 >> 4) & 0b111;
+		ch.sweepDir = (NR10 >> 3) & 1;
+		ch.sweepShift = NR10 & 0b111;
+		ch.duty = NR11 >> 6;
+		ch.lengthTimer = NR11 & 63;
+		ch.envVol = NR12 >> 4;
+		ch.envDir = (NR12 >> 3) & 1;
+		ch.envPeriod = NR12 & 0b111;
+		ch.trigger = (NR14 >> 7) == 1;
+		ch.enableLength = ((NR14 >> 6) & 1) == 1;
+		ch.freq = NR13 | ((NR14 & 0b111) << 8);
 	}
 
-	ChannelData GetChannel2Data(Memory* mem)
+	void GetChannel2Data(Memory* mem, ChannelData& ch)
 	{
 		const uint8 NR21 = mem->read(Address::NR21);
 		const uint8 NR22 = mem->read(Address::NR22);
 		const uint8 NR23 = mem->read(Address::NR23);
 		const uint8 NR24 = mem->read(Address::NR24);
 
-		return ChannelData{
-			.duty = NR21 >> 6,
-			.lengthTimer = NR21 & 63,
-			.envVol = NR22 >> 4,
-			.envDir = (NR22 >> 3) & 1,
-			.envPeriod = NR22 & 0b111,
-			.trigger = (NR24 >> 7) == 1,
-			.enableLength = ((NR24 >> 6) & 1) == 1,
-			.freq = NR23 | ((NR24 & 0b111) << 8),
-		};
+		ch.duty = NR21 >> 6;
+		ch.lengthTimer = NR21 & 63;
+		ch.envVol = NR22 >> 4;
+		ch.envDir = (NR22 >> 3) & 1;
+		ch.envPeriod = NR22 & 0b111;
+		ch.trigger = (NR24 >> 7) == 1;
+		ch.enableLength = ((NR24 >> 6) & 1) == 1;
+		ch.freq = NR23 | ((NR24 & 0b111) << 8);
 	}
 
-	ChannelData GetChannel3Data(Memory* mem)
+	void GetChannel3Data(Memory* mem, ChannelData& ch)
 	{
 		const uint8 NR30 = mem->read(Address::NR30);
 		const uint8 NR31 = mem->read(Address::NR31);
@@ -53,34 +49,30 @@ namespace dmge
 		const uint8 NR33 = mem->read(Address::NR33);
 		const uint8 NR34 = mem->read(Address::NR34);
 
-		return ChannelData{
-			.enable = (NR30 >> 7) == 1,
-			.outputLevel = (NR32 >> 5) & 0b11,
-			.lengthTimer = NR31,
-			.trigger = (NR34 >> 7) == 1,
-			.enableLength = ((NR34 >> 6) & 1) == 1,
-			.freq = NR33 | ((NR34 & 0b111) << 8),
-		};
+		ch.enable = (NR30 >> 7) == 1;
+		ch.outputLevel = (NR32 >> 5) & 0b11;
+		ch.lengthTimer = NR31;
+		ch.trigger = (NR34 >> 7) == 1;
+		ch.enableLength = ((NR34 >> 6) & 1) == 1;
+		ch.freq = NR33 | ((NR34 & 0b111) << 8);
 	}
 
-	ChannelData GetChannel4Data(Memory* mem)
+	void GetChannel4Data(Memory* mem, ChannelData& ch)
 	{
 		const uint8 NR41 = mem->read(Address::NR41);
 		const uint8 NR42 = mem->read(Address::NR42);
 		const uint8 NR43 = mem->read(Address::NR43);
 		const uint8 NR44 = mem->read(Address::NR44);
 
-		return ChannelData{
-			.lengthTimer = NR41 & 0b111111,
-			.envVol = NR42 >> 4,
-			.envDir = (NR42 >> 3) & 1,
-			.envPeriod = NR42 & 0b111,
-			.trigger = (NR44 >> 7) == 1,
-			.enableLength = ((NR44 >> 6) & 1) == 1,
-			.divisorShift = NR43 >> 4,
-			.counterWidth = (NR43 >> 3) & 1,
-			.divisor = NR43 & 0b111,
-		};
+		ch.lengthTimer = NR41 & 0b111111;
+		ch.envVol = NR42 >> 4;
+		ch.envDir = (NR42 >> 3) & 1;
+		ch.envPeriod = NR42 & 0b111;
+		ch.trigger = (NR44 >> 7) == 1;
+		ch.enableLength = ((NR44 >> 6) & 1) == 1;
+		ch.divisorShift = NR43 >> 4;
+		ch.counterWidth = (NR43 >> 3) & 1;
+		ch.divisor = NR43 & 0b111;
 	}
 
 	int SquareWaveAmplitude(int duty, int dutyPos)
@@ -103,19 +95,19 @@ namespace dmge
 		switch (ch_)
 		{
 		case Channels::Ch1:
-			data_ = GetChannel1Data(mem_);
+			GetChannel1Data(mem_, data_);
 			break;
 
 		case Channels::Ch2:
-			data_ = GetChannel2Data(mem_);
+			GetChannel2Data(mem_, data_);
 			break;
 
 		case Channels::Ch3:
-			data_ = GetChannel3Data(mem_);
+			GetChannel3Data(mem_, data_);
 			break;
 
 		case Channels::Ch4:
-			data_ = GetChannel4Data(mem_);
+			GetChannel4Data(mem_, data_);
 			break;
 
 		default:

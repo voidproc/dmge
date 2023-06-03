@@ -128,6 +128,8 @@ private:
 
 		bool alwaysDump = false;
 
+		bool enableAPU = true;
+
 		while (not quitApp_)
 		{
 			// ブレークポイントが有効で、ブレークポイントに達していたら
@@ -142,8 +144,12 @@ private:
 				dmge::DebugPrint::Writeln(U"Break: pc={:04X}"_fmt(cpu_.currentPC()));
 			}
 
+
+			// [DEBUG]
 			if (alwaysDump)
+			{
 				cpu_.dump();
+			}
 
 			// トレースモードなら、専用のループへ
 
@@ -194,13 +200,14 @@ private:
 			}
 
 			// APU
-			
-			for (int i : step(cpu_.consumedCycles()))
-			{
-				apu_.run();
-			}
 
-			apu_.updatePlaybackState();
+			if (enableAPU)
+			{
+				for (int i : step(cpu_.consumedCycles()))
+				{
+					apu_.run();
+				}
+			}
 
 			// 割り込み
 
@@ -232,6 +239,16 @@ private:
 					alwaysDump = not alwaysDump;
 				}
 
+				// [DEBUG]
+				if (Key1.down())
+				{
+					enableAPU = not enableAPU;
+					if (not enableAPU)
+					{
+						apu_.pause();
+					}
+				}
+
 				// ボタン入力の更新
 				// ※デバッグモニタのテキストボックス入力中は更新しない
 				if (not (showDebugMonitor_ && debugMonitor_.isVisibleTextbox()))
@@ -251,6 +268,12 @@ private:
 				if (config_.showFPS)
 				{
 					DrawStatusText(U"FPS:{:3d}"_fmt(Profiler::FPS()));
+				}
+
+				// APU
+				if (enableAPU)
+				{
+					apu_.updatePlaybackState();
 				}
 
 				toDraw = false;

@@ -85,6 +85,7 @@ namespace dmge
 
 		// Count T-cycles
 		int cycles_ = 0;
+		int cyclesMod_ = 95;
 
 		uint8 prevDiv_ = 0;
 	};

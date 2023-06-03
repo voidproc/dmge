@@ -99,7 +99,7 @@ public:
 		String cartridgePath = config_.cartridgePath;
 
 		// カートリッジが指定されていない：
-		if (not FileSystem::Exists(cartridgePath))
+		if (not FileSystem::Exists(cartridgePath) || not FileSystem::IsFile(cartridgePath))
 		{
 			const auto cartDir = FileSystem::PathAppend(FileSystem::InitialDirectory(), U"cartridges");
 			const auto openPath = Dialog::OpenFile({ FileFilter{ .name = U"GAMEBOY Cartridge", .patterns = {U"gb?"} } }, cartDir, U"ファイルを開く");

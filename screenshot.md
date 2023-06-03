@@ -3,20 +3,22 @@
 
 ## No MBC
 
-![DRMARIO](screenshot/drmario.png)
+![Dr. Mario](screenshot/drmario.png)
 
 
 ## MBC1
 
-![MARIO](screenshot/mario.png)
+![Mario Land](screenshot/mario.png)
 
-![HOSHINOKA-BI](screenshot/hoshinok.png)
+![Kirby](screenshot/hoshinok.png)
 
-![kirby2](screenshot/kirby2.png)
+![Kirby 2](screenshot/kirby2.png)
 
-![ZELDA](screenshot/zelda.png)
+![Zelda](screenshot/zelda.png)
 
 ![PUYOPUYO](screenshot/puyopuyo.png)
+
+![Burger Time Deluxe](screenshot/burgerti.png)
 
 ### Tobu Tobu Girl
 
@@ -27,12 +29,12 @@ https://tangramgames.dk/tobutobugirl/
 
 ## MBC2
 
-![KIRBY'S PINBALL](screenshot/kirbyspi.png)
+![Kirby's Pinball](screenshot/kirbyspi.png)
 
 
 ## MBC3
 
-![POKEMONY](screenshot/pokemony.png)
+![Pokemon Yellow](screenshot/pokemony.png)
 
 
 ## Test ROMs

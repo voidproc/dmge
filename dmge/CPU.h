@@ -44,7 +44,7 @@ namespace dmge
 		int consumedCycles() const;
 
 		// 現在のレジスタの値を取得（デバッグ用）
-		RegisterValues getRegisterValues();
+		RegisterValues getRegisterValues() const;
 
 	private:
 		Memory* mem_;

@@ -21,9 +21,6 @@ namespace dmge
 
 		int bufferMaxSize() const;
 
-		// [DEBUG]
-		std::pair<int, int> getSamplePos();
-
 	private:
 		virtual void getAudio(float* left, float* right, size_t samplesToWrite) override;
 
@@ -40,6 +37,13 @@ namespace dmge
 
 		int bufferSize_ = 0;
 
+	};
+
+
+	struct APUStreamBufferState
+	{
+		int remain;
+		int max;
 	};
 
 
@@ -66,9 +70,9 @@ namespace dmge
 		void trigger(Channels ch);
 		void setLengthTimer(Channels ch, uint8 reg);
 
-		// [DEBUG]
-		void draw(const Point& pos);
-
+		// 現在のストリームバッファの状態を取得（デバッグ用）
+		APUStreamBufferState getBufferState() const;
+		
 	private:
 		Memory* mem_;
 

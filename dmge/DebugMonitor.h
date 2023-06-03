@@ -11,9 +11,11 @@ namespace dmge
 	public:
 		DebugMonitor(Memory* mem, CPU* cpu, APU* apu);
 
-		void draw(Point pos);
+		void update();
 
-		bool isVisibleTextbox();
+		void draw(const Point& pos);
+
+		bool isVisibleTextbox() const;
 
 	private:
 		Memory* mem_;

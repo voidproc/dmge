@@ -2298,7 +2298,7 @@ namespace dmge
 		return cpuDetail_->consumedCycles_;
 	}
 
-	RegisterValues CPU::getRegisterValues()
+	RegisterValues CPU::getRegisterValues() const
 	{
 		return {
 			cpuDetail_->af(),

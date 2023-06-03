@@ -64,11 +64,6 @@ namespace dmge
 		return wave_.size();
 	}
 
-	std::pair<int, int> APUStream::getSamplePos()
-	{
-		return std::pair<int, int>(posWrite_, posRead_);
-	}
-
 
 	APU::APU(Memory* mem)
 		:
@@ -261,7 +256,6 @@ namespace dmge
 		case Channels::Ch2: ch2_.setEnable(dacState); return;
 		case Channels::Ch4: ch4_.setEnable(dacState); return;
 		}
-
 	}
 
 	void APU::trigger(Channels ch)
@@ -286,22 +280,8 @@ namespace dmge
 		}
 	}
 
-	void APU::draw(const Point& pos)
+	APUStreamBufferState APU::getBufferState() const
 	{
-		const Size GaugeSize{ 240, 12 };
-
-		const auto buffer = apuStream_->bufferRemain();
-
-		if (buffer > 0)
-		{
-			RectF{ pos, SizeF{ 1.0 * GaugeSize.x * buffer / apuStream_->bufferMaxSize(), 12} }.draw(Palette::Green);
-		}
-		else
-		{
-			RectF{ pos, GaugeSize }.draw(Palette::Red);
-		}
-
-		const auto area = RectF{ pos.movedBy(0.5, 0.5), GaugeSize}.drawFrame(1.0, 0.0);
-		FontAsset(U"debug")(U"{:5} / 44100"_fmt(apuStream_->bufferRemain())).drawAt(area.center());
+		return APUStreamBufferState{ apuStream_->bufferRemain(), apuStream_->bufferMaxSize() };
 	}
 }

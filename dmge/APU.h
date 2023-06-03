@@ -62,6 +62,7 @@ namespace dmge
 		// チャンネル操作
 
 		void setFrequency(Channels ch, int freq);
+		void setEnvelopeAndDAC(Channels ch, uint8 reg);
 		void trigger(Channels ch);
 		void setLengthTimer(Channels ch, uint8 reg);
 

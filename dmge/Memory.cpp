@@ -167,6 +167,21 @@ namespace dmge
 			apu_->setLengthTimer(Channels::Ch4, value);
 		}
 
+		// APU - Enable DAC / Envelope ?
+
+		else if (addr == Address::NR12)
+		{
+			apu_->setEnvelopeAndDAC(Channels::Ch1, value);
+		}
+		else if (addr == Address::NR22)
+		{
+			apu_->setEnvelopeAndDAC(Channels::Ch2, value);
+		}
+		else if (addr == Address::NR42)
+		{
+			apu_->setEnvelopeAndDAC(Channels::Ch4, value);
+		}
+
 		// APU - Update Frequency
 
 		else if (addr == Address::NR13)

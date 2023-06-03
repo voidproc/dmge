@@ -251,6 +251,19 @@ namespace dmge
 		}
 	}
 
+	void APU::setEnvelopeAndDAC(Channels ch, uint8 reg)
+	{
+		bool dacState = (reg & 0xf8) != 0;
+
+		switch (ch)
+		{
+		case Channels::Ch1: ch1_.setEnable(dacState); return;
+		case Channels::Ch2: ch2_.setEnable(dacState); return;
+		case Channels::Ch4: ch4_.setEnable(dacState); return;
+		}
+
+	}
+
 	void APU::trigger(Channels ch)
 	{
 		switch (ch)

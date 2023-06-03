@@ -309,14 +309,6 @@ namespace dmge
 		return 0;
 	}
 
-	void Channel::checkDAC()
-	{
-		if (not getDACEnable())
-		{
-			setEnable(false);
-		}
-	}
-
 	bool Channel::getDACEnable() const
 	{
 		switch (ch_)

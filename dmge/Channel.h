@@ -60,8 +60,6 @@ namespace dmge
 
 		int amplitude() const;
 
-		void checkDAC();
-
 		bool getDACEnable() const;
 
 		bool getEnable() const;

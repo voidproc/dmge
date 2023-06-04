@@ -128,7 +128,7 @@ namespace dmge
 				break;
 
 			case Channels::Ch3:
-				freqTimer_ = (2048 - freq_) * 2;
+				freqTimer_ = (2048 - data_.freq) * 2;
 				waveRAMOffset_ = (waveRAMOffset_ + 1) % 32;
 				break;
 

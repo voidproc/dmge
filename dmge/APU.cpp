@@ -258,6 +258,14 @@ namespace dmge
 		}
 	}
 
+	void APU::setDAC(Channels ch, bool enable)
+	{
+		switch (ch)
+		{
+		case Channels::Ch3: ch3_.setEnable(enable); return;
+		}
+	}
+
 	void APU::trigger(Channels ch)
 	{
 		switch (ch)

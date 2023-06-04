@@ -180,6 +180,10 @@ namespace dmge
 		{
 			apu_->setEnvelopeAndDAC(Channels::Ch2, value);
 		}
+		else if (addr == Address::NR30)
+		{
+			apu_->setDAC(Channels::Ch3, (value >> 7) == 1);
+		}
 		else if (addr == Address::NR42)
 		{
 			apu_->setEnvelopeAndDAC(Channels::Ch4, value);

@@ -31,6 +31,8 @@ namespace dmge
 
 		config.showConsole = ParseOr<int>(ini[U"showconsole"], true);
 
+		config.showDebugMonitor = ParseOr<int>(ini[U"showdebugmonitor"], true);
+
 		return config;
 	}
 
@@ -66,5 +68,8 @@ namespace dmge
 
 		DebugPrint::Writeln(U"enableBreakpoint={}"_fmt(enableBreakpoint));
 		DebugPrint::Writeln(U"showFPS={}"_fmt(showFPS));
+		DebugPrint::Writeln(U"scale={}"_fmt(scale));
+		DebugPrint::Writeln(U"showConsole={}"_fmt(showConsole));
+		DebugPrint::Writeln(U"showDebugMonitor={}"_fmt(showDebugMonitor));
 	}
 }

@@ -31,6 +31,9 @@ namespace dmge
 		// コンソールを表示する
 		bool showConsole = true;
 
+		// デバッグモニタを表示する
+		bool showDebugMonitor = true;
+
 		// config.ini のパース結果を返す
 		static AppConfig LoadConfig();
 

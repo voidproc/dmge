@@ -70,6 +70,8 @@ public:
 			dmge::DebugPrint::EnableConsole();
 		}
 
+		showDebugMonitor_ = config_.showDebugMonitor;
+
 		config_.print();
 
 		mem_.init(&ppu_, &apu_, &timer_, &joypad_);

@@ -41,6 +41,16 @@ namespace dmge
 	};
 
 
+	void DrawRenderTexture(const RenderTexture& renderTexture, const Point& pos, int scale)
+	{
+		const ScopedRenderStates2D renderState{ SamplerState::ClampNearest };
+
+		const Transformer2D transformer{ Mat3x2::Scale(scale).translated(pos) };
+
+		renderTexture.draw();
+	}
+
+
 	PPU::PPU(Memory* mem)
 		: mem_{ mem }, lcd_{ std::make_unique<LCD>(mem) }, renderTexture_{ 160, 144 }
 	{
@@ -144,7 +154,7 @@ namespace dmge
 
 	}
 
-	void PPU::draw(const Point pos, int scale)
+	void PPU::draw(const Point& pos, int scale)
 	{
 		if (not lcd_->isEnabled()) return;
 
@@ -162,26 +172,14 @@ namespace dmge
 			}
 		}
 
-		{
-			const ScopedRenderStates2D renderState{ SamplerState::ClampNearest };
-
-			const Transformer2D transformer{ Mat3x2::Scale(scale).translated(pos) };
-
-			renderTexture_.draw();
-		}
+		DrawRenderTexture(renderTexture_, pos, scale);
 	}
 
-	void PPU::drawCache(const Point pos, int scale)
+	void PPU::drawCache(const Point& pos, int scale)
 	{
 		if (not lcd_->isEnabled()) return;
 
-		{
-			const ScopedRenderStates2D renderState{ SamplerState::ClampNearest };
-
-			const Transformer2D transformer{ Mat3x2::Scale(scale).translated(pos) };
-
-			renderTexture_.draw();
-		}
+		DrawRenderTexture(renderTexture_, pos, scale);
 	}
 
 	PPUMode PPU::mode() const

@@ -31,11 +31,8 @@ namespace dmge
 	private:
 		Wave wave_;
 
-		int posWrite_ = 0;
-
-		int posRead_ = 0;
-
-		int bufferSize_ = 0;
+		int posHead_ = 0;
+		int posTail_ = 0;
 
 	};
 
@@ -50,15 +47,18 @@ namespace dmge
 	class APU
 	{
 	public:
-		APU(Memory* mem);
+		APU(Memory* mem, int sampleRate = 44100);
 
 		// サウンド処理を1クロック分実行し、
 		// サンプリングレートの周期にある場合はオーディオストリームにサンプルを書き込む
-		void run();
+		// バッファに書き込んだサンプル数を返却する
+		int run();
 
-		// オーディオストリームが十分にバッファリングされている場合は再生を開始し、
-		// そうでない場合は再生を一時停止する
-		void updatePlaybackState();
+		// オーディオストリームのバッファリングがしきい値を超えている場合に再生を開始する
+		void playIfBufferEnough(int thresholdSamples);
+
+		// オーディオストリームのバッファリングがしきい値未満の場合に再生を一時停止する
+		void pauseIfBufferNotEnough(int thresholdSamples);
 
 		// オーディオストリームの再生を一時停止する
 		void pause();
@@ -77,6 +77,8 @@ namespace dmge
 	private:
 		Memory* mem_;
 
+		int sampleRate_;
+
 		std::shared_ptr<APUStream> apuStream_;
 
 		Audio audio_;
@@ -90,8 +92,7 @@ namespace dmge
 		uint64 fsClock_ = 0;
 
 		// Count T-cycles
-		int cycles_ = 0;
-		int cyclesMod_ = 95;
+		double cycles_ = 0;
 
 		uint8 prevDiv_ = 0;
 	};

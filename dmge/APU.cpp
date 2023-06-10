@@ -1,6 +1,7 @@
 ﻿#include "APU.h"
 #include "Memory.h"
 #include "Address.h"
+#include "Timing.h"
 
 namespace dmge
 {
@@ -16,22 +17,21 @@ namespace dmge
 
 	void APUStream::getAudio(float* left, float* right, size_t samplesToWrite)
 	{
-		for (const auto i : step(samplesToWrite))
+		const int buffer = bufferRemain();
+		const int writable = (buffer >= samplesToWrite) ? samplesToWrite : buffer;
+
+		for (const auto i : step(writable))
 		{
-			if (bufferSize_ > 0)
-			{
-				*(left++) = wave_[posRead_].left;
-				*(right++) = wave_[posRead_].right;
+			*(left++) = wave_[posHead_].left;
+			*(right++) = wave_[posHead_].right;
 
-				posRead_ = (posRead_ + 1) % wave_.size();
+			posHead_ = (posHead_ + 1) % wave_.size();
+		}
 
-				bufferSize_--;
-			}
-			else
-			{
-				*(left++) = 0;
-				*(right++) = 0;
-			}
+		for (const auto i : step(samplesToWrite - writable))
+		{
+			*(left++) = 0;
+			*(right++) = 0;
 		}
 	}
 
@@ -46,17 +46,20 @@ namespace dmge
 
 	void APUStream::pushSample(float left, float right)
 	{
-		wave_[posWrite_].left = left;
-		wave_[posWrite_].right = right;
+		wave_[posTail_].left = left;
+		wave_[posTail_].right = right;
 
-		posWrite_ = (posWrite_ + 1) % wave_.size();
-
-		bufferSize_++;
+		posTail_ = (posTail_ + 1) % wave_.size();
 	}
 
 	int APUStream::bufferRemain() const
 	{
-		return bufferSize_;
+		if (posTail_ >= posHead_)
+		{
+			return posTail_ - posHead_;
+		}
+
+		return posTail_ - posHead_ + wave_.size();
 	}
 
 	int APUStream::bufferMaxSize() const
@@ -65,9 +68,10 @@ namespace dmge
 	}
 
 
-	APU::APU(Memory* mem)
+	APU::APU(Memory* mem, int sampleRate)
 		:
 		mem_{ mem },
+		sampleRate_{ sampleRate },
 		ch1_{ mem, Channels::Ch1 },
 		ch2_{ mem, Channels::Ch2 },
 		ch3_{ mem, Channels::Ch3 },
@@ -77,14 +81,23 @@ namespace dmge
 	{
 	}
 
-	void APU::run()
+	int APU::run()
 	{
+		// バッファが十分なら書き込まない
+
+		if (apuStream_->bufferRemain() > sampleRate_ / 8)
+		{
+			return 0;
+		}
+
+		// マスタースイッチがOffならAPUを停止する
+
 		const uint8 NR52 = mem_->read(Address::NR52);
 		const uint8 masterSwitch = NR52 >> 7;
 		if (masterSwitch == 0)
 		{
 			audio_.pause();
-			return;
+			return 0;
 		}
 
 		ch1_.fetch();
@@ -163,8 +176,12 @@ namespace dmge
 		// Output audio
 		// (CPUFreq / SampleRate) ==> 4194304 / 44100 ==> Every 95.1 T-cycles
 
-		if (cycles_ == 0)
+		cycles_ += 1.0;
+
+		if (cycles_ >= 1.0 * ClockFrequency / sampleRate_)
 		{
+			cycles_ -= 1.0 * ClockFrequency / sampleRate_;
+
 			const std::array<int, 4> chAmp = {
 				ch1_.amplitude() * ch1_.getEnable(),
 				ch2_.amplitude() * ch2_.getEnable(),
@@ -204,31 +221,27 @@ namespace dmge
 			const double rightVolume = (((NR50 >> 0) & 0b111) + 1) / 8.0;
 
 			apuStream_->pushSample(left * leftVolume / 4.0, right * rightVolume / 4.0);
+
+			return 1;
 		}
 
-		if (apuStream_->bufferRemain() > 12000)
-		{
-			cyclesMod_ = 96;
-		}
-		else if (apuStream_->bufferRemain() < 7000)
-		{
-			cyclesMod_ = 95;
-		}
-
-		cycles_ = (cycles_ + 1) % cyclesMod_;
+		return 0;
 	}
 
-	void APU::updatePlaybackState()
+	void APU::playIfBufferEnough(int thresholdSamples)
 	{
-		if (apuStream_->bufferRemain() > 10000 && not audio_.isPlaying())
-		{
-			audio_.play();
-		}
+		if (audio_.isPlaying()) return;
+		if (apuStream_->bufferRemain() < thresholdSamples) return;
 
-		if (apuStream_->bufferRemain() <= 3000 && audio_.isPlaying())
-		{
-			audio_.pause();
-		}
+		audio_.play();
+	}
+
+	void APU::pauseIfBufferNotEnough(int thresholdSamples)
+	{
+		if (not audio_.isPlaying()) return;
+		if (apuStream_->bufferRemain() > thresholdSamples) return;
+
+		audio_.pause();
 	}
 
 	void APU::pause()

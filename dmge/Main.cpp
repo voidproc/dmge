@@ -7,6 +7,7 @@
 #include "Timer.h"
 #include "Joypad.h"
 #include "Address.h"
+#include "Timing.h"
 #include "AppConfig.h"
 #include "DebugPrint.h"
 #include "DebugMonitor.h"
@@ -131,18 +132,19 @@ private:
 
 	void mainLoop_()
 	{
-		// VBlankに変化したら描画する
-		bool toDraw = false;
-
 		// 前回の描画からの経過サイクル数
-		// ※基本的に描画タイミングはVBlank移行時だが、LCD=offの場合にはVBlankに移行しないので
-		//   画面の更新（System::Update()）がされない期間が長くなってしまうため、
-		//   経過サイクル数が一定数を超えた場合にも描画を行う
-		int cyclesFromPreviousDraw = 0;
+		uint64 cyclesFromPreviousDraw = 0;
+
+		bool shouldDraw = false;
 
 		bool alwaysDump = false;
 
 		bool enableAPU = true;
+
+		int bufferedSamples = 0;
+
+		//dmge::FPSKeeper fpsKeeper{};
+
 
 		while (not quitApp_)
 		{
@@ -184,16 +186,6 @@ private:
 			cpu_.applyScheduledIME();
 			cpu_.run();
 
-			// 描画されないまま一定のサイクル数が経過した場合に強制的に描画する
-			cyclesFromPreviousDraw += cpu_.consumedCycles();
-			if (cyclesFromPreviousDraw > 70224 + 16)
-			{
-				toDraw = true;
-			}
-
-			//[DEBUG]
-			totalCycles_ += cpu_.consumedCycles();
-
 			// タイマーを更新
 
 			for (int i : step(cpu_.consumedCycles()))
@@ -206,11 +198,6 @@ private:
 			for (int i : step(cpu_.consumedCycles()))
 			{
 				ppu_.run();
-
-				if (ppu_.modeChangedToVBlank())
-				{
-					toDraw = true;
-				}
 			}
 
 			// APU
@@ -219,7 +206,7 @@ private:
 			{
 				for (int i : step(cpu_.consumedCycles()))
 				{
-					apu_.run();
+					bufferedSamples += apu_.run();
 				}
 			}
 
@@ -227,9 +214,34 @@ private:
 
 			cpu_.interrupt();
 
+
+			// 描画するか？
+
+			if (enableAPU)
+			{
+				// (1) オーディオバッファに1フレーム分のサンプルを書き込んだら描画する
+
+				if (bufferedSamples > 1.0 * sampleRate_ / 59.73)
+				{
+					shouldDraw = true;
+
+					bufferedSamples -= sampleRate_ / 59.73;
+				}
+			}
+
+			// (2) 描画されないまま一定のサイクル数が経過した場合に強制的に描画する
+
+			cyclesFromPreviousDraw += cpu_.consumedCycles();
+
+			if (cyclesFromPreviousDraw >= dmge::ClockFrequency / 59.50)
+			{
+				shouldDraw = true;
+			}
+
+
 			// キー入力と描画
 
-			if (toDraw)
+			if (shouldDraw)
 			{
 				if (not System::Update())
 				{
@@ -273,6 +285,13 @@ private:
 				// PPUのレンダリング結果を画面表示
 				ppu_.draw(Point{ 0, 0 }, config_.scale);
 
+				// APU
+				if (enableAPU && mode_ != Mode::Trace)
+				{
+					apu_.playIfBufferEnough(2000);
+					apu_.pauseIfBufferNotEnough(512);
+				}
+
 				// デバッグ用モニタ表示
 				if (showDebugMonitor_)
 				{
@@ -286,13 +305,14 @@ private:
 					DrawStatusText(U"FPS:{:3d}"_fmt(Profiler::FPS()));
 				}
 
-				// APU
-				if (enableAPU)
-				{
-					apu_.updatePlaybackState();
-				}
+				// Wait
 
-				toDraw = false;
+				//if (not Graphics::IsVSyncEnabled())
+				//{
+				//	fpsKeeper.sleep(60.0 * 70224 / Max(cyclesFromPreviousDraw, 1ull));
+				//}
+
+				shouldDraw = false;
 				cyclesFromPreviousDraw = 0;
 			}
 		}
@@ -407,7 +427,10 @@ private:
 
 	dmge::PPU ppu_{ &mem_ };
 
-	dmge::APU apu_{ &mem_ };
+	// (APU)サンプリングレート
+	int sampleRate_ = 44100;
+
+	dmge::APU apu_{ &mem_, sampleRate_ };
 
 	dmge::Timer timer_{ &mem_ };
 
@@ -441,8 +464,6 @@ private:
 
 	// メモリダンプするアドレス設定用
 	uint16 dumpAddress_ = 0;
-
-	uint64 totalCycles_ = 0;
 
 };
 

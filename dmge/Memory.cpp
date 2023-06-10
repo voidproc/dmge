@@ -74,8 +74,20 @@ namespace dmge
 			return false;
 		}
 
-		// メモリ
+		// メモリ全体
 		mem_.resize(0x10000);
+
+		// VRAM
+		for (auto& vram : vram_)
+		{
+			vram.resize(0x2000);
+		}
+
+		// WRAM
+		for (auto& wram : wram_)
+		{
+			wram.resize(0x1000);
+		}
 
 		// メモリを初期状態にリセット
 		reset();
@@ -118,6 +130,27 @@ namespace dmge
 		{
 			doWrite = false;
 			mbc_->write(addr, value);
+		}
+
+		// VRAM
+
+		else if (ADDRESS_IN_RANGE(addr, Address::VRAM))
+		{
+			doWrite = false;
+			vram_[vramBank_][addr - Address::VRAM] = value;
+		}
+
+		// WRAM
+
+		else if (ADDRESS_IN_RANGE(addr, Address::WRAM0))
+		{
+			doWrite = false;
+			wram_[0][addr - Address::WRAM0] = value;
+		}
+		else if (ADDRESS_IN_RANGE(addr, Address::WRAM1))
+		{
+			doWrite = false;
+			wram_[wramBank_][addr - Address::WRAM1] = value;
 		}
 
 		// Joypad
@@ -237,6 +270,23 @@ namespace dmge
 			}
 		}
 
+		// VRAM Bank (VBK)
+
+		else if (addr == Address::VBK)
+		{
+			vramBank_ = value & 1;
+			value |= 0xfe;
+		}
+
+		// VRAM Bank (VBK)
+
+		else if (addr == Address::SVBK)
+		{
+			if ((value & 0b111) == 0) value |= 1;
+			wramBank_ = value & 0b111;
+			value |= 0xf8;
+		}
+
 		// Boot ROM
 
 		else if (addr == Address::BANK)
@@ -273,6 +323,8 @@ namespace dmge
 	{
 		uint8 value;
 
+		// MBC
+
 		if (ADDRESS_IN_RANGE(addr, Address::ROMBank0))
 		{
 			// ROM Bank 0
@@ -288,6 +340,40 @@ namespace dmge
 			// External RAM
 			value = mbc_->read(addr);
 		}
+
+		// VRAM
+
+		else if (ADDRESS_IN_RANGE(addr, Address::VRAM))
+		{
+			value = vram_[vramBank_][addr - Address::VRAM];
+		}
+
+		// WRAM
+
+		else if (ADDRESS_IN_RANGE(addr, Address::WRAM0))
+		{
+			value = wram_[0][addr - Address::WRAM0];
+		}
+		else if (ADDRESS_IN_RANGE(addr, Address::WRAM1))
+		{
+			value = wram_[wramBank_][addr - Address::WRAM1];
+		}
+
+
+		// VRAM Bank (VBK)
+
+		else if (addr == Address::VBK)
+		{
+			value = mem_[addr] | 0xfe;
+		}
+
+		// WRAM Bank (SVBK)
+
+		else if (addr == Address::SVBK)
+		{
+			value = mem_[addr] | 0xf8;
+		}
+
 		else
 		{
 			value = mem_[addr];

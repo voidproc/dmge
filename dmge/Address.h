@@ -110,6 +110,12 @@ namespace dmge
 			WRAM = 0xc000,
 			WRAM_End = 0xdfff,
 
+			WRAM0 = 0xc000,
+			WRAM0_End = 0xcfff,
+
+			WRAM1 = 0xd000,
+			WRAM1_End = 0xdfff,
+
 			// Echo of WRAM (c000-ddff)
 
 			EchoRAM = 0xe000,

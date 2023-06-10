@@ -60,6 +60,14 @@ namespace dmge
 		// メモリ全体
 		Array<uint8> mem_;
 
+		// VRAM
+		std::array<Array<uint8>, 2> vram_;
+		int vramBank_ = 0;
+
+		// WRAM
+		std::array<Array<uint8>, 8> wram_;
+		int wramBank_ = 1;
+
 		// メモリ書き込み時フック
 		Array<std::function<void(uint16, uint8)>> writeHooks_;
 	};

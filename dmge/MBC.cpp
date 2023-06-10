@@ -91,9 +91,6 @@ namespace dmge
 		rom_.resize(reader.size());
 		reader.read(rom_.data(), rom_.size());
 
-		// SRAM (32KiB)
-		sram_.resize(0x8000);
-
 		// SRAMをファイルからロード
 		if (ramSizeBytes())
 		{
@@ -155,8 +152,6 @@ namespace dmge
 		{
 			return cartridgeHeader_.ramSizeKB * 1024;
 		}
-
-		return 0;
 	}
 
 	void MBC::dumpCartridgeInfo()
@@ -180,7 +175,7 @@ namespace dmge
 	{
 	}
 
-	uint8 NoMBC::read(uint16 addr)
+	uint8 NoMBC::read(uint16 addr) const
 	{
 		return rom_[addr];
 	}
@@ -251,30 +246,28 @@ namespace dmge
 		}
 	}
 
-	uint8 MBC1::read(uint16 addr)
+	uint8 MBC1::read(uint16 addr) const
 	{
-		uint8 value = 0;
-
-		// MBC
-
-		if (ADDRESS_IN_RANGE(addr, Address::ROMBank0))
+		if (addr <= Address::ROMBank0_End)
 		{
 			// ROM Bank 0
 
-			value = rom_[addr];
-
-			if (cartridgeHeader_.romSizeKB >= 1024)
+			if (cartridgeHeader_.romSizeKB < 1024)
 			{
-				value = rom_[0x4000 * (romBank() | (ramBank_ << 5)) + addr];
+				return rom_[addr];
+			}
+			else
+			{
+				return rom_[0x4000 * (romBank() | (ramBank_ << 5)) + addr];
 			}
 		}
-		else if (ADDRESS_IN_RANGE(addr, Address::SwitchableROMBank))
+		else if (addr <= Address::SwitchableROMBank_End)
 		{
 			// ROM Bank 1-
 			const uint16 offset = addr - Address::SwitchableROMBank;
-			value = rom_[romBank() * 0x4000 + offset];
+			return rom_[romBank() * 0x4000 + offset];
 		}
-		else if (ADDRESS_IN_RANGE(addr, Address::SRAM))
+		else if (addr <= Address::SRAM_End)
 		{
 			// External RAM
 
@@ -282,10 +275,10 @@ namespace dmge
 			// 大容量RAMのとき、モード1の場合、セカンダリバンクで指定されたバンクに切り替わる
 
 			const uint16 offset = addr - Address::SRAM;
-			value = sram_[bankingMode_ == 0 ? offset : ramBank_ * 0x2000 + offset];
+			return sram_[bankingMode_ == 0 ? offset : ramBank_ * 0x2000 + offset];
 		}
 
-		return value;
+		return 0;
 	}
 
 	// ------------------------------------------------
@@ -325,30 +318,26 @@ namespace dmge
 		}
 	}
 
-	uint8 MBC2::read(uint16 addr)
+	uint8 MBC2::read(uint16 addr) const
 	{
-		uint8 value = 0;
-
-		// MBC
-
-		if (ADDRESS_IN_RANGE(addr, Address::ROMBank0))
+		if (addr <= Address::ROMBank0_End)
 		{
 			// ROM Bank 0
-			value = rom_[addr];
+			return rom_[addr];
 		}
-		else if (ADDRESS_IN_RANGE(addr, Address::SwitchableROMBank))
+		else if (addr <= Address::SwitchableROMBank_End)
 		{
 			// ROM Bank 1-
 			const uint16 offset = addr - Address::SwitchableROMBank;
-			value = rom_[romBank() * 0x4000 + offset];
+			return rom_[romBank() * 0x4000 + offset];
 		}
-		else if (ADDRESS_IN_RANGE(addr, Address::SRAM))
+		else if (addr <= Address::SRAM_End)
 		{
 			// Built in RAM
-			value = sram_[(addr - Address::SRAM) & 0x1ff];
+			return sram_[(addr - Address::SRAM) & 0x1ff];
 		}
 
-		return value;
+		return 0;
 	}
 
 	// ------------------------------------------------
@@ -393,30 +382,26 @@ namespace dmge
 		}
 	}
 
-	uint8 MBC3::read(uint16 addr)
+	uint8 MBC3::read(uint16 addr) const
 	{
-		uint8 value = 0;
-
-		// MBC
-
-		if (ADDRESS_IN_RANGE(addr, Address::ROMBank0))
+		if (addr <= Address::ROMBank0_End)
 		{
 			// ROM Bank 0
-			value = rom_[addr];
+			return rom_[addr];
 		}
-		else if (ADDRESS_IN_RANGE(addr, Address::SwitchableROMBank))
+		else if (addr <= Address::SwitchableROMBank_End)
 		{
 			// ROM Bank 1-
-			value = MBC1::read(addr);
+			return MBC1::read(addr);
 		}
-		else if (ADDRESS_IN_RANGE(addr, Address::SRAM))
+		else if (addr <= Address::SRAM_End)
 		{
 			// External RAM
 
 			const uint16 offset = addr - Address::SRAM;
-			value = sram_[ramBank_ * 0x2000 + offset];
+			return sram_[ramBank_ * 0x2000 + offset];
 		}
 
-		return value;
+		return 0;
 	}
 }

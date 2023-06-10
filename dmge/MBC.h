@@ -13,7 +13,7 @@ namespace dmge
 
 		virtual void write(uint16 addr, uint8 value) = 0;
 
-		virtual uint8 read(uint16 addr) = 0;
+		virtual uint8 read(uint16 addr) const = 0;
 
 		static std::unique_ptr<MBC> LoadCartridge(FilePath cartridgePath);
 
@@ -38,7 +38,7 @@ namespace dmge
 		Array<uint8> rom_;
 
 		// External RAM (SRAM)
-		Array<uint8> sram_;
+		std::array<uint8, 0x8000> sram_;
 
 		// カートリッジのヘッダ情報
 		CartridgeHeader cartridgeHeader_;
@@ -59,7 +59,7 @@ namespace dmge
 
 		virtual void write(uint16 addr, uint8 value) override;
 
-		virtual uint8 read(uint16 addr) override;
+		virtual uint8 read(uint16 addr) const override;
 	};
 
 	class MBC1 : public MBC
@@ -69,7 +69,7 @@ namespace dmge
 
 		virtual void write(uint16 addr, uint8 value) override;
 
-		virtual uint8 read(uint16 addr) override;
+		virtual uint8 read(uint16 addr) const override;
 	};
 
 	class MBC2 : public MBC1
@@ -79,7 +79,7 @@ namespace dmge
 
 		virtual void write(uint16 addr, uint8 value) override;
 
-		virtual uint8 read(uint16 addr) override;
+		virtual uint8 read(uint16 addr) const override;
 	};
 
 	class MBC3 : public MBC1
@@ -89,6 +89,6 @@ namespace dmge
 
 		virtual void write(uint16 addr, uint8 value) override;
 
-		virtual uint8 read(uint16 addr) override;
+		virtual uint8 read(uint16 addr) const override;
 	};
 }

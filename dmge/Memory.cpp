@@ -74,21 +74,6 @@ namespace dmge
 			return false;
 		}
 
-		// メモリ全体
-		mem_.resize(0x10000);
-
-		// VRAM
-		for (auto& vram : vram_)
-		{
-			vram.resize(0x2000);
-		}
-
-		// WRAM
-		for (auto& wram : wram_)
-		{
-			wram.resize(0x1000);
-		}
-
 		// メモリを初期状態にリセット
 		reset();
 
@@ -102,63 +87,59 @@ namespace dmge
 
 	void Memory::write(uint16 addr, uint8 value)
 	{
-		bool doWrite = true;
+		// フック
+
+		if (not writeHooks_.empty())
+		{
+			for (const auto& hook : writeHooks_)
+			{
+				hook(addr, value);
+			}
+		}
 
 		// MBC
 
-		if (ADDRESS_IN_RANGE(addr, Address::MBC_RAMEnable))
+		if (addr >= Address::MBC_RAMEnable && addr <= Address::MBC_BankingMode_End)
 		{
-			doWrite = false;
 			mbc_->write(addr, value);
-		}
-		else if (ADDRESS_IN_RANGE(addr, Address::MBC_ROMBank))
-		{
-			doWrite = false;
-			mbc_->write(addr, value);
-		}
-		else if (ADDRESS_IN_RANGE(addr, Address::MBC_RAMBank))
-		{
-			doWrite = false;
-			mbc_->write(addr, value);
-		}
-		else if (ADDRESS_IN_RANGE(addr, Address::MBC_BankingMode))
-		{
-			doWrite = false;
-			mbc_->write(addr, value);
-		}
-		else if (ADDRESS_IN_RANGE(addr, Address::SRAM))
-		{
-			doWrite = false;
-			mbc_->write(addr, value);
+			return;
 		}
 
 		// VRAM
 
 		else if (ADDRESS_IN_RANGE(addr, Address::VRAM))
 		{
-			doWrite = false;
 			vram_[vramBank_][addr - Address::VRAM] = value;
+			return;
+		}
+
+		// SRAM
+
+		else if (ADDRESS_IN_RANGE(addr, Address::SRAM))
+		{
+			mbc_->write(addr, value);
+			return;
 		}
 
 		// WRAM
 
-		else if (ADDRESS_IN_RANGE(addr, Address::WRAM0))
-		{
-			doWrite = false;
-			wram_[0][addr - Address::WRAM0] = value;
-		}
-		else if (ADDRESS_IN_RANGE(addr, Address::WRAM1))
-		{
-			doWrite = false;
-			wram_[wramBank_][addr - Address::WRAM1] = value;
-		}
+		//else if (ADDRESS_IN_RANGE(addr, Address::WRAM0))
+		//{
+		//	doWrite = false;
+		//	wram_[0][addr - Address::WRAM0] = value;
+		//}
+		//else if (ADDRESS_IN_RANGE(addr, Address::WRAM1))
+		//{
+		//	doWrite = false;
+		//	wram_[wramBank_][addr - Address::WRAM1] = value;
+		//}
 
 		// Joypad
 
 		else if (addr == Address::JOYP)
 		{
 			joypad_->update(value);
-			doWrite = false;
+			return;
 		}
 
 		// Timer
@@ -166,7 +147,7 @@ namespace dmge
 		else if (addr == Address::DIV)
 		{
 			timer_->resetInternalDIV();
-			doWrite = false;
+			return;
 		}
 		else if (addr == Address::TIMA)
 		{
@@ -295,23 +276,7 @@ namespace dmge
 			//...
 		}
 
-
-	HOOK:
-
-		// フック
-
-		if (not writeHooks_.empty())
-		{
-			for (const auto& hook : writeHooks_)
-			{
-				hook(addr, value);
-			}
-		}
-
-		if (doWrite)
-		{
-			mem_[addr] = value;
-		}
+		mem_[addr] = value;
 	}
 
 	void Memory::writeDirect(uint16 addr, uint8 value)
@@ -321,65 +286,39 @@ namespace dmge
 
 	uint8 Memory::read(uint16 addr) const
 	{
-		uint8 value;
+		// ROM
 
-		// MBC
-
-		if (ADDRESS_IN_RANGE(addr, Address::ROMBank0))
+		if (addr <= Address::SwitchableROMBank_End)
 		{
-			// ROM Bank 0
-			value = mbc_->read(addr);
-		}
-		else if (ADDRESS_IN_RANGE(addr, Address::SwitchableROMBank))
-		{
-			// ROM Bank 1-
-			value = mbc_->read(addr);
-		}
-		else if (ADDRESS_IN_RANGE(addr, Address::SRAM))
-		{
-			// External RAM
-			value = mbc_->read(addr);
+			return mbc_->read(addr);
 		}
 
 		// VRAM
 
-		else if (ADDRESS_IN_RANGE(addr, Address::VRAM))
+		else if (addr <= Address::VRAM_End)
 		{
-			value = vram_[vramBank_][addr - Address::VRAM];
+			return vram_[vramBank_][addr - Address::VRAM];
+		}
+
+		// SRAM
+
+		else if (addr <= Address::SRAM_End)
+		{
+			return mbc_->read(addr);
 		}
 
 		// WRAM
 
-		else if (ADDRESS_IN_RANGE(addr, Address::WRAM0))
-		{
-			value = wram_[0][addr - Address::WRAM0];
-		}
-		else if (ADDRESS_IN_RANGE(addr, Address::WRAM1))
-		{
-			value = wram_[wramBank_][addr - Address::WRAM1];
-		}
+		//else if (ADDRESS_IN_RANGE(addr, Address::WRAM0))
+		//{
+		//	value = wram_[0][addr - Address::WRAM0];
+		//}
+		//else if (ADDRESS_IN_RANGE(addr, Address::WRAM1))
+		//{
+		//	value = wram_[wramBank_][addr - Address::WRAM1];
+		//}
 
-
-		// VRAM Bank (VBK)
-
-		else if (addr == Address::VBK)
-		{
-			value = mem_[addr] | 0xfe;
-		}
-
-		// WRAM Bank (SVBK)
-
-		else if (addr == Address::SVBK)
-		{
-			value = mem_[addr] | 0xf8;
-		}
-
-		else
-		{
-			value = mem_[addr];
-		}
-
-		return value;
+		return mem_[addr];
 	}
 
 	uint16 Memory::read16(uint16 addr) const

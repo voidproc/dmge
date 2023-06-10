@@ -138,6 +138,7 @@
     <ClCompile Include="TileData.cpp" />
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="DebugPrint.cpp" />
+    <ClCompile Include="Timing.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="App\engine\texture\box-shadow\128.png" />
@@ -356,6 +357,7 @@
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="TileData.h" />
     <ClInclude Include="Timer.h" />
+    <ClInclude Include="Timing.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App\example\obj\blacksmith.obj">

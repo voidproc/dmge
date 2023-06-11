@@ -34,6 +34,8 @@ namespace dmge
 
 		uint16 read16(uint16 addr) const;
 
+		bool isCGBMode() const;
+
 		int romBank() const;
 
 		int ramBank() const;

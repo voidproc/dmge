@@ -119,6 +119,11 @@ namespace dmge
 		}
 	}
 
+	CGBFlag MBC::cgbFlag() const
+	{
+		return cartridgeHeader_.cgbFlag;
+	}
+
 	int MBC::romBank() const
 	{
 		if (IsMBC1(cartridgeHeader_.type))

@@ -21,6 +21,8 @@ namespace dmge
 
 		void saveSRAM();
 
+		CGBFlag cgbFlag() const;
+
 		int romBank() const;
 
 		int ramBank() const;

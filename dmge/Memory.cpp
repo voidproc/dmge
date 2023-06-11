@@ -26,6 +26,12 @@ namespace dmge
 
 	void Memory::reset()
 	{
+		const bool cgb = isCGBMode();
+
+		writeDirect(0xff00, 0xcf); // P1
+		writeDirect(0xff01, 0x00); // SB
+		writeDirect(0xff02, cgb ? 0x7f : 0x7e); // SC
+
 		writeDirect(0xff05, 0x00); // TIMA
 		writeDirect(0xff06, 0x00); // TMA
 		writeDirect(0xff07, 0xf8); // TAC, 0xff80 | (0x00 & ~0xff80)
@@ -55,6 +61,7 @@ namespace dmge
 		writeDirect(0xff42, 0x00); // SCY
 		writeDirect(0xff43, 0x00); // SCX
 		writeDirect(0xff45, 0x00); // LYC
+		writeDirect(0xff46, cgb ? 0x00 : 0xff); // DMA
 		writeDirect(0xff47, 0xfc); // BGP
 		writeDirect(0xff48, 0xff); // OBP0
 		writeDirect(0xff49, 0xff); // OBP1
@@ -247,7 +254,7 @@ namespace dmge
 			apu_->trigger(Channels::Ch4);
 		}
 
-		// DMA
+		// DMA (0xff46)
 
 		else if (addr == Address::DMA)
 		{
@@ -258,7 +265,7 @@ namespace dmge
 			}
 		}
 
-		// VRAM Bank (VBK)
+		// VRAM Bank (VBK) (0xff4f)
 
 		else if (addr == Address::VBK)
 		{
@@ -266,7 +273,21 @@ namespace dmge
 			value |= 0xfe;
 		}
 
-		// WRAM Bank (SVBK)
+		// HDMA (0xff51 - 0xff55)
+
+		else if (addr == Address::HDMA5)
+		{
+			// TODO: 転送モード（bit7）を考慮していない
+			const uint16 srcAddr = (read(Address::HDMA1) << 8) | (read(Address::HDMA2) & 0xf0);
+			const uint16 dstAddr = (((read(Address::HDMA3) << 8) | read(Address::HDMA4)) & 0x1ff0) + 0x8000;
+			const auto length = ((value & 0x7f) + 1) * 0x10;
+			for (auto i = 0; i < length; i++)
+			{
+				write(dstAddr + i, read(srcAddr + i));
+			}
+		}
+
+		// WRAM Bank (SVBK) (0xff70)
 
 		else if (addr == Address::SVBK)
 		{
@@ -336,6 +357,11 @@ namespace dmge
 	uint16 Memory::read16(uint16 addr) const
 	{
 		return read(addr) | (read(addr + 1) << 8);
+	}
+
+	bool Memory::isCGBMode() const
+	{
+		return (static_cast<uint8>(mbc_->cgbFlag()) & 0x80) == 0x80;
 	}
 
 	int Memory::romBank() const

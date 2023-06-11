@@ -22,6 +22,8 @@ namespace dmge
 
 		~CPU();
 
+		void setCGBMode(bool value);
+
 		// レジスタを初期状態にする
 		void reset();
 

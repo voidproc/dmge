@@ -26,10 +26,15 @@ namespace dmge
 		{
 		}
 
+		void setCGBMode(bool value)
+		{
+			cgbMode_ = value;
+		}
+
 		void reset()
 		{
-			af(0x01b0); // GB/SGB:0x01b0, GBP:0xffb0, GBC:0x11b0
-			bc(0x0013);
+			af(cgbMode_ ? 0x11b0 : 0x01b0); // GB/SGB:0x01b0, GBP:0xffb0, GBC:0x11b0
+			bc(cgbMode_ ? 0x0000 : 0x0013);
 			de(0x00d8);
 			hl(0x014d);
 			sp = 0xfffe;
@@ -275,6 +280,10 @@ namespace dmge
 
 		// HALT
 		bool powerSavingMode_ = false;
+
+		// CGB Mode
+		bool cgbMode_ = false;
+
 
 		// 命令セット
 		
@@ -2261,6 +2270,11 @@ namespace dmge
 
 	CPU::~CPU()
 	{
+	}
+
+	void CPU::setCGBMode(bool value)
+	{
+		cpuDetail_->setCGBMode(value);
 	}
 
 	void CPU::reset()

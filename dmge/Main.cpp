@@ -123,6 +123,9 @@ public:
 
 		mem_.dumpCartridgeInfo();
 
+		cpu_.setCGBMode(mem_.isCGBMode());
+		cpu_.reset();
+
 		mainLoop_();
 
 		mem_.saveSRAM();

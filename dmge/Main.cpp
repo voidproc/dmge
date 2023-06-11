@@ -221,11 +221,11 @@ private:
 			{
 				// (1) オーディオバッファに1フレーム分のサンプルを書き込んだら描画する
 
-				if (bufferedSamples > 1.0 * sampleRate_ / 59.73)
+				if (bufferedSamples > 1.0 * sampleRate_ / 60.0)
 				{
 					shouldDraw = true;
 
-					bufferedSamples -= sampleRate_ / 59.73;
+					bufferedSamples -= sampleRate_ / 60.0;
 				}
 			}
 

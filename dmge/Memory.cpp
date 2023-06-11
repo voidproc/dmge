@@ -98,41 +98,48 @@ namespace dmge
 		}
 
 		// MBC
+		// 0x0000 - 0x7fff
 
-		if (addr >= Address::MBC_RAMEnable && addr <= Address::MBC_BankingMode_End)
+		if (addr <= Address::MBC_BankingMode_End)
 		{
 			mbc_->write(addr, value);
 			return;
 		}
 
 		// VRAM
+		// 0x8000 - 0x9fff
 
-		else if (ADDRESS_IN_RANGE(addr, Address::VRAM))
+		else if (addr <= Address::VRAM_End)
 		{
 			vram_[vramBank_][addr - Address::VRAM] = value;
 			return;
 		}
 
 		// SRAM
+		// 0xa000 - 0xbfff
 
-		else if (ADDRESS_IN_RANGE(addr, Address::SRAM))
+		else if (addr <= Address::SRAM_End)
 		{
 			mbc_->write(addr, value);
 			return;
 		}
 
 		// WRAM
+		// 0xc000 - 0xdfff
 
-		//else if (ADDRESS_IN_RANGE(addr, Address::WRAM0))
-		//{
-		//	doWrite = false;
-		//	wram_[0][addr - Address::WRAM0] = value;
-		//}
-		//else if (ADDRESS_IN_RANGE(addr, Address::WRAM1))
-		//{
-		//	doWrite = false;
-		//	wram_[wramBank_][addr - Address::WRAM1] = value;
-		//}
+		else if (addr <= Address::WRAM0_End)
+		{
+			wram_[0][addr - Address::WRAM0] = value;
+			return;
+		}
+		else if (addr <= Address::WRAM1_End)
+		{
+			wram_[wramBank_][addr - Address::WRAM1] = value;
+			return;
+		}
+
+		// IO-Reg.
+		// 0xff00 - 0xffff
 
 		// Joypad
 
@@ -259,7 +266,7 @@ namespace dmge
 			value |= 0xfe;
 		}
 
-		// VRAM Bank (VBK)
+		// WRAM Bank (SVBK)
 
 		else if (addr == Address::SVBK)
 		{
@@ -286,9 +293,14 @@ namespace dmge
 
 	uint8 Memory::read(uint16 addr) const
 	{
+		if (addr > Address::WRAM1_End)
+		{
+			return mem_[addr];
+		}
+
 		// ROM
 
-		if (addr <= Address::SwitchableROMBank_End)
+		else if (addr <= Address::SwitchableROMBank_End)
 		{
 			return mbc_->read(addr);
 		}
@@ -309,14 +321,14 @@ namespace dmge
 
 		// WRAM
 
-		//else if (ADDRESS_IN_RANGE(addr, Address::WRAM0))
-		//{
-		//	value = wram_[0][addr - Address::WRAM0];
-		//}
-		//else if (ADDRESS_IN_RANGE(addr, Address::WRAM1))
-		//{
-		//	value = wram_[wramBank_][addr - Address::WRAM1];
-		//}
+		else if (addr <= Address::WRAM0_End)
+		{
+			return wram_[0][addr - Address::WRAM0];
+		}
+		else if (addr <= Address::WRAM1_End)
+		{
+			return wram_[wramBank_][addr - Address::WRAM1];
+		}
 
 		return mem_[addr];
 	}

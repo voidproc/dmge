@@ -13,15 +13,18 @@ namespace dmge
 		// Title
 		title = header.slice(Address::Title, 15).map([](uint8 x) { return static_cast<char32_t>(x); }).join(U""_sv, U""_sv, U""_sv);
 
+		// CGB flag
+		cgbFlag = static_cast<CGBFlag>(header[Address::CGBFlag]);
+
 		// Type
 		type = static_cast<CartridgeType>(header[Address::CartridgeType]);
 
-		// ROM Size
+		// ROM size
 
 		const uint8 romSize = header[Address::ROMSize];
 		romSizeKB = 32 * (1 << romSize);
 
-		// RAM Size
+		// RAM size
 
 		const uint8 ramSize = header[Address::RAMSize];
 

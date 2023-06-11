@@ -159,6 +159,9 @@ namespace dmge
 		DebugPrint::Writeln(U"* Cartridge Info:");
 		DebugPrint::Writeln(U"Title={}"_fmt(cartridgeHeader_.title));
 
+		const auto cgbFlagStr = magic_enum::enum_name<CGBFlag>(cartridgeHeader_.cgbFlag);
+		DebugPrint::Writeln(U"CGBFlag={}"_fmt(Unicode::WidenAscii(cgbFlagStr)));
+
 		const auto typeStr = magic_enum::enum_name<CartridgeType>(cartridgeHeader_.type);
 		DebugPrint::Writeln(U"Type={}"_fmt(Unicode::WidenAscii(typeStr)));
 

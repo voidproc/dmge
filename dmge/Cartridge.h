@@ -34,11 +34,28 @@ namespace dmge
 		HUC1_RAM_BATTERY = 0xFF,
 	};
 
+	enum class CGBFlag : uint8
+	{
+		None = 0x00,
+		CGBSupport = 0x80,
+		CGBOnly = 0xC0,
+	};
+
 	struct CartridgeHeader
 	{
+		// Title (0x0134 - 0x0143)
 		String title{};
+
+		// CGB flag
+		CGBFlag cgbFlag{};
+
+		// Cartridge type (0x0147)
 		CartridgeType type{};
+
+		// ROM size (0x0148)
 		int romSizeKB{};
+
+		// RAM size (0x0149)
 		int ramSizeKB{};
 
 		CartridgeHeader() = default;

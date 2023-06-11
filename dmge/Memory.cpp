@@ -277,7 +277,6 @@ namespace dmge
 
 		else if (addr == Address::HDMA5)
 		{
-			// TODO: 転送モード（bit7）を考慮していない
 			const uint16 srcAddr = (read(Address::HDMA1) << 8) | (read(Address::HDMA2) & 0xf0);
 			const uint16 dstAddr = (((read(Address::HDMA3) << 8) | read(Address::HDMA4)) & 0x1ff0) + 0x8000;
 			const auto length = ((value & 0x7f) + 1) * 0x10;
@@ -285,6 +284,37 @@ namespace dmge
 			{
 				write(dstAddr + i, read(srcAddr + i));
 			}
+
+			// TODO: 転送モード（bit7）を考慮していないので、転送が終わったことにする
+			value = 0xff;
+		}
+
+		// BCPS/BGPI (0xff68)
+
+		if (addr == Address::BCPS)
+		{
+			ppu_->setBGPaletteIndex(value & 0x3f, value >> 7);
+		}
+
+		// BCPD/BGPD (0xff69)
+
+		if (addr == Address::BCPD)
+		{
+			ppu_->setBGPaletteData(value);
+		}
+
+		// OCPS/OBPI (0xff6a)
+
+		if (addr == Address::OCPS)
+		{
+			ppu_->setOBJPaletteIndex(value & 0x3f, value >> 7);
+		}
+
+		// OCPD/OBPD (0xff6b)
+
+		if (addr == Address::OCPD)
+		{
+			ppu_->setOBJPaletteData(value);
 		}
 
 		// WRAM Bank (SVBK) (0xff70)
@@ -354,9 +384,19 @@ namespace dmge
 		return mem_[addr];
 	}
 
+	uint8 Memory::readVRAMBank(uint16 addr, int bank) const
+	{
+		return vram_[bank][addr - Address::VRAM];
+	}
+
 	uint16 Memory::read16(uint16 addr) const
 	{
 		return read(addr) | (read(addr + 1) << 8);
+	}
+
+	uint16 Memory::read16VRAMBank(uint16 addr, int bank) const
+	{
+		return vram_[bank][addr - Address::VRAM] | (vram_[bank][addr + 1 - Address::VRAM] << 8);
 	}
 
 	bool Memory::isCGBMode() const

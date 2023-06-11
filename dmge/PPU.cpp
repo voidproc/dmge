@@ -36,10 +36,27 @@ namespace dmge
 		// パレット（0=OBP0, 1=OBP1）
 		uint8 palette;
 
-		// CGB Only
-		uint8 cgbFlag;
+		// (CGB) Tile VRAM-Bank
+		uint8 bank;
+
+		// (CGB) Palette number
+		uint8 obp;
 	};
 
+	// (CGB) 背景マップ属性
+	union TileMapAttribute
+	{
+		struct
+		{
+			uint8 palette : 3;
+			uint8 bank : 1;
+			uint8 unused1 : 1;
+			bool xFlip : 1;
+			bool yFlip : 1;
+			uint8 priority : 1;
+		} attr;
+		uint8 value;
+	};
 
 	void DrawRenderTexture(const RenderTexture& renderTexture, const Point& pos, int scale)
 	{
@@ -57,10 +74,24 @@ namespace dmge
 		dot_ = 70224 - 52 + 4;
 		canvas_.resize(160 + 8, 144, Palette::White);
 		oamBuffer_.reserve(10);
+
+		for (int pal = 0; pal < 8; pal++)
+		{
+			for (int i = 0; i < 4; i++)
+			{
+				displayBGColorPalette_[pal][i].set(0, 0, 0);
+				displayOBJColorPalette_[pal][i].set(0, 0, 0);
+			}
+		}
 	}
 
 	PPU::~PPU()
 	{
+	}
+
+	void PPU::setCGBMode(bool value)
+	{
+		cgbMode_ = value;
 	}
 
 	void PPU::run()
@@ -212,6 +243,73 @@ namespace dmge
 		std::copy(palette.cbegin(), palette.cend(), displayColorPalette_.begin());
 	}
 
+	void PPU::setBGPaletteIndex(uint8 index, bool autoIncrement)
+	{
+		bgPaletteIndex_ = index;
+		bgPaletteIndexAutoIncr_ = autoIncrement;
+	}
+
+	void PPU::setBGPaletteData(uint8 value)
+	{
+		bgPalette_[bgPaletteIndex_] = value;
+
+		const int pal = bgPaletteIndex_ / 8;
+		const int nColor = (bgPaletteIndex_ / 2) % 4;
+		const uint16 color = bgPalette_[pal * 8 + nColor * 2] | (bgPalette_[pal * 8 + nColor * 2 + 1] << 8);
+
+		displayBGColorPalette_[pal][nColor].set(
+			((color >> 0) & 0x1f) * 1.0 / 0x1f,
+			((color >> 5) & 0x1f) * 1.0 / 0x1f,
+			((color >> 10) & 0x1f) * 1.0 / 0x1f);
+
+		if (bgPaletteIndexAutoIncr_)
+		{
+			bgPaletteIndex_ = (bgPaletteIndex_ + 1) % 64;
+			mem_->writeDirect(Address::BCPS, ((uint8)bgPaletteIndexAutoIncr_ << 7) | bgPaletteIndex_);
+		}
+	}
+
+	void PPU::setOBJPaletteIndex(uint8 index, bool autoIncrement)
+	{
+		objPaletteIndex_ = index;
+		objPaletteIndexAutoIncr_ = autoIncrement;
+	}
+
+	void PPU::setOBJPaletteData(uint8 value)
+	{
+		objPalette_[objPaletteIndex_] = value;
+
+		const int pal = objPaletteIndex_ / 8;
+		const int nColor = (objPaletteIndex_ / 2) % 4;
+		const uint16 color = objPalette_[pal * 8 + nColor * 2] | (objPalette_[pal * 8 + nColor * 2 + 1] << 8);
+
+		displayOBJColorPalette_[pal][nColor].set(
+			((color >> 0) & 0x1f) * 1.0 / 0x1f,
+			((color >> 5) & 0x1f) * 1.0 / 0x1f,
+			((color >> 10) & 0x1f) * 1.0 / 0x1f);
+
+		if (objPaletteIndexAutoIncr_)
+		{
+			objPaletteIndex_ = (objPaletteIndex_ + 1) % 64;
+			mem_->writeDirect(Address::OCPS, ((uint8)objPaletteIndexAutoIncr_ << 7) | objPaletteIndex_);
+		}
+	}
+
+	void PPU::drawCGBPalette()
+	{
+		const Point pos{ 0, 0 };
+
+		for (auto pal : step(8))
+		{
+			for (auto col : step(4))
+			{
+				Rect{ pos + Point{ col * 24, pal * 24 }, Size{ 16, 16 } }.draw(displayBGColorPalette_[pal][col]);
+
+				Rect{ pos + Point{ col * 24 + 24*6, pal * 24 }, Size{ 16, 16 } }.draw(displayOBJColorPalette_[pal][col]);
+			}
+		}
+	}
+
 	void PPU::updateLY_()
 	{
 		if (not lcd_->isEnabled())
@@ -311,7 +409,8 @@ namespace dmge
 			oam.yFlip = (flags >> 6) & 1;
 			oam.xFlip = (flags >> 5) & 1;
 			oam.palette = (flags >> 4) & 1;
-			oam.cgbFlag = flags & 0b1111;
+			oam.bank = (flags >> 3) & 1;
+			oam.obp = flags & 0b111;
 
 			// 8x16サイズのスプライトの場合、上半分のタイルIDはLSB=0、下半分はLSB=1となる
 			// ただし yFlip==true の場合は反対になる
@@ -334,8 +433,12 @@ namespace dmge
 
 	void PPU::scanline_()
 	{
-		// BGとWindowが無効なので、ピクセルを1つ進めて終了
-		if (not lcd_->isEnabledBgAndWindow())
+		// DMG: BGとWindow無効
+		// CGB: BGとWindowの優先度無効
+		const bool lcdc0 = lcd_->isEnabledBgAndWindow();
+
+		// (DMG) BGとWindowが無効なので、ピクセルを1つ進めて終了
+		if (not cgbMode_ && not lcdc0)
 		{
 			canvas_.at(lcd_->ly(), canvasX_) = displayColorPalette_[0];
 
@@ -351,6 +454,7 @@ namespace dmge
 		const uint8 wy = lcd_->wy();
 		const uint8 wx = lcd_->wx();
 		const bool enabledWindow = lcd_->isEnabledWindow();
+		const uint8 opri = mem_->read(Address::OPRI) & 1;
 
 		// ※スクロール処理
 		// BG描画中（ウィンドウ描画中でないとき）、SCXの端数分を読み飛ばす
@@ -397,22 +501,42 @@ namespace dmge
 			tileAddr = tileMapAddrBase + ((addrOffsetX + addrOffsetY) & 0x3ff);
 		}
 
+		// (CGB) 背景マップ属性を取得（VRAM Bank1）
+
+		TileMapAttribute tileMapAttr{};
+
+		if (cgbMode_)
+		{
+			tileMapAttr.value = mem_->readVRAMBank(tileAddr, 1);
+		}
+
 		// タイルデータのアドレスを得る
 		const uint8 tileId = mem_->read(tileAddr);
-		const uint16 tileDataAddr = TileData::GetAddress(lcd_->tileDataAddress(), tileId, drawingWindow_ ? (windowLine_ % 8) : ((ly + scy) % 8));
+		const uint16 tileDataAddr = TileData::GetAddress(lcd_->tileDataAddress(), tileId, drawingWindow_ ? (windowLine_ % 8) : ((ly + scy) % 8), tileMapAttr.attr.yFlip);
 
 		// タイルデータを参照
-		const uint16 tileData = mem_->read16(tileDataAddr);
-		const uint8 color = TileData::GetColor(tileData, x % 8);
+		const uint16 tileData = mem_->read16VRAMBank(tileDataAddr, tileMapAttr.attr.bank);
+		const uint8 color = TileData::GetColor(tileData, x % 8, tileMapAttr.attr.xFlip);
 
 		// 実際の描画色
-		Color dispColor = displayColorPalette_[(int)lcd_->bgp(color)];
+		Color dispColor;
+		if (not cgbMode_)
+			dispColor = displayColorPalette_[(int)lcd_->bgp(color)];
+		else
+			dispColor = displayBGColorPalette_[tileMapAttr.attr.palette][color];
+
 
 		// スプライトをフェッチ
 		if (lcd_->isEnabledSprite())
 		{
+			int oamPriorityVal = 999;
+			int oamIndex = 0;
+
 			for (const auto& oam : oamBuffer_)
 			{
+				// 0xff6c(OPRI)を反映
+				if (oamPriorityVal != 999 && ((opri && oamPriorityVal < oam.x) || (not opri && oamPriorityVal < oamIndex))) continue;
+
 				// 描画中のドットがスプライトに重なっているか？
 				if (not (oam.x <= canvasX_ + 8 && oam.x + 8 > canvasX_ + 8)) continue;
 
@@ -423,14 +547,54 @@ namespace dmge
 				const uint16 oamTileDataAddr = TileData::GetAddress(0x8000, oam.tile, (ly + 16 - oam.y) % 8, oam.yFlip);
 
 				// タイルデータを参照
-				const uint16 oamTileData = mem_->read16(oamTileDataAddr);
+				const uint16 oamTileData = mem_->read16VRAMBank(oamTileDataAddr, oam.bank);
 				const uint8 oamColor = TileData::GetColor(oamTileData, oamX % 8, oam.xFlip);
 
 				// BGとのマージ
-				if (oamColor != 0 && not (oam.priority == 1 && color != 0))
+				if (not cgbMode_)
 				{
-					dispColor = displayColorPalette_[(int)lcd_->obp(oam.palette, oamColor)];
+					if (oamColor != 0 && not (oam.priority == 1 && color != 0))
+					{
+						dispColor = displayColorPalette_[(int)lcd_->obp(oam.palette, oamColor)];
+					}
 				}
+				else
+				{
+					// Refer: https://gbdev.io/pandocs/Tile_Maps.html#bg-to-obj-priority-in-cgb-mode
+
+					bool drawObj = false;
+
+					if (oamColor != 0)
+					{
+
+						// LCDC.0 :
+						// ... When Bit 0 is cleared, ... the sprites will be always displayed on top of background and window
+						// independently of the priority flags in OAM and BG Map attributes.
+						if (not lcdc0)
+						{
+							drawObj = true;
+						}
+						else
+						{
+							if (oam.priority == 0 && tileMapAttr.attr.priority == 0)
+							{
+								drawObj = true;
+							}
+							else
+							{
+								if (color == 0) drawObj = true;
+							}
+						}
+					}
+
+					if (drawObj)
+					{
+						dispColor = displayOBJColorPalette_[oam.obp][oamColor];
+						oamPriorityVal = opri ? oam.x : oamIndex;
+					}
+				}
+
+				oamIndex++;
 			}
 		}
 

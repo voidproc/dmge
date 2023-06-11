@@ -16,6 +16,8 @@ namespace dmge
 
 		~PPU();
 
+		void setCGBMode(bool value);
+
 		// このフレームのレンダリングを1ドット進める
 		// LY・PPUモード・STATを更新する
 		// 状態更新の結果により割り込み要求を行う
@@ -42,9 +44,24 @@ namespace dmge
 		// このフレームの描画ドット数
 		int dot() const;
 
-		// カラーパレットを設定する
+		// (DMG) カラーパレットを設定する
 		// （「色番号から実際の色への変換テーブル」を置き換える）
 		void setDisplayColorPalette(const std::array<Color, 4>& palette);
+
+		// (CGB) BGパレットインデックスを設定する
+		void setBGPaletteIndex(uint8 index, bool autoIncrement);
+
+		// (CGB) BGパレットデータを設定する
+		void setBGPaletteData(uint8 value);
+
+		// (CGB) OBJパレットインデックスを設定する
+		void setOBJPaletteIndex(uint8 index, bool autoIncrement);
+
+		// (CGB) OBJパレットデータを設定する
+		void setOBJPaletteData(uint8 value);
+
+		// [DEBUG]
+		void drawCGBPalette();
 
 	private:
 		Memory* mem_;
@@ -88,7 +105,7 @@ namespace dmge
 		// スキャンラインのはじめのあたり（OAMScanモード時）に構築される
 		Array<BufferedOAM> oamBuffer_;
 
-		// 色番号から実際の色への変換テーブル
+		// (DMG) 色番号から実際の色への変換テーブル
 		std::array<Color, 4> displayColorPalette_{
 			Color{ 221, 255, 212 },
 			Palette::Lightgreen,
@@ -97,6 +114,23 @@ namespace dmge
 		};
 
 		RenderTexture renderTexture_;
+
+		// CGB Mode
+		bool cgbMode_ = false;
+
+		// CGB BG/OBJ Palette Index
+		uint8 bgPaletteIndex_ = 0;
+		bool bgPaletteIndexAutoIncr_ = false;
+		uint8 objPaletteIndex_ = 0;
+		bool objPaletteIndexAutoIncr_ = false;
+
+		// CGB BG/OBJ Palette
+		std::array<uint8, 64> bgPalette_;
+		std::array<uint8, 64> objPalette_;
+
+		// (CGB) 色番号から実際の色への変換テーブル
+		std::array<std::array<ColorF, 4>, 8> displayBGColorPalette_;
+		std::array<std::array<ColorF, 4>, 8> displayOBJColorPalette_;
 
 		void updateLY_();
 		void updateMode_();

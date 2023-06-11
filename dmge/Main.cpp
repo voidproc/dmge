@@ -123,6 +123,8 @@ public:
 
 		mem_.dumpCartridgeInfo();
 
+		ppu_.setCGBMode(mem_.isCGBMode());
+
 		cpu_.setCGBMode(mem_.isCGBMode());
 		cpu_.reset();
 
@@ -307,6 +309,9 @@ private:
 				{
 					DrawStatusText(U"FPS:{:3d}"_fmt(Profiler::FPS()));
 				}
+
+				// [DEBUG]
+				//ppu_.drawCGBPalette();
 
 				// Wait
 

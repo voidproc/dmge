@@ -32,7 +32,11 @@ namespace dmge
 
 		uint8 read(uint16 addr) const;
 
+		uint8 readVRAMBank(uint16 addr, int bank) const;
+
 		uint16 read16(uint16 addr) const;
+
+		uint16 read16VRAMBank(uint16 addr, int bank) const;
 
 		bool isCGBMode() const;
 

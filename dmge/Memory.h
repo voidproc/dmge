@@ -64,17 +64,17 @@ namespace dmge
 		std::unique_ptr<MBC> mbc_;
 
 		// メモリ全体
-		std::array<uint8, 0x10000> mem_;
+		Array<uint8> mem_{};
 
 		// VRAM
-		std::array<std::array<uint8, 0x2000>, 2> vram_;
+		std::array<std::array<uint8, 0x2000>, 2> vram_{};
 		int vramBank_ = 0;
 
 		// WRAM
-		std::array<std::array<uint8, 0x1000>, 8> wram_;
+		std::array<std::array<uint8, 0x1000>, 8> wram_{};
 		int wramBank_ = 1;
 
 		// メモリ書き込み時フック
-		Array<std::function<void(uint16, uint8)>> writeHooks_;
+		Array<std::function<void(uint16, uint8)>> writeHooks_{};
 	};
 }

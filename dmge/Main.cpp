@@ -101,7 +101,9 @@ public:
 	{
 		String cartridgePath = config_.cartridgePath;
 
-		// カートリッジが指定されていない：
+		// 設定ファイルでカートリッジが指定されていない場合は
+		// ファイルを開くダイアログで選択する
+		// ファイルが存在しない or キャンセルされた場合は終了する
 		if (not FileSystem::Exists(cartridgePath) || not FileSystem::IsFile(cartridgePath))
 		{
 			const auto cartDir = FileSystem::PathAppend(FileSystem::InitialDirectory(), U"cartridges");
@@ -116,20 +118,25 @@ public:
 			cartridgePath = *openPath;
 		}
 
+		// カートリッジ読み込み
+		// 対応するMBCがカートリッジとSRAMをロードする
+		// 対応するMBCがない場合は終了する
 		if (not mem_.loadCartridge(cartridgePath))
 		{
 			return;
 		}
 
+		// [DEBUG]
 		mem_.dumpCartridgeInfo();
 
+		// CGBモードの適用
 		ppu_.setCGBMode(mem_.isCGBMode());
-
 		cpu_.setCGBMode(mem_.isCGBMode());
 		cpu_.reset();
 
 		mainLoop_();
 
+		// アプリケーション終了時にSRAMを保存する
 		mem_.saveSRAM();
 	}
 
@@ -310,9 +317,6 @@ private:
 					DrawStatusText(U"FPS:{:3d}"_fmt(Profiler::FPS()));
 				}
 
-				// [DEBUG]
-				//ppu_.drawCGBPalette();
-
 				// Wait
 
 				//if (not Graphics::IsVSyncEnabled())
@@ -477,6 +481,6 @@ private:
 
 void Main()
 {
-	DmgeApp app{};
-	app.run();
+	auto app = std::make_unique<DmgeApp>();
+	app->run();
 }

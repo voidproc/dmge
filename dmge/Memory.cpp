@@ -81,6 +81,8 @@ namespace dmge
 			return false;
 		}
 
+		mem_.resize(0x10000);
+
 		// メモリを初期状態にリセット
 		reset();
 

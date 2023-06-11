@@ -33,7 +33,7 @@ namespace dmge
 		// 水平反転
 		bool xFlip;
 
-		// パレット（0=OBP0, 1=OBP1）
+		// (DMG) パレット（0=OBP0, 1=OBP1）
 		uint8 palette;
 
 		// (CGB) Tile VRAM-Bank

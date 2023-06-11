@@ -125,12 +125,12 @@ namespace dmge
 		bool objPaletteIndexAutoIncr_ = false;
 
 		// CGB BG/OBJ Palette
-		std::array<uint8, 64> bgPalette_;
-		std::array<uint8, 64> objPalette_;
+		std::array<uint8, 64> bgPalette_{};
+		std::array<uint8, 64> objPalette_{};
 
 		// (CGB) 色番号から実際の色への変換テーブル
-		std::array<std::array<ColorF, 4>, 8> displayBGColorPalette_;
-		std::array<std::array<ColorF, 4>, 8> displayOBJColorPalette_;
+		std::array<std::array<ColorF, 4>, 8> displayBGColorPalette_{};
+		std::array<std::array<ColorF, 4>, 8> displayOBJColorPalette_{};
 
 		void updateLY_();
 		void updateMode_();

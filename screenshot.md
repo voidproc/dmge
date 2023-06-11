@@ -40,6 +40,8 @@ https://tangramgames.dk/tobutobugirl/
 
 ![Pokemon Yellow](screenshot/pokemony.png)
 
+![Pokemon Silver](screenshot/pokemons.png)
+
 
 ## Test ROMs
 
@@ -48,5 +50,7 @@ https://tangramgames.dk/tobutobugirl/
 ![instr_timing](screenshot/instr_timing.png)
 
 ![dmg-acid2](screenshot/dmg-acid2.png)
+
+![cgb-acid2](screenshot/cgb-acid2.png)
 
 ![bgbtest](screenshot/bgbtest.png)

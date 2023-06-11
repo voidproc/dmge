@@ -111,7 +111,7 @@ Resource(engine/font/mplus/mplus-1p-regular.ttf.zstdcmp)
 //
 //	Sound Font
 //
-Resource(engine/soundfont/GMGSx.sf2.zstdcmp)
+//Resource(engine/soundfont/GMGSx.sf2.zstdcmp)
 
 //////////////////////////////////////////////////////
 //

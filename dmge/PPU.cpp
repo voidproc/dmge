@@ -385,7 +385,7 @@ namespace dmge
 			// 1ライン10個まで
 			if (oamBuffer_.size() >= 10) break;
 
-			BufferedOAM oam;
+			BufferedOAM oam{};
 			oam.y = mem_->read(addr);
 
 			// Y座標が描画範囲にあるか？

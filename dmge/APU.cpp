@@ -303,6 +303,9 @@ namespace dmge
 	{
 		bool dacState = (reg & 0xf8) != 0;
 
+		// Enabling DAC shouldn't re-enable channel
+		if (dacState) return;
+
 		switch (ch)
 		{
 		case Channels::Ch1: ch1_.setEnable(dacState); return;
@@ -313,6 +316,9 @@ namespace dmge
 
 	void APU::setDAC(Channels ch, bool enable)
 	{
+		// Enabling DAC shouldn't re-enable channel
+		if (enable) return;
+
 		switch (ch)
 		{
 		case Channels::Ch3: ch3_.setEnable(enable); return;

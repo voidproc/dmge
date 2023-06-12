@@ -20,7 +20,6 @@ namespace dmge
 		int envPeriod;
 		bool trigger;
 		bool enableLength;
-		int freq;
 
 		int divisorShift;
 		int counterWidth;
@@ -69,6 +68,8 @@ namespace dmge
 		void setLengthTimer(uint8 reg);
 
 		void setFrequency(int freq);
+
+		int getFrequency();
 
 	private:
 		Memory* mem_;

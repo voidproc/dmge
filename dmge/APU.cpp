@@ -259,6 +259,26 @@ namespace dmge
 		}
 	}
 
+	void APU::setFrequencyLow(Channels ch, uint8 value)
+	{
+		switch (ch)
+		{
+		case Channels::Ch1: ch1_.setFrequency(value | (ch1_.getFrequency() & 0x700)); return;
+		case Channels::Ch2: ch2_.setFrequency(value | (ch2_.getFrequency() & 0x700)); return;
+		case Channels::Ch3: ch3_.setFrequency(value | (ch3_.getFrequency() & 0x700)); return;
+		}
+	}
+
+	void APU::setFrequencyHigh(Channels ch, uint8 value)
+	{
+		switch (ch)
+		{
+		case Channels::Ch1: ch1_.setFrequency(((value & 0x7) << 8) | (ch1_.getFrequency() & 0xff)); return;
+		case Channels::Ch2: ch2_.setFrequency(((value & 0x7) << 8) | (ch2_.getFrequency() & 0xff)); return;
+		case Channels::Ch3: ch3_.setFrequency(((value & 0x7) << 8) | (ch3_.getFrequency() & 0xff)); return;
+		}
+	}
+
 	void APU::setEnvelopeAndDAC(Channels ch, uint8 reg)
 	{
 		bool dacState = (reg & 0xf8) != 0;

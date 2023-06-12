@@ -19,9 +19,7 @@ namespace dmge
 		ch.envVol = NR12 >> 4;
 		ch.envDir = (NR12 >> 3) & 1;
 		ch.envPeriod = NR12 & 0b111;
-		ch.trigger = (NR14 >> 7) == 1;
 		ch.enableLength = ((NR14 >> 6) & 1) == 1;
-		ch.freq = NR13 | ((NR14 & 0b111) << 8);
 	}
 
 	void GetChannel2Data(Memory* mem, ChannelData& ch)
@@ -36,9 +34,7 @@ namespace dmge
 		ch.envVol = NR22 >> 4;
 		ch.envDir = (NR22 >> 3) & 1;
 		ch.envPeriod = NR22 & 0b111;
-		ch.trigger = (NR24 >> 7) == 1;
 		ch.enableLength = ((NR24 >> 6) & 1) == 1;
-		ch.freq = NR23 | ((NR24 & 0b111) << 8);
 	}
 
 	void GetChannel3Data(Memory* mem, ChannelData& ch)
@@ -52,9 +48,7 @@ namespace dmge
 		ch.enable = (NR30 >> 7) == 1;
 		ch.outputLevel = (NR32 >> 5) & 0b11;
 		ch.lengthTimer = NR31;
-		ch.trigger = (NR34 >> 7) == 1;
 		ch.enableLength = ((NR34 >> 6) & 1) == 1;
-		ch.freq = NR33 | ((NR34 & 0b111) << 8);
 	}
 
 	void GetChannel4Data(Memory* mem, ChannelData& ch)
@@ -68,7 +62,6 @@ namespace dmge
 		ch.envVol = NR42 >> 4;
 		ch.envDir = (NR42 >> 3) & 1;
 		ch.envPeriod = NR42 & 0b111;
-		ch.trigger = (NR44 >> 7) == 1;
 		ch.enableLength = ((NR44 >> 6) & 1) == 1;
 		ch.divisorShift = NR43 >> 4;
 		ch.counterWidth = (NR43 >> 3) & 1;
@@ -128,7 +121,7 @@ namespace dmge
 				break;
 
 			case Channels::Ch3:
-				freqTimer_ = (2048 - data_.freq) * 2;
+				freqTimer_ = (2048 - freq_) * 2;
 				waveRAMOffset_ = (waveRAMOffset_ + 1) % 32;
 				break;
 
@@ -163,7 +156,6 @@ namespace dmge
 		{
 		case Channels::Ch1:
 			dutyPos_ = 0;
-			freq_ = data_.freq;
 			currentVolume_ = data_.envVol;
 			periodTimer_ = data_.envPeriod;
 
@@ -178,7 +170,6 @@ namespace dmge
 
 		case Channels::Ch2:
 			dutyPos_ = 0;
-			freq_ = data_.freq;
 			currentVolume_ = data_.envVol;
 
 			if (lengthTimer_ == 0)
@@ -186,8 +177,6 @@ namespace dmge
 			break;
 
 		case Channels::Ch3:
-			freq_ = data_.freq;
-
 			if (lengthTimer_ == 0)
 				lengthTimer_ = 256 - data_.lengthTimer;
 
@@ -243,9 +232,6 @@ namespace dmge
 				{
 					freq_ = shadowFreq_ = newFreq;
 
-					mem_->writeDirect(Address::NR13, newFreq & 0xff);
-					mem_->writeDirect(Address::NR14, (mem_->read(Address::NR14) & 0b1111000) | ((newFreq >> 8) & 0b111));
-
 					// Check sweepEnabled
 					calcSweepFrequency_();
 				}
@@ -273,7 +259,7 @@ namespace dmge
 
 	bool Channel::onTrigger() const
 	{
-		return trigger_ && data_.trigger && getDACEnable();
+		return trigger_ && getDACEnable();
 	}
 
 	int Channel::amplitude() const
@@ -385,6 +371,11 @@ namespace dmge
 	void Channel::setFrequency(int freq)
 	{
 		freq_ = freq;
+	}
+
+	int Channel::getFrequency()
+	{
+		return freq_;
 	}
 
 	int Channel::calcSweepFrequency_()

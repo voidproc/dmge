@@ -223,37 +223,44 @@ namespace dmge
 
 		else if (addr == Address::NR13)
 		{
-			const int freq = value | ((read(Address::NR14) & 0b111) << 8);
-			apu_->setFrequency(Channels::Ch1, freq);
+			apu_->setFrequencyLow(Channels::Ch1, value);
 		}
 		else if (addr == Address::NR23)
 		{
-			const int freq = value | ((read(Address::NR24) & 0b111) << 8);
-			apu_->setFrequency(Channels::Ch2, freq);
+			apu_->setFrequencyLow(Channels::Ch2, value);
 		}
 		else if (addr == Address::NR33)
 		{
-			const int freq = value | ((read(Address::NR34) & 0b111) << 8);
-			apu_->setFrequency(Channels::Ch3, freq);
+			apu_->setFrequencyLow(Channels::Ch3, value);
 		}
 
 		// APU - Channel Trigger (Update Frequency)
 
 		else if (addr == Address::NR14)
 		{
-			apu_->trigger(Channels::Ch1);
+			apu_->setFrequencyHigh(Channels::Ch1, value);
+
+			if (value & 0x80)
+				apu_->trigger(Channels::Ch1);
 		}
 		else if (addr == Address::NR24)
 		{
-			apu_->trigger(Channels::Ch2);
+			apu_->setFrequencyHigh(Channels::Ch2, value);
+
+			if (value & 0x80)
+				apu_->trigger(Channels::Ch2);
 		}
 		else if (addr == Address::NR34)
 		{
-			apu_->trigger(Channels::Ch3);
+			apu_->setFrequencyHigh(Channels::Ch3, value);
+
+			if (value & 0x80)
+				apu_->trigger(Channels::Ch3);
 		}
 		else if (addr == Address::NR44)
 		{
-			apu_->trigger(Channels::Ch4);
+			if (value & 0x80)
+				apu_->trigger(Channels::Ch4);
 		}
 
 		// DMA (0xff46)
@@ -346,6 +353,25 @@ namespace dmge
 
 	uint8 Memory::read(uint16 addr) const
 	{
+		// APU
+
+		if (addr >= Address::NR10 && addr < Address::NR10 + 48)
+		{
+			static constexpr std::array<uint8, 48> mask = {
+				0x80,0x3F,0x00,0xFF,0xBF,
+				0xFF,0x3F,0x00,0xFF,0xBF,
+				0x7F,0xFF,0x9F,0xFF,0xBF,
+				0xFF,0xFF,0x00,0x00,0xBF,
+				0x00,0x00,0x70,
+				0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
+				0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+				0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+			};
+			return mem_[addr] | mask[addr - Address::NR10];
+		}
+
+		// Others
+
 		if (addr > Address::WRAM1_End)
 		{
 			return mem_[addr];

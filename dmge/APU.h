@@ -66,6 +66,8 @@ namespace dmge
 		// チャンネル操作
 
 		void setFrequency(Channels ch, int freq);
+		void setFrequencyLow(Channels ch, uint8 value);
+		void setFrequencyHigh(Channels ch, uint8 value);
 		void setEnvelopeAndDAC(Channels ch, uint8 reg);
 		void setDAC(Channels ch, bool enable);
 		void trigger(Channels ch);

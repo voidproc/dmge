@@ -181,6 +181,13 @@ namespace dmge
 			value |= 0b11100000;
 		}
 
+		// APU - Ignore if APU is off
+
+		else if (addr >= Address::NR10 && addr <= Address::NR51 && (read(Address::NR52) & 0x80) == 0)
+		{
+			return;
+		}
+
 		// APU - Reload Length Timer
 
 		else if (addr == Address::NR11)
@@ -263,7 +270,7 @@ namespace dmge
 				apu_->trigger(Channels::Ch4);
 		}
 
-		// APU NR52
+		// APU - NR52
 
 		else if (addr == Address::NR52)
 		{
@@ -271,6 +278,16 @@ namespace dmge
 			apu_->setEnable(Channels::Ch2, ((value >> 1) & 1) == 1);
 			apu_->setEnable(Channels::Ch3, ((value >> 2) & 1) == 1);
 			apu_->setEnable(Channels::Ch4, ((value >> 3) & 1) == 1);
+
+			// APUがoffになったとき、APUレジスタが全てクリアされる
+			if ((value & 0x80) == 0)
+			{
+				for (uint16 apuReg = Address::NR10; apuReg <= Address::NR51; apuReg++)
+				{
+					write(apuReg, 0);
+				}
+			}
+
 			value &= 0x80;
 		}
 

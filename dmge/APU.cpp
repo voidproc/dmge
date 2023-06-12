@@ -260,6 +260,15 @@ namespace dmge
 		}
 	}
 
+	uint8 APU::getEnableMask() const
+	{
+		return
+			((uint8)ch1_.getEnable() << 0) |
+			((uint8)ch2_.getEnable() << 1) |
+			((uint8)ch3_.getEnable() << 2) |
+			((uint8)ch4_.getEnable() << 3);
+	}
+
 	void APU::setFrequency(Channels ch, int freq)
 	{
 		switch (ch)

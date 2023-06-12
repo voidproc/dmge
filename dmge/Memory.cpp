@@ -383,6 +383,11 @@ namespace dmge
 	{
 		// APU
 
+		if (addr == Address::NR52)
+		{
+			return mem_[addr] | 0x70 | apu_->getEnableMask();
+		}
+
 		if (addr >= Address::NR10 && addr < Address::NR10 + 48)
 		{
 			static constexpr std::array<uint8, 48> mask = {

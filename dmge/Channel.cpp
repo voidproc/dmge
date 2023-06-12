@@ -165,7 +165,7 @@ namespace dmge
 			if (data_.sweepShift != 0) calcSweepFrequency_();
 
 			if (lengthTimer_ == 0)
-				lengthTimer_ = 64 - data_.lengthTimer;
+				lengthTimer_ = 64;
 			break;
 
 		case Channels::Ch2:
@@ -173,12 +173,12 @@ namespace dmge
 			currentVolume_ = data_.envVol;
 
 			if (lengthTimer_ == 0)
-				lengthTimer_ = 64 - data_.lengthTimer;
+				lengthTimer_ = 64;
 			break;
 
 		case Channels::Ch3:
 			if (lengthTimer_ == 0)
-				lengthTimer_ = 256 - data_.lengthTimer;
+				lengthTimer_ = 256;
 
 			waveRAMOffset_ = 0;
 			break;
@@ -188,7 +188,7 @@ namespace dmge
 			periodTimer_ = data_.envPeriod;
 
 			if (lengthTimer_ == 0)
-				lengthTimer_ = 64 - data_.lengthTimer;
+				lengthTimer_ = 64;
 
 			lfsr_ = 0xffff;
 			break;

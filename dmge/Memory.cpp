@@ -263,6 +263,17 @@ namespace dmge
 				apu_->trigger(Channels::Ch4);
 		}
 
+		// APU NR52
+
+		else if (addr == Address::NR52)
+		{
+			apu_->setEnable(Channels::Ch1, ((value >> 0) & 1) == 1);
+			apu_->setEnable(Channels::Ch2, ((value >> 1) & 1) == 1);
+			apu_->setEnable(Channels::Ch3, ((value >> 2) & 1) == 1);
+			apu_->setEnable(Channels::Ch4, ((value >> 3) & 1) == 1);
+			value &= 0x80;
+		}
+
 		// DMA (0xff46)
 
 		else if (addr == Address::DMA)

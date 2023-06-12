@@ -78,6 +78,9 @@ namespace dmge
 
 		ChannelData data_{};
 
+		// Enabled (NR52)
+		bool enabled_ = false;
+
 		// Trigger Flag
 		bool trigger_ = false;
 

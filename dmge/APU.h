@@ -65,6 +65,7 @@ namespace dmge
 
 		// チャンネル操作
 
+		void setEnable(Channels ch, bool enable);
 		void setFrequency(Channels ch, int freq);
 		void setFrequencyLow(Channels ch, uint8 value);
 		void setFrequencyHigh(Channels ch, uint8 value);

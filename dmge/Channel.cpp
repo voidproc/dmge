@@ -320,36 +320,12 @@ namespace dmge
 
 	bool Channel::getEnable() const
 	{
-		const uint8 NR52 = mem_->read(Address::NR52);
-
-		switch (ch_)
-		{
-		case Channels::Ch1: return ((NR52 >> 0) & 1) == 1;
-		case Channels::Ch2: return ((NR52 >> 1) & 1) == 1;
-		case Channels::Ch3: return ((NR52 >> 2) & 1) == 1;
-		case Channels::Ch4: return ((NR52 >> 3) & 1) == 1;
-		}
-
-		return false;
+		return enabled_;
 	}
 
 	void Channel::setEnable(bool enable)
 	{
-		uint8 NR52 = mem_->read(Address::NR52);
-
-		int shift = 0;
-
-		switch (ch_)
-		{
-		case Channels::Ch1: shift = 0; break;
-		case Channels::Ch2: shift = 1; break;
-		case Channels::Ch3: shift = 2; break;
-		case Channels::Ch4: shift = 3; break;
-		}
-
-		NR52 &= ~(1 << shift);
-		NR52 |= (enable ? 1 : 0) << shift;
-		mem_->write(Address::NR52, NR52);
+		enabled_ = enable;
 	}
 
 	void Channel::setLengthTimer(uint8 reg)

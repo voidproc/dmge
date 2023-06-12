@@ -249,6 +249,17 @@ namespace dmge
 		audio_.pause();
 	}
 
+	void APU::setEnable(Channels ch, bool enable)
+	{
+		switch (ch)
+		{
+		case Channels::Ch1: ch1_.setEnable(enable); return;
+		case Channels::Ch2: ch2_.setEnable(enable); return;
+		case Channels::Ch3: ch3_.setEnable(enable); return;
+		case Channels::Ch4: ch4_.setEnable(enable); return;
+		}
+	}
+
 	void APU::setFrequency(Channels ch, int freq)
 	{
 		switch (ch)

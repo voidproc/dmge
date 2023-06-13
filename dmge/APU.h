@@ -63,18 +63,11 @@ namespace dmge
 		// オーディオストリームの再生を一時停止する
 		void pause();
 
-		// チャンネル操作
+		// IOレジスタへの書き込み
+		void writeRegister(uint16 addr, uint8 value);
 
-		void setEnable(Channels ch, bool enable);
-		uint8 getEnableMask() const;
-		void setFrequency(Channels ch, int freq);
-		void setFrequencyLow(Channels ch, uint8 value);
-		void setFrequencyHigh(Channels ch, uint8 value);
-		void setEnvelopeAndDAC(Channels ch, uint8 reg);
-		void setDAC(Channels ch, bool enable);
-		void trigger(Channels ch);
-		void setEnableLength(Channels ch, bool enable);
-		void setLengthTimer(Channels ch, uint8 reg);
+		// NR52の下位4bit
+		uint8 getChannelsEnabledState() const;
 
 		// 現在のストリームバッファの状態を取得（デバッグ用）
 		APUStreamBufferState getBufferState() const;

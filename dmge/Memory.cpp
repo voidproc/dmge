@@ -181,125 +181,21 @@ namespace dmge
 			value |= 0b11100000;
 		}
 
-		// APU - Ignore if APU is off
+		// APU
+		// 0xff10 - 0xff26
 
-		else if (addr >= Address::NR10 && addr <= Address::NR51 && (read(Address::NR52) & 0x80) == 0)
+		else if (addr >= Address::NR10 && addr <= Address::NR52)
 		{
-			return;
-		}
+			apu_->writeRegister(addr, value);
 
-		// APU - Reload Length Timer
-
-		else if (addr == Address::NR11)
-		{
-			apu_->setLengthTimer(Channels::Ch1, value);
-		}
-		else if (addr == Address::NR21)
-		{
-			apu_->setLengthTimer(Channels::Ch2, value);
-		}
-		else if (addr == Address::NR31)
-		{
-			apu_->setLengthTimer(Channels::Ch3, value);
-		}
-		else if (addr == Address::NR41)
-		{
-			apu_->setLengthTimer(Channels::Ch4, value);
-		}
-
-		// APU - Enable DAC / Envelope ?
-
-		else if (addr == Address::NR12)
-		{
-			apu_->setEnvelopeAndDAC(Channels::Ch1, value);
-		}
-		else if (addr == Address::NR22)
-		{
-			apu_->setEnvelopeAndDAC(Channels::Ch2, value);
-		}
-		else if (addr == Address::NR30)
-		{
-			apu_->setDAC(Channels::Ch3, (value >> 7) == 1);
-		}
-		else if (addr == Address::NR42)
-		{
-			apu_->setEnvelopeAndDAC(Channels::Ch4, value);
-		}
-
-		// APU - Update Frequency
-
-		else if (addr == Address::NR13)
-		{
-			apu_->setFrequencyLow(Channels::Ch1, value);
-		}
-		else if (addr == Address::NR23)
-		{
-			apu_->setFrequencyLow(Channels::Ch2, value);
-		}
-		else if (addr == Address::NR33)
-		{
-			apu_->setFrequencyLow(Channels::Ch3, value);
-		}
-
-		// APU - Channel Trigger (Update Frequency)
-
-		else if (addr == Address::NR14)
-		{
-			apu_->setFrequencyHigh(Channels::Ch1, value);
-
-			apu_->setEnableLength(Channels::Ch1, (value & 0x40) == 0x40);
-
-			if (value & 0x80)
-				apu_->trigger(Channels::Ch1);
-		}
-		else if (addr == Address::NR24)
-		{
-			apu_->setFrequencyHigh(Channels::Ch2, value);
-
-			apu_->setEnableLength(Channels::Ch2, (value & 0x40) == 0x40);
-
-			if (value & 0x80)
-				apu_->trigger(Channels::Ch2);
-		}
-		else if (addr == Address::NR34)
-		{
-			apu_->setFrequencyHigh(Channels::Ch3, value);
-
-			apu_->setEnableLength(Channels::Ch3, (value & 0x40) == 0x40);
-
-			if (value & 0x80)
-				apu_->trigger(Channels::Ch3);
-		}
-		else if (addr == Address::NR44)
-		{
-			apu_->setEnableLength(Channels::Ch4, (value & 0x40) == 0x40);
-
-			if (value & 0x80)
-				apu_->trigger(Channels::Ch4);
-		}
-
-		// APU - NR52
-
-		else if (addr == Address::NR52)
-		{
-			apu_->setEnable(Channels::Ch1, ((value >> 0) & 1) == 1);
-			apu_->setEnable(Channels::Ch2, ((value >> 1) & 1) == 1);
-			apu_->setEnable(Channels::Ch3, ((value >> 2) & 1) == 1);
-			apu_->setEnable(Channels::Ch4, ((value >> 3) & 1) == 1);
-
-			// APUがoffになったとき、APUレジスタが全てクリアされる
-			if ((value & 0x80) == 0)
+			if (addr == Address::NR52)
 			{
-				for (uint16 apuReg = Address::NR10; apuReg <= Address::NR51; apuReg++)
-				{
-					write(apuReg, 0);
-				}
+				value &= 0x80;
 			}
-
-			value &= 0x80;
 		}
 
-		// DMA (0xff46)
+		// DMA
+		// 0xff46
 
 		else if (addr == Address::DMA)
 		{
@@ -310,7 +206,8 @@ namespace dmge
 			}
 		}
 
-		// VRAM Bank (VBK) (0xff4f)
+		// VBK (VRAM Bank)
+		// 0xff4f
 
 		else if (addr == Address::VBK)
 		{
@@ -318,7 +215,8 @@ namespace dmge
 			value |= 0xfe;
 		}
 
-		// HDMA (0xff51 - 0xff55)
+		// HDMA
+		// 0xff51 - 0xff55
 
 		else if (addr == Address::HDMA5)
 		{
@@ -334,35 +232,40 @@ namespace dmge
 			value = 0xff;
 		}
 
-		// BCPS/BGPI (0xff68)
+		// BCPS/BGPI
+		// 0xff68
 
 		if (addr == Address::BCPS)
 		{
 			ppu_->setBGPaletteIndex(value & 0x3f, value >> 7);
 		}
 
-		// BCPD/BGPD (0xff69)
+		// BCPD/BGPD
+		// 0xff69
 
 		if (addr == Address::BCPD)
 		{
 			ppu_->setBGPaletteData(value);
 		}
 
-		// OCPS/OBPI (0xff6a)
+		// OCPS/OBPI
+		// 0xff6a
 
 		if (addr == Address::OCPS)
 		{
 			ppu_->setOBJPaletteIndex(value & 0x3f, value >> 7);
 		}
 
-		// OCPD/OBPD (0xff6b)
+		// OCPD/OBPD
+		// 0xff6b
 
 		if (addr == Address::OCPD)
 		{
 			ppu_->setOBJPaletteData(value);
 		}
 
-		// WRAM Bank (SVBK) (0xff70)
+		// WRAM Bank (SVBK)
+		// 0xff70
 
 		else if (addr == Address::SVBK)
 		{
@@ -393,7 +296,7 @@ namespace dmge
 
 		if (addr == Address::NR52)
 		{
-			return mem_[addr] | 0x70 | apu_->getEnableMask();
+			return mem_[addr] | 0x70 | apu_->getChannelsEnabledState();
 		}
 
 		if (addr >= Address::NR10 && addr < Address::NR10 + 48)

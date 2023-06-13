@@ -8,61 +8,52 @@ namespace dmge
 		const uint8 NR10 = mem->read(Address::NR10);
 		const uint8 NR11 = mem->read(Address::NR11);
 		const uint8 NR12 = mem->read(Address::NR12);
-		const uint8 NR13 = mem->read(Address::NR13);
-		const uint8 NR14 = mem->read(Address::NR14);
+		//const uint8 NR13 = mem->read(Address::NR13);
+		//const uint8 NR14 = mem->read(Address::NR14);
 
 		ch.sweepPeriod = (NR10 >> 4) & 0b111;
 		ch.sweepDir = (NR10 >> 3) & 1;
 		ch.sweepShift = NR10 & 0b111;
 		ch.duty = NR11 >> 6;
-		ch.lengthTimer = NR11 & 63;
 		ch.envVol = NR12 >> 4;
 		ch.envDir = (NR12 >> 3) & 1;
 		ch.envPeriod = NR12 & 0b111;
-		//ch.enableLength = ((NR14 >> 6) & 1) == 1;
 	}
 
 	void GetChannel2Data(Memory* mem, ChannelData& ch)
 	{
 		const uint8 NR21 = mem->read(Address::NR21);
 		const uint8 NR22 = mem->read(Address::NR22);
-		const uint8 NR23 = mem->read(Address::NR23);
-		const uint8 NR24 = mem->read(Address::NR24);
+		//const uint8 NR23 = mem->read(Address::NR23);
+		//const uint8 NR24 = mem->read(Address::NR24);
 
 		ch.duty = NR21 >> 6;
-		ch.lengthTimer = NR21 & 63;
 		ch.envVol = NR22 >> 4;
 		ch.envDir = (NR22 >> 3) & 1;
 		ch.envPeriod = NR22 & 0b111;
-		//ch.enableLength = ((NR24 >> 6) & 1) == 1;
 	}
 
 	void GetChannel3Data(Memory* mem, ChannelData& ch)
 	{
-		const uint8 NR30 = mem->read(Address::NR30);
-		const uint8 NR31 = mem->read(Address::NR31);
+		//const uint8 NR30 = mem->read(Address::NR30);
+		//const uint8 NR31 = mem->read(Address::NR31);
 		const uint8 NR32 = mem->read(Address::NR32);
-		const uint8 NR33 = mem->read(Address::NR33);
-		const uint8 NR34 = mem->read(Address::NR34);
+		//const uint8 NR33 = mem->read(Address::NR33);
+		//const uint8 NR34 = mem->read(Address::NR34);
 
-		ch.enable = (NR30 >> 7) == 1;
 		ch.outputLevel = (NR32 >> 5) & 0b11;
-		ch.lengthTimer = NR31;
-		//ch.enableLength = ((NR34 >> 6) & 1) == 1;
 	}
 
 	void GetChannel4Data(Memory* mem, ChannelData& ch)
 	{
-		const uint8 NR41 = mem->read(Address::NR41);
+		//const uint8 NR41 = mem->read(Address::NR41);
 		const uint8 NR42 = mem->read(Address::NR42);
 		const uint8 NR43 = mem->read(Address::NR43);
-		const uint8 NR44 = mem->read(Address::NR44);
+		//const uint8 NR44 = mem->read(Address::NR44);
 
-		ch.lengthTimer = NR41 & 0b111111;
 		ch.envVol = NR42 >> 4;
 		ch.envDir = (NR42 >> 3) & 1;
 		ch.envPeriod = NR42 & 0b111;
-		//ch.enableLength = ((NR44 >> 6) & 1) == 1;
 		ch.divisorShift = NR43 >> 4;
 		ch.counterWidth = (NR43 >> 3) & 1;
 		ch.divisor = NR43 & 0b111;
@@ -70,7 +61,7 @@ namespace dmge
 
 	int SquareWaveAmplitude(int duty, int dutyPos)
 	{
-		const std::array<uint8, 4> waveDutyTable = {
+		constexpr std::array<uint8, 4> waveDutyTable = {
 			0b00000001, 0b00000011, 0b00001111, 0b11111100,
 		};
 
@@ -149,8 +140,6 @@ namespace dmge
 	void Channel::doTrigger()
 	{
 		setEnable(true);
-
-		trigger_ = false;
 
 		switch (ch_)
 		{
@@ -264,16 +253,6 @@ namespace dmge
 		}
 	}
 
-	void Channel::setTriggerFlag()
-	{
-		trigger_ = true;
-	}
-
-	bool Channel::onTrigger() const
-	{
-		return trigger_ && getDACEnable();
-	}
-
 	int Channel::amplitude() const
 	{
 		switch (ch_)
@@ -284,8 +263,6 @@ namespace dmge
 
 		case Channels::Ch3:
 		{
-			if (not data_.enable) return 0;
-
 			uint8 wave = mem_->read(Address::WaveRAM + waveRAMOffset_ / 2);
 			uint8 amp3 = (wave >> ((1 - (waveRAMOffset_ % 2)) * 4)) & 0xf;
 			const int shift[4] = { 4, 0, 1, 2 };
@@ -318,7 +295,7 @@ namespace dmge
 			return (mem_->read(Address::NR22) & 0xf8) != 0;
 
 		case Channels::Ch3:
-			return data_.enable;
+			return (mem_->read(Address::NR30) & 0x80) != 0;
 
 		case Channels::Ch4:
 			return (mem_->read(Address::NR42) & 0xf8) != 0;
@@ -353,10 +330,9 @@ namespace dmge
 			{
 				enableLength_ = enable;
 				doLength();
+				return;
 			}
 		}
-
-
 
 		enableLength_ = enable;
 		//if (ch_==Channels::Ch1) Console.writeln(U"{:10d} Channel1 setEnableLength({})"_fmt(g_clock, enable));
@@ -386,9 +362,14 @@ namespace dmge
 		extraLengthClockCond_ = value;
 	}
 
-	void Channel::setFrequency(int freq)
+	void Channel::setFrequencyLow(uint8 freqLow)
 	{
-		freq_ = freq;
+		freq_ = (freq_ & 0x700) | freqLow;
+	}
+
+	void Channel::setFrequencyHigh(uint8 freqHigh)
+	{
+		freq_ = ((freqHigh & 0x7) << 8) | (freq_ & 0xff);
 	}
 
 	int Channel::getFrequency()

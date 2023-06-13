@@ -6,7 +6,6 @@ namespace dmge
 
 	struct ChannelData
 	{
-		bool enable;
 		int outputLevel;
 
 		int sweepPeriod;
@@ -14,12 +13,9 @@ namespace dmge
 		int sweepShift;
 
 		int duty;
-		int lengthTimer;
 		int envVol;
 		int envDir;
 		int envPeriod;
-		bool trigger;
-		//bool enableLength;
 
 		int divisorShift;
 		int counterWidth;
@@ -56,10 +52,6 @@ namespace dmge
 
 		void doLength();
 
-		void setTriggerFlag();
-
-		bool onTrigger() const;
-
 		int amplitude() const;
 
 		bool getDACEnable() const;
@@ -74,7 +66,8 @@ namespace dmge
 
 		void setExtraLengthClockCondition(bool value);
 
-		void setFrequency(int freq);
+		void setFrequencyLow(uint8 freqLow);
+		void setFrequencyHigh(uint8 freqHigh);
 
 		int getFrequency();
 
@@ -87,9 +80,6 @@ namespace dmge
 
 		// Enabled (NR52)
 		bool enabled_ = false;
-
-		// Trigger Flag
-		bool trigger_ = false;
 
 		// Frequency timer
 		int freqTimer_ = 0;

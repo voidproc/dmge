@@ -138,21 +138,6 @@ namespace dmge
 			//	Console.writeln(U"{:10d} onLengthClock"_fmt(g_clock));
 		}
 
-		// トリガー
-		// エンベロープ、スイープ、Length制御の初期化
-
-		if (ch1_.onTrigger())
-			ch1_.doTrigger();
-
-		if (ch2_.onTrigger())
-			ch2_.doTrigger();
-
-		if (ch3_.onTrigger())
-			ch3_.doTrigger();
-
-		if (ch4_.onTrigger())
-			ch4_.doTrigger();
-
 		// スイープ
 
 		if (onSweepClock)
@@ -258,113 +243,150 @@ namespace dmge
 		audio_.pause();
 	}
 
-	void APU::setEnable(Channels ch, bool enable)
+	void APU::writeRegister(uint16 addr, uint8 value)
 	{
-		switch (ch)
+		// NR52
+
+		if (addr == Address::NR52)
 		{
-		case Channels::Ch1: ch1_.setEnable(enable); return;
-		case Channels::Ch2: ch2_.setEnable(enable); return;
-		case Channels::Ch3: ch3_.setEnable(enable); return;
-		case Channels::Ch4: ch4_.setEnable(enable); return;
+			ch1_.setEnable(((value >> 0) & 1) == 1);
+			ch2_.setEnable(((value >> 1) & 1) == 1);
+			ch3_.setEnable(((value >> 2) & 1) == 1);
+			ch4_.setEnable(((value >> 3) & 1) == 1);
+
+			// APUがoffになったとき、APUレジスタが全てクリアされる
+			if ((value & 0x80) == 0)
+			{
+				for (uint16 apuReg = Address::NR10; apuReg <= Address::NR51; apuReg++)
+				{
+					mem_->write(apuReg, 0);
+				}
+			}
+		}
+		else if ((mem_->read(Address::NR52) & 0x80) == 0)
+		{
+			// Ignore if APU is off
+			return;
+		}
+
+		// APU - Reload Length Timer
+
+		else if (addr == Address::NR11)
+		{
+			ch1_.setLengthTimer(value);
+		}
+		else if (addr == Address::NR21)
+		{
+			ch2_.setLengthTimer(value);
+		}
+		else if (addr == Address::NR31)
+		{
+			ch3_.setLengthTimer(value);
+		}
+		else if (addr == Address::NR41)
+		{
+			ch4_.setLengthTimer(value);
+		}
+
+		// APU - Enable DAC / Envelope ?
+
+		else if (addr == Address::NR12)
+		{
+			if ((value & 0xf8) == 0)
+			{
+				ch1_.setEnable(false);
+			}
+		}
+		else if (addr == Address::NR22)
+		{
+			if ((value & 0xf8) == 0)
+			{
+				ch2_.setEnable(false);
+			}
+		}
+		else if (addr == Address::NR30)
+		{
+			if ((value >> 7) == 0)
+			{
+				ch3_.setEnable(false);
+			}
+		}
+		else if (addr == Address::NR42)
+		{
+			if ((value & 0xf8) == 0)
+			{
+				ch4_.setEnable(false);
+			}
+		}
+
+		// APU - Update Frequency
+
+		else if (addr == Address::NR13)
+		{
+			ch1_.setFrequencyLow(value);
+		}
+		else if (addr == Address::NR23)
+		{
+			ch2_.setFrequencyLow(value);
+		}
+		else if (addr == Address::NR33)
+		{
+			ch3_.setFrequencyLow(value);
+		}
+
+		// APU - Channel Trigger (Update Frequency)
+
+		else if (addr == Address::NR14)
+		{
+			ch1_.setFrequencyHigh(value);
+
+			ch1_.setEnableLength((value & 0x40) == 0x40);
+
+			if (value & 0x80)
+			{
+				ch1_.doTrigger();
+			}
+		}
+		else if (addr == Address::NR24)
+		{
+			ch2_.setFrequencyHigh(value);
+
+			ch2_.setEnableLength((value & 0x40) == 0x40);
+
+			if (value & 0x80)
+			{
+				ch2_.doTrigger();
+			}
+		}
+		else if (addr == Address::NR34)
+		{
+			ch3_.setFrequencyHigh(value);
+
+			ch3_.setEnableLength((value & 0x40) == 0x40);
+
+			if (value & 0x80)
+			{
+				ch3_.doTrigger();
+			}
+		}
+		else if (addr == Address::NR44)
+		{
+			ch4_.setEnableLength((value & 0x40) == 0x40);
+
+			if (value & 0x80)
+			{
+				ch4_.doTrigger();
+			}
 		}
 	}
 
-	uint8 APU::getEnableMask() const
+	uint8 APU::getChannelsEnabledState() const
 	{
 		return
 			((uint8)ch1_.getEnable() << 0) |
 			((uint8)ch2_.getEnable() << 1) |
 			((uint8)ch3_.getEnable() << 2) |
 			((uint8)ch4_.getEnable() << 3);
-	}
-
-	void APU::setFrequency(Channels ch, int freq)
-	{
-		switch (ch)
-		{
-		case Channels::Ch1: ch1_.setFrequency(freq); return;
-		case Channels::Ch2: ch2_.setFrequency(freq); return;
-		case Channels::Ch3: ch3_.setFrequency(freq); return;
-		}
-	}
-
-	void APU::setFrequencyLow(Channels ch, uint8 value)
-	{
-		switch (ch)
-		{
-		case Channels::Ch1: ch1_.setFrequency(value | (ch1_.getFrequency() & 0x700)); return;
-		case Channels::Ch2: ch2_.setFrequency(value | (ch2_.getFrequency() & 0x700)); return;
-		case Channels::Ch3: ch3_.setFrequency(value | (ch3_.getFrequency() & 0x700)); return;
-		}
-	}
-
-	void APU::setFrequencyHigh(Channels ch, uint8 value)
-	{
-		switch (ch)
-		{
-		case Channels::Ch1: ch1_.setFrequency(((value & 0x7) << 8) | (ch1_.getFrequency() & 0xff)); return;
-		case Channels::Ch2: ch2_.setFrequency(((value & 0x7) << 8) | (ch2_.getFrequency() & 0xff)); return;
-		case Channels::Ch3: ch3_.setFrequency(((value & 0x7) << 8) | (ch3_.getFrequency() & 0xff)); return;
-		}
-	}
-
-	void APU::setEnvelopeAndDAC(Channels ch, uint8 reg)
-	{
-		bool dacState = (reg & 0xf8) != 0;
-
-		// Enabling DAC shouldn't re-enable channel
-		if (dacState) return;
-
-		switch (ch)
-		{
-		case Channels::Ch1: ch1_.setEnable(dacState); return;
-		case Channels::Ch2: ch2_.setEnable(dacState); return;
-		case Channels::Ch4: ch4_.setEnable(dacState); return;
-		}
-	}
-
-	void APU::setDAC(Channels ch, bool enable)
-	{
-		// Enabling DAC shouldn't re-enable channel
-		if (enable) return;
-
-		switch (ch)
-		{
-		case Channels::Ch3: ch3_.setEnable(enable); return;
-		}
-	}
-
-	void APU::trigger(Channels ch)
-	{
-		switch (ch)
-		{
-		case Channels::Ch1: ch1_.setTriggerFlag(); return;
-		case Channels::Ch2: ch2_.setTriggerFlag(); return;
-		case Channels::Ch3: ch3_.setTriggerFlag(); return;
-		case Channels::Ch4: ch4_.setTriggerFlag(); return;
-		}
-	}
-
-	void APU::setEnableLength(Channels ch, bool enable)
-	{
-		switch (ch)
-		{
-		case Channels::Ch1: ch1_.setEnableLength(enable); return;
-		case Channels::Ch2: ch2_.setEnableLength(enable); return;
-		case Channels::Ch3: ch3_.setEnableLength(enable); return;
-		case Channels::Ch4: ch4_.setEnableLength(enable); return;
-		}
-	}
-
-	void APU::setLengthTimer(Channels ch, uint8 reg)
-	{
-		switch (ch)
-		{
-		case Channels::Ch1: ch1_.setLengthTimer(reg); return;
-		case Channels::Ch2: ch2_.setLengthTimer(reg); return;
-		case Channels::Ch3: ch3_.setLengthTimer(reg); return;
-		case Channels::Ch4: ch4_.setLengthTimer(reg); return;
-		}
 	}
 
 	APUStreamBufferState APU::getBufferState() const

@@ -127,6 +127,15 @@ namespace dmge
 			if ((fsClock_ % 8) == 7) onVolumeClock = true;
 			if ((fsClock_ & 3) == 2) onSweepClock = true;
 			if ((fsClock_ % 2) == 0) onLengthClock = true;
+
+			const bool extraLengthClockCond = ((fsClock_ + 1) % 2) != 0;
+			ch1_.setExtraLengthClockCondition(extraLengthClockCond);
+			ch2_.setExtraLengthClockCondition(extraLengthClockCond);
+			ch3_.setExtraLengthClockCondition(extraLengthClockCond);
+			ch4_.setExtraLengthClockCondition(extraLengthClockCond);
+
+			//if (onLengthClock)
+			//	Console.writeln(U"{:10d} onLengthClock"_fmt(g_clock));
 		}
 
 		// トリガー

@@ -243,11 +243,23 @@ namespace dmge
 	{
 		if (enableLength_)
 		{
-			if (lengthTimer_ > 0) --lengthTimer_;
+			//if (ch_ == Channels::Ch1) Console.writeln(U"{:10d} Channel::doLength() enableLength_=true lengthTimer_={}"_fmt(g_clock, lengthTimer_));
+
+			if (lengthTimer_ > 0)
+			{
+				--lengthTimer_;
+				//if (ch_ == Channels::Ch1) Console.writeln(U"{:10d} Channel1 doLength() clocked lengthTimer_={}"_fmt(g_clock, lengthTimer_));
+				//if (ch_ == Channels::Ch2) Console.writeln(U"{:10d} Channel2 doLength() clocked lengthTimer_={}"_fmt(g_clock, lengthTimer_));
+
+				//if (ch_ == Channels::Ch1 && lengthTimer_ == 0) Console.writeln(U"{:10d} Channel1 doLength() lengthTimer reached to 0"_fmt(g_clock));
+				//if (ch_ == Channels::Ch2 && lengthTimer_ == 0) Console.writeln(U"{:10d} Channel2 doLength() lengthTimer reached to 0"_fmt(g_clock));
+			}
 
 			if (lengthTimer_ == 0)
 			{
 				setEnable(false);
+				//if (ch_ == Channels::Ch1) Console.writeln(U"{:10d} Channel1 doLength() expired"_fmt(g_clock));
+				//if (ch_ == Channels::Ch2) Console.writeln(U"{:10d} Channel2 doLength() expired"_fmt(g_clock));
 			}
 		}
 	}
@@ -330,7 +342,25 @@ namespace dmge
 
 	void Channel::setEnableLength(bool enable)
 	{
+		{
+			// フレームシーケンサの次のステップが長さカウンターをクロックしないものである場合、
+			// NRx4への書き込み時に余分な長さクロックが発生します。
+			// この場合、長さカウンタが以前は無効で、現在は有効で、長さカウンタがゼロでない場合、
+			// 長さカウンタはデクリメントされます。
+			// Refer: https://gbdev.gg8.se/wiki/articles/Gameboy_sound_hardware#Obscure_Behavior
+
+			if (not enableLength_ && enable && extraLengthClockCond_)
+			{
+				enableLength_ = enable;
+				doLength();
+			}
+		}
+
+
+
 		enableLength_ = enable;
+		//if (ch_==Channels::Ch1) Console.writeln(U"{:10d} Channel1 setEnableLength({})"_fmt(g_clock, enable));
+		//if (ch_==Channels::Ch2) Console.writeln(U"{:10d} Channel2 setEnableLength({})"_fmt(g_clock, enable));
 	}
 
 	void Channel::setLengthTimer(uint8 reg)
@@ -341,12 +371,19 @@ namespace dmge
 		case Channels::Ch2:
 		case Channels::Ch4:
 			lengthTimer_ = 64 - (reg & 0b111111);
+			//if (ch_ == Channels::Ch1) Console.writeln(U"{:10d} Channel1 setLengthTimer({})"_fmt(g_clock, lengthTimer_));
+			//if (ch_ == Channels::Ch2) Console.writeln(U"{:10d} Channel2 setLengthTimer({})"_fmt(g_clock, lengthTimer_));
 			break;
 
 		case Channels::Ch3:
 			lengthTimer_ = 256 - reg;
 			break;
 		}
+	}
+
+	void Channel::setExtraLengthClockCondition(bool value)
+	{
+		extraLengthClockCond_ = value;
 	}
 
 	void Channel::setFrequency(int freq)

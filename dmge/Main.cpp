@@ -170,6 +170,9 @@ private:
 				apu_.pause();
 
 				dmge::DebugPrint::Writeln(U"Break: pc={:04X}"_fmt(cpu_.currentPC()));
+
+				//
+				//Console.writeln(U"{:10d}"_fmt(dmge::g_clock));
 			}
 
 
@@ -219,8 +222,12 @@ private:
 				for (int i : step(cpu_.consumedCycles()))
 				{
 					bufferedSamples += apu_.run();
+
+					// [DEBUG]
+					dmge::g_clock++;
 				}
 			}
+
 
 			// 割り込み
 

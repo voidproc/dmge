@@ -35,6 +35,9 @@ namespace dmge
 		Ch4,
 	};
 
+	//[DEBUG]
+	inline uint64 g_clock = 0;
+
 
 	class Channel
 	{
@@ -68,6 +71,8 @@ namespace dmge
 		void setEnableLength(bool enable);
 
 		void setLengthTimer(uint8 reg);
+
+		void setExtraLengthClockCondition(bool value);
 
 		void setFrequency(int freq);
 
@@ -110,6 +115,7 @@ namespace dmge
 		// Length
 		bool enableLength_ = false;
 		int lengthTimer_ = 0;
+		bool extraLengthClockCond_ = false;
 
 		// Noise
 		uint16 lfsr_ = 0;

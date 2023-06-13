@@ -73,6 +73,7 @@ namespace dmge
 		void setEnvelopeAndDAC(Channels ch, uint8 reg);
 		void setDAC(Channels ch, bool enable);
 		void trigger(Channels ch);
+		void setEnableLength(Channels ch, bool enable);
 		void setLengthTimer(Channels ch, uint8 reg);
 
 		// 現在のストリームバッファの状態を取得（デバッグ用）

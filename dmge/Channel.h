@@ -19,7 +19,7 @@ namespace dmge
 		int envDir;
 		int envPeriod;
 		bool trigger;
-		bool enableLength;
+		//bool enableLength;
 
 		int divisorShift;
 		int counterWidth;
@@ -65,6 +65,8 @@ namespace dmge
 
 		void setEnable(bool enable);
 
+		void setEnableLength(bool enable);
+
 		void setLengthTimer(uint8 reg);
 
 		void setFrequency(int freq);
@@ -106,6 +108,7 @@ namespace dmge
 		int shadowFreq_ = 0;
 
 		// Length
+		bool enableLength_ = false;
 		int lengthTimer_ = 0;
 
 		// Noise

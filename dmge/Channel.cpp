@@ -19,7 +19,7 @@ namespace dmge
 		ch.envVol = NR12 >> 4;
 		ch.envDir = (NR12 >> 3) & 1;
 		ch.envPeriod = NR12 & 0b111;
-		ch.enableLength = ((NR14 >> 6) & 1) == 1;
+		//ch.enableLength = ((NR14 >> 6) & 1) == 1;
 	}
 
 	void GetChannel2Data(Memory* mem, ChannelData& ch)
@@ -34,7 +34,7 @@ namespace dmge
 		ch.envVol = NR22 >> 4;
 		ch.envDir = (NR22 >> 3) & 1;
 		ch.envPeriod = NR22 & 0b111;
-		ch.enableLength = ((NR24 >> 6) & 1) == 1;
+		//ch.enableLength = ((NR24 >> 6) & 1) == 1;
 	}
 
 	void GetChannel3Data(Memory* mem, ChannelData& ch)
@@ -48,7 +48,7 @@ namespace dmge
 		ch.enable = (NR30 >> 7) == 1;
 		ch.outputLevel = (NR32 >> 5) & 0b11;
 		ch.lengthTimer = NR31;
-		ch.enableLength = ((NR34 >> 6) & 1) == 1;
+		//ch.enableLength = ((NR34 >> 6) & 1) == 1;
 	}
 
 	void GetChannel4Data(Memory* mem, ChannelData& ch)
@@ -62,7 +62,7 @@ namespace dmge
 		ch.envVol = NR42 >> 4;
 		ch.envDir = (NR42 >> 3) & 1;
 		ch.envPeriod = NR42 & 0b111;
-		ch.enableLength = ((NR44 >> 6) & 1) == 1;
+		//ch.enableLength = ((NR44 >> 6) & 1) == 1;
 		ch.divisorShift = NR43 >> 4;
 		ch.counterWidth = (NR43 >> 3) & 1;
 		ch.divisor = NR43 & 0b111;
@@ -241,7 +241,7 @@ namespace dmge
 
 	void Channel::doLength()
 	{
-		if (data_.enableLength)
+		if (enableLength_)
 		{
 			if (lengthTimer_ > 0) --lengthTimer_;
 
@@ -326,6 +326,11 @@ namespace dmge
 	void Channel::setEnable(bool enable)
 	{
 		enabled_ = enable;
+	}
+
+	void Channel::setEnableLength(bool enable)
+	{
+		enableLength_ = enable;
 	}
 
 	void Channel::setLengthTimer(uint8 reg)

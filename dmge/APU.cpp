@@ -336,6 +336,17 @@ namespace dmge
 		}
 	}
 
+	void APU::setEnableLength(Channels ch, bool enable)
+	{
+		switch (ch)
+		{
+		case Channels::Ch1: ch1_.setEnableLength(enable); return;
+		case Channels::Ch2: ch2_.setEnableLength(enable); return;
+		case Channels::Ch3: ch3_.setEnableLength(enable); return;
+		case Channels::Ch4: ch4_.setEnableLength(enable); return;
+		}
+	}
+
 	void APU::setLengthTimer(Channels ch, uint8 reg)
 	{
 		switch (ch)

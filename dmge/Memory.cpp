@@ -247,12 +247,16 @@ namespace dmge
 		{
 			apu_->setFrequencyHigh(Channels::Ch1, value);
 
+			apu_->setEnableLength(Channels::Ch1, (value & 0x40) == 0x40);
+
 			if (value & 0x80)
 				apu_->trigger(Channels::Ch1);
 		}
 		else if (addr == Address::NR24)
 		{
 			apu_->setFrequencyHigh(Channels::Ch2, value);
+
+			apu_->setEnableLength(Channels::Ch2, (value & 0x40) == 0x40);
 
 			if (value & 0x80)
 				apu_->trigger(Channels::Ch2);
@@ -261,11 +265,15 @@ namespace dmge
 		{
 			apu_->setFrequencyHigh(Channels::Ch3, value);
 
+			apu_->setEnableLength(Channels::Ch3, (value & 0x40) == 0x40);
+
 			if (value & 0x80)
 				apu_->trigger(Channels::Ch3);
 		}
 		else if (addr == Address::NR44)
 		{
+			apu_->setEnableLength(Channels::Ch4, (value & 0x40) == 0x40);
+
 			if (value & 0x80)
 				apu_->trigger(Channels::Ch4);
 		}

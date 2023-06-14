@@ -86,6 +86,11 @@ namespace dmge
 		Channel ch3_;
 		Channel ch4_;
 
+		SquareChannel ch1__;
+		SquareChannel ch2__;
+		WaveChannel ch3__;
+		NoiseChannel ch4__;
+
 		// Frame Seq. Clock
 		uint64 fsClock_ = 0;
 

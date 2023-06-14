@@ -1,7 +1,7 @@
 ﻿#include "Memory.h"
 #include "MBC.h"
 #include "PPU.h"
-#include "APU.h"
+#include "APU/APU.h"
 #include "Timer.h"
 #include "Joypad.h"
 #include "DebugPrint.h"

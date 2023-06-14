@@ -119,26 +119,28 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="AppConfig.cpp" />
-    <ClCompile Include="APU.cpp" />
-    <ClCompile Include="APUStream.cpp" />
+    <ClCompile Include="APU\APU.cpp" />
+    <ClCompile Include="APU\APUStream.cpp" />
+    <ClCompile Include="APU\Channel.cpp" />
+    <ClCompile Include="APU\FrameSequencer.cpp" />
+    <ClCompile Include="APU\Frequency.cpp" />
+    <ClCompile Include="APU\FrequencySweep.cpp" />
+    <ClCompile Include="APU\LengthCounter.cpp" />
+    <ClCompile Include="APU\NoiseChannel.cpp" />
+    <ClCompile Include="APU\SquareChannel.cpp" />
+    <ClCompile Include="APU\SquareWave.cpp" />
+    <ClCompile Include="APU\VolumeEnvelope.cpp" />
+    <ClCompile Include="APU\WaveChannel.cpp" />
     <ClCompile Include="Cartridge.cpp" />
-    <ClCompile Include="Channel.cpp" />
     <ClCompile Include="CPU.cpp" />
     <ClCompile Include="DebugMonitor.cpp" />
-    <ClCompile Include="FrameSequencer.cpp" />
-    <ClCompile Include="Frequency.cpp" />
-    <ClCompile Include="FrequencySweep.cpp" />
     <ClCompile Include="Joypad.cpp" />
     <ClCompile Include="LCD.cpp" />
-    <ClCompile Include="LengthCounter.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="MBC.cpp" />
     <ClCompile Include="Memory.cpp" />
-    <ClCompile Include="NoiseChannel.cpp" />
     <ClCompile Include="PPU.cpp" />
     <ClCompile Include="PPUMode.cpp" />
-    <ClCompile Include="SquareChannel.cpp" />
-    <ClCompile Include="SquareWave.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
@@ -147,8 +149,6 @@
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="DebugPrint.cpp" />
     <ClCompile Include="Timing.cpp" />
-    <ClCompile Include="VolumeEnvelope.cpp" />
-    <ClCompile Include="WaveChannel.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="App\engine\texture\box-shadow\128.png" />
@@ -346,38 +346,38 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AppConfig.h" />
-    <ClInclude Include="APU.h" />
-    <ClInclude Include="APUStream.h" />
+    <ClInclude Include="APU\APU.h" />
+    <ClInclude Include="APU\APUStream.h" />
+    <ClInclude Include="APU\Channel.h" />
+    <ClInclude Include="APU\FrameSequencer.h" />
+    <ClInclude Include="APU\Frequency.h" />
+    <ClInclude Include="APU\FrequencySweep.h" />
+    <ClInclude Include="APU\LengthCounter.h" />
+    <ClInclude Include="APU\NoiseChannel.h" />
+    <ClInclude Include="APU\SquareChannel.h" />
+    <ClInclude Include="APU\SquareWave.h" />
+    <ClInclude Include="APU\VolumeEnvelope.h" />
+    <ClInclude Include="APU\WaveChannel.h" />
     <ClInclude Include="BitMask\InterruptFlag.h" />
     <ClInclude Include="BitMask\LCDC.h" />
     <ClInclude Include="BitMask\STAT.h" />
     <ClInclude Include="BitMask\TAC.h" />
     <ClInclude Include="Cartridge.h" />
-    <ClInclude Include="Channel.h" />
     <ClInclude Include="Colors.h" />
     <ClInclude Include="CPU.h" />
     <ClInclude Include="DebugMonitor.h" />
     <ClInclude Include="DebugPrint.h" />
-    <ClInclude Include="FrameSequencer.h" />
-    <ClInclude Include="Frequency.h" />
-    <ClInclude Include="FrequencySweep.h" />
     <ClInclude Include="Joypad.h" />
     <ClInclude Include="LCD.h" />
-    <ClInclude Include="LengthCounter.h" />
     <ClInclude Include="MBC.h" />
     <ClInclude Include="Memory.h" />
     <ClInclude Include="Address.h" />
-    <ClInclude Include="NoiseChannel.h" />
     <ClInclude Include="PPU.h" />
     <ClInclude Include="PPUMode.h" />
-    <ClInclude Include="SquareChannel.h" />
-    <ClInclude Include="SquareWave.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="TileData.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="Timing.h" />
-    <ClInclude Include="VolumeEnvelope.h" />
-    <ClInclude Include="WaveChannel.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App\example\obj\blacksmith.obj">

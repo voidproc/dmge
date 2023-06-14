@@ -1,8 +1,8 @@
 ﻿#include "APU.h"
 #include "APUStream.h"
-#include "Memory.h"
-#include "Address.h"
-#include "Timing.h"
+#include "../Memory.h"
+#include "../Address.h"
+#include "../Timing.h"
 
 namespace dmge
 {

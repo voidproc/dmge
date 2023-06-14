@@ -139,6 +139,12 @@
     <Filter Include="Header Files\BitMask">
       <UniqueIdentifier>{252bad4a-7181-4821-b799-694bf1eb2118}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\APU">
+      <UniqueIdentifier>{3a06e0a8-2004-4254-aa34-45d440032918}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\APU">
+      <UniqueIdentifier>{7c629390-c099-4fa6-a2f7-8c3d5de954a5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -183,47 +189,47 @@
     <ClCompile Include="DebugMonitor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="APU.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Channel.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="MBC.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Timing.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="APUStream.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="APU\APU.cpp">
+      <Filter>Source Files\APU</Filter>
     </ClCompile>
-    <ClCompile Include="VolumeEnvelope.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="APU\APUStream.cpp">
+      <Filter>Source Files\APU</Filter>
     </ClCompile>
-    <ClCompile Include="FrequencySweep.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="APU\Channel.cpp">
+      <Filter>Source Files\APU</Filter>
     </ClCompile>
-    <ClCompile Include="LengthCounter.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="APU\FrameSequencer.cpp">
+      <Filter>Source Files\APU</Filter>
     </ClCompile>
-    <ClCompile Include="SquareChannel.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="APU\Frequency.cpp">
+      <Filter>Source Files\APU</Filter>
     </ClCompile>
-    <ClCompile Include="SquareWave.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="APU\FrequencySweep.cpp">
+      <Filter>Source Files\APU</Filter>
     </ClCompile>
-    <ClCompile Include="Frequency.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="APU\LengthCounter.cpp">
+      <Filter>Source Files\APU</Filter>
     </ClCompile>
-    <ClCompile Include="WaveChannel.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="APU\NoiseChannel.cpp">
+      <Filter>Source Files\APU</Filter>
     </ClCompile>
-    <ClCompile Include="NoiseChannel.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="APU\SquareChannel.cpp">
+      <Filter>Source Files\APU</Filter>
     </ClCompile>
-    <ClCompile Include="FrameSequencer.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="APU\SquareWave.cpp">
+      <Filter>Source Files\APU</Filter>
+    </ClCompile>
+    <ClCompile Include="APU\VolumeEnvelope.cpp">
+      <Filter>Source Files\APU</Filter>
+    </ClCompile>
+    <ClCompile Include="APU\WaveChannel.cpp">
+      <Filter>Source Files\APU</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -912,47 +918,47 @@
     <ClInclude Include="DebugMonitor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="APU.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Channel.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="MBC.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Timing.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="APUStream.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="APU\APU.h">
+      <Filter>Header Files\APU</Filter>
     </ClInclude>
-    <ClInclude Include="VolumeEnvelope.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="APU\APUStream.h">
+      <Filter>Header Files\APU</Filter>
     </ClInclude>
-    <ClInclude Include="FrequencySweep.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="APU\Channel.h">
+      <Filter>Header Files\APU</Filter>
     </ClInclude>
-    <ClInclude Include="LengthCounter.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="APU\FrameSequencer.h">
+      <Filter>Header Files\APU</Filter>
     </ClInclude>
-    <ClInclude Include="SquareChannel.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="APU\Frequency.h">
+      <Filter>Header Files\APU</Filter>
     </ClInclude>
-    <ClInclude Include="SquareWave.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="APU\FrequencySweep.h">
+      <Filter>Header Files\APU</Filter>
     </ClInclude>
-    <ClInclude Include="Frequency.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="APU\LengthCounter.h">
+      <Filter>Header Files\APU</Filter>
     </ClInclude>
-    <ClInclude Include="WaveChannel.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="APU\NoiseChannel.h">
+      <Filter>Header Files\APU</Filter>
     </ClInclude>
-    <ClInclude Include="NoiseChannel.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="APU\SquareChannel.h">
+      <Filter>Header Files\APU</Filter>
     </ClInclude>
-    <ClInclude Include="FrameSequencer.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="APU\SquareWave.h">
+      <Filter>Header Files\APU</Filter>
+    </ClInclude>
+    <ClInclude Include="APU\VolumeEnvelope.h">
+      <Filter>Header Files\APU</Filter>
+    </ClInclude>
+    <ClInclude Include="APU\WaveChannel.h">
+      <Filter>Header Files\APU</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

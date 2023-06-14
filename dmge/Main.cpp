@@ -3,7 +3,7 @@
 #include "Memory.h"
 #include "CPU.h"
 #include "PPU.h"
-#include "APU.h"
+#include "APU/APU.h"
 #include "Timer.h"
 #include "Joypad.h"
 #include "Address.h"

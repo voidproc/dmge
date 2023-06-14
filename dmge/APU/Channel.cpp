@@ -1,5 +1,5 @@
 ﻿#include "Channel.h"
-#include "Memory.h"
+#include "../Memory.h"
 
 namespace dmge
 {

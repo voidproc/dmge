@@ -1,6 +1,6 @@
 ﻿#include "WaveChannel.h"
-#include "Memory.h"
 #include "Frequency.h"
+#include "../Memory.h"
 
 namespace dmge
 {

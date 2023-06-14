@@ -27,9 +27,9 @@ namespace dmge
 		int initialVolume() const;
 
 	private:
-		int envVol = 0;
-		int envDir = 0;
-		int envPeriod = 0;
+		int initialVolume_ = 0;
+		int direction_ = 0;
+		int period_ = 0;
 		int currentVolume_ = 0;
 		int periodTimer_ = 0;
 	};
@@ -37,12 +37,12 @@ namespace dmge
 
 	// FrequencySweep
 
-	class ChannelBase;
+	class Channel;
 
 	class FrequencySweep
 	{
 	public:
-		FrequencySweep(ChannelBase* channel);
+		FrequencySweep(Channel* channel);
 
 		int step(int freq);
 
@@ -51,13 +51,13 @@ namespace dmge
 		void set(uint8 NRx0);
 
 	private:
-		ChannelBase* channel_;
+		Channel* channel_;
 
-		int sweepPeriod = 0;
-		int sweepDir = 0;
-		int sweepShift = 0;
+		int period_ = 0;
+		int direction_ = 0;
+		int shift_ = 0;
 		int sweepTimer_ = 0;
-		bool sweepEnabled_ = false;
+		bool enabled_ = false;
 		int shadowFreq_ = 0;
 
 		int calcSweepFrequency_();
@@ -69,7 +69,7 @@ namespace dmge
 	class LengthCounter
 	{
 	public:
-		LengthCounter(ChannelBase* channel);
+		LengthCounter(Channel* channel);
 
 		void step();
 
@@ -84,17 +84,17 @@ namespace dmge
 		void setExtraLengthClockCond(bool cond);
 
 	private:
-		ChannelBase* channel_;
+		Channel* channel_;
 
-		bool enableLength_ = false;
+		bool enabled_ = false;
 		int lengthTimer_ = 0;
 		bool extraLengthClockCond_ = false;
 	};
 
 
-	// ChannelBase
+	// Channel
 
-	class ChannelBase
+	class Channel
 	{
 	public:
 		bool getEnable() const;
@@ -109,7 +109,7 @@ namespace dmge
 
 	// SquareChannel
 
-	class SquareChannel : public ChannelBase
+	class SquareChannel : public Channel
 	{
 	public:
 		// Frequency Timer を進める
@@ -176,7 +176,7 @@ namespace dmge
 
 	// WaveChannel
 
-	class WaveChannel : public ChannelBase
+	class WaveChannel : public Channel
 	{
 	public:
 		WaveChannel(Memory* mem);
@@ -231,7 +231,7 @@ namespace dmge
 
 	// NoiseChannel
 
-	class NoiseChannel : public ChannelBase
+	class NoiseChannel : public Channel
 	{
 	public:
 		// Frequency Timer を進める
@@ -269,11 +269,11 @@ namespace dmge
 		// Frequency timer
 		int freqTimer_ = 0;
 
-		// Noise
+		// Noise randomness
 
-		int divisorShift = 0;
-		int counterWidth = 0;
-		int divisor = 0;
+		int divisorShift_ = 0;
+		int counterWidth_ = 0;
+		int divisor_ = 0;
 		uint16 lfsr_ = 0;
 
 	};

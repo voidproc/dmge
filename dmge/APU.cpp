@@ -74,11 +74,10 @@ namespace dmge
 		sampleRate_{ sampleRate },
 		apuStream_{ std::make_shared<APUStream>() },
 		audio_{ apuStream_ },
-
-		ch1__{},
-		ch2__{},
-		ch3__{ mem_ },
-		ch4__{}
+		ch1_{},
+		ch2_{},
+		ch3_{ mem_ },
+		ch4_{}
 	{
 	}
 
@@ -101,10 +100,10 @@ namespace dmge
 			return 0;
 		}
 
-		ch1__.step();
-		ch2__.step();
-		ch3__.step();
-		ch4__.step();
+		ch1_.step();
+		ch2_.step();
+		ch3_.step();
+		ch4_.step();
 
 		// Frame Sequencer (FS)
 
@@ -125,10 +124,10 @@ namespace dmge
 			if ((fsClock_ % 2) == 0) onLengthClock = true;
 
 			const bool extraLengthClockCond = ((fsClock_ + 1) % 2) != 0;
-			ch1__.setExtraLengthClockCondition(extraLengthClockCond);
-			ch2__.setExtraLengthClockCondition(extraLengthClockCond);
-			ch3__.setExtraLengthClockCondition(extraLengthClockCond);
-			ch4__.setExtraLengthClockCondition(extraLengthClockCond);
+			ch1_.setExtraLengthClockCondition(extraLengthClockCond);
+			ch2_.setExtraLengthClockCondition(extraLengthClockCond);
+			ch3_.setExtraLengthClockCondition(extraLengthClockCond);
+			ch4_.setExtraLengthClockCondition(extraLengthClockCond);
 
 			//if (onLengthClock)
 			//	Console.writeln(U"{:10d} onLengthClock"_fmt(g_clock));
@@ -138,26 +137,26 @@ namespace dmge
 
 		if (onSweepClock)
 		{
-			ch1__.stepSweep();
+			ch1_.stepSweep();
 		}
 
 		// Length
 
 		if (onLengthClock)
 		{
-			ch1__.stepLength();
-			ch2__.stepLength();
-			ch3__.stepLength();
-			ch4__.stepLength();
+			ch1_.stepLength();
+			ch2_.stepLength();
+			ch3_.stepLength();
+			ch4_.stepLength();
 		}
 
 		// エンベロープ
 
 		if (onVolumeClock)
 		{
-			ch1__.stepEnvelope();
-			ch2__.stepEnvelope();
-			ch4__.stepEnvelope();
+			ch1_.stepEnvelope();
+			ch2_.stepEnvelope();
+			ch4_.stepEnvelope();
 		}
 
 		// Save previous state
@@ -173,10 +172,10 @@ namespace dmge
 			cycles_ -= 1.0 * ClockFrequency / sampleRate_;
 
 			const std::array<int, 4> chAmp = {
-				1 * ch1__.amplitude() * ch1__.getEnable(),
-				1 * ch2__.amplitude() * ch2__.getEnable(),
-				1 * ch3__.amplitude() * ch3__.getEnable(),
-				1 * ch4__.amplitude() * ch4__.getEnable(),
+				1 * ch1_.amplitude() * ch1_.getEnable(),
+				1 * ch2_.amplitude() * ch2_.getEnable(),
+				1 * ch3_.amplitude() * ch3_.getEnable(),
+				1 * ch4_.amplitude() * ch4_.getEnable(),
 			};
 
 			// Input / Panning
@@ -245,10 +244,10 @@ namespace dmge
 
 		if (addr == Address::NR52)
 		{
-			ch1__.setEnable(((value >> 0) & 1) == 1);
-			ch2__.setEnable(((value >> 1) & 1) == 1);
-			ch3__.setEnable(((value >> 2) & 1) == 1);
-			ch4__.setEnable(((value >> 3) & 1) == 1);
+			ch1_.setEnable(((value >> 0) & 1) == 1);
+			ch2_.setEnable(((value >> 1) & 1) == 1);
+			ch3_.setEnable(((value >> 2) & 1) == 1);
+			ch4_.setEnable(((value >> 3) & 1) == 1);
 
 
 			// APUがoffになったとき、APUレジスタが全てクリアされる
@@ -270,64 +269,64 @@ namespace dmge
 
 		else if (addr == Address::NR10)
 		{
-			ch1__.setSweep(value);
+			ch1_.setSweep(value);
 		}
 
 		// APU - Reload Length Timer
 
 		else if (addr == Address::NR11)
 		{
-			ch1__.setLengthTimer(value);
-			ch1__.setDuty(value);
+			ch1_.setLengthTimer(value);
+			ch1_.setDuty(value);
 		}
 		else if (addr == Address::NR21)
 		{
-			ch2__.setLengthTimer(value);
-			ch2__.setDuty(value);
+			ch2_.setLengthTimer(value);
+			ch2_.setDuty(value);
 		}
 		else if (addr == Address::NR31)
 		{
-			ch3__.setLengthTimer(value);
+			ch3_.setLengthTimer(value);
 		}
 		else if (addr == Address::NR41)
 		{
-			ch4__.setLengthTimer(value);
+			ch4_.setLengthTimer(value);
 		}
 
 		// APU - Enable DAC / Envelope
 
 		else if (addr == Address::NR12)
 		{
-			ch1__.setEnvelope(value);
+			ch1_.setEnvelope(value);
 
 			if ((value & 0xf8) == 0)
 			{
-				ch1__.setEnable(false);
+				ch1_.setEnable(false);
 			}
 		}
 		else if (addr == Address::NR22)
 		{
-			ch2__.setEnvelope(value);
+			ch2_.setEnvelope(value);
 
 			if ((value & 0xf8) == 0)
 			{
-				ch2__.setEnable(false);
+				ch2_.setEnable(false);
 			}
 		}
 		else if (addr == Address::NR30)
 		{
 			if ((value >> 7) == 0)
 			{
-				ch3__.setEnable(false);
+				ch3_.setEnable(false);
 			}
 		}
 		else if (addr == Address::NR42)
 		{
-			ch4__.setEnvelope(value);
+			ch4_.setEnvelope(value);
 
 			if ((value & 0xf8) == 0)
 			{
-				ch4__.setEnable(false);
+				ch4_.setEnable(false);
 			}
 		}
 
@@ -335,73 +334,73 @@ namespace dmge
 
 		else if (addr == Address::NR32)
 		{
-			ch3__.setWaveOutputLevel(value);
+			ch3_.setWaveOutputLevel(value);
 		}
 
 		// APU - Update Frequency
 
 		else if (addr == Address::NR13)
 		{
-			ch1__.setFrequencyLow(value);
+			ch1_.setFrequencyLow(value);
 		}
 		else if (addr == Address::NR23)
 		{
-			ch2__.setFrequencyLow(value);
+			ch2_.setFrequencyLow(value);
 		}
 		else if (addr == Address::NR33)
 		{
-			ch3__.setFrequencyLow(value);
+			ch3_.setFrequencyLow(value);
 		}
 
 		// Noise
 
 		else if (addr == Address::NR43)
 		{
-			ch4__.setRandomness(value);
+			ch4_.setRandomness(value);
 		}
 
 		// APU - Channel Trigger (Update Frequency)
 
 		else if (addr == Address::NR14)
 		{
-			ch1__.setFrequencyHigh(value);
+			ch1_.setFrequencyHigh(value);
 
-			ch1__.setEnableLength((value & 0x40) == 0x40);
+			ch1_.setEnableLength((value & 0x40) == 0x40);
 
 			if (value & 0x80)
 			{
-				ch1__.trigger();
+				ch1_.trigger();
 			}
 		}
 		else if (addr == Address::NR24)
 		{
-			ch2__.setFrequencyHigh(value);
+			ch2_.setFrequencyHigh(value);
 
-			ch2__.setEnableLength((value & 0x40) == 0x40);
+			ch2_.setEnableLength((value & 0x40) == 0x40);
 
 			if (value & 0x80)
 			{
-				ch2__.trigger();
+				ch2_.trigger();
 			}
 		}
 		else if (addr == Address::NR34)
 		{
-			ch3__.setFrequencyHigh(value);
+			ch3_.setFrequencyHigh(value);
 
-			ch3__.setEnableLength((value & 0x40) == 0x40);
+			ch3_.setEnableLength((value & 0x40) == 0x40);
 
 			if (value & 0x80)
 			{
-				ch3__.trigger();
+				ch3_.trigger();
 			}
 		}
 		else if (addr == Address::NR44)
 		{
-			ch4__.setEnableLength((value & 0x40) == 0x40);
+			ch4_.setEnableLength((value & 0x40) == 0x40);
 
 			if (value & 0x80)
 			{
-				ch4__.trigger();
+				ch4_.trigger();
 			}
 		}
 	}
@@ -409,10 +408,10 @@ namespace dmge
 	uint8 APU::getChannelsEnabledState() const
 	{
 		return
-			((uint8)ch1__.getEnable() << 0) |
-			((uint8)ch2__.getEnable() << 1) |
-			((uint8)ch3__.getEnable() << 2) |
-			((uint8)ch4__.getEnable() << 3);
+			((uint8)ch1_.getEnable() << 0) |
+			((uint8)ch2_.getEnable() << 1) |
+			((uint8)ch3_.getEnable() << 2) |
+			((uint8)ch4_.getEnable() << 3);
 	}
 
 	APUStreamBufferState APU::getBufferState() const

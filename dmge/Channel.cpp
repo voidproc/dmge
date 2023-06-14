@@ -27,17 +27,17 @@ namespace dmge
 
 	void VolumeEnvelope::step()
 	{
-		if (envPeriod)
+		if (period_)
 		{
 			if (periodTimer_ > 0) periodTimer_--;
 
 			if (periodTimer_ == 0)
 			{
-				periodTimer_ = envPeriod;
+				periodTimer_ = period_;
 
-				if ((currentVolume_ < 0xf && envDir == 1) || (currentVolume_ > 0 && envDir == 0))
+				if ((currentVolume_ < 0xf && direction_ == 1) || (currentVolume_ > 0 && direction_ == 0))
 				{
-					currentVolume_ += (envDir == 1) ? 1 : -1;
+					currentVolume_ += (direction_ == 1) ? 1 : -1;
 				}
 			}
 		}
@@ -45,15 +45,15 @@ namespace dmge
 
 	void VolumeEnvelope::trigger()
 	{
-		currentVolume_ = envVol;
-		periodTimer_ = envPeriod;
+		currentVolume_ = initialVolume_;
+		periodTimer_ = period_;
 	}
 
 	void VolumeEnvelope::set(uint8 NRx2)
 	{
-		envVol = NRx2 >> 4;
-		envDir = (NRx2 >> 3) & 1;
-		envPeriod = NRx2 & 0b111;
+		initialVolume_ = NRx2 >> 4;
+		direction_ = (NRx2 >> 3) & 1;
+		period_ = NRx2 & 0b111;
 	}
 
 	int VolumeEnvelope::volume() const
@@ -63,13 +63,13 @@ namespace dmge
 
 	int VolumeEnvelope::initialVolume() const
 	{
-		return envVol;
+		return initialVolume_;
 	}
 
 
 	// FrequencySweep
 
-	FrequencySweep::FrequencySweep(ChannelBase* channel)
+	FrequencySweep::FrequencySweep(Channel* channel)
 		: channel_{ channel }
 	{
 	}
@@ -80,13 +80,13 @@ namespace dmge
 
 		if (sweepTimer_ == 0)
 		{
-			sweepTimer_ = (sweepPeriod > 0) ? sweepPeriod : 8;
+			sweepTimer_ = (period_ > 0) ? period_ : 8;
 
-			if (sweepEnabled_ && sweepPeriod > 0)
+			if (enabled_ && period_ > 0)
 			{
 				const int newFreq = calcSweepFrequency_();
 
-				if (newFreq <= 2047 && sweepShift > 0)
+				if (newFreq <= 2047 && shift_ > 0)
 				{
 					freq = shadowFreq_ = newFreq;
 
@@ -102,23 +102,23 @@ namespace dmge
 	void FrequencySweep::trigger(int freq)
 	{
 		shadowFreq_ = freq;
-		sweepTimer_ = (sweepPeriod > 0) ? sweepPeriod : 8;
-		sweepEnabled_ = sweepPeriod != 0 || sweepShift != 0;
-		if (sweepShift != 0) calcSweepFrequency_();
+		sweepTimer_ = (period_ > 0) ? period_ : 8;
+		enabled_ = period_ != 0 || shift_ != 0;
+		if (shift_ != 0) calcSweepFrequency_();
 	}
 
 	void FrequencySweep::set(uint8 NRx0)
 	{
-		sweepPeriod = (NRx0 >> 4) & 0b111;
-		sweepDir = (NRx0 >> 3) & 1;
-		sweepShift = NRx0 & 0b111;
+		period_ = (NRx0 >> 4) & 0b111;
+		direction_ = (NRx0 >> 3) & 1;
+		shift_ = NRx0 & 0b111;
 	}
 
 	int FrequencySweep::calcSweepFrequency_()
 	{
-		int newFreq = shadowFreq_ >> sweepShift;
+		int newFreq = shadowFreq_ >> shift_;
 
-		if (sweepDir == 0)
+		if (direction_ == 0)
 			newFreq = shadowFreq_ + newFreq;
 		else
 			newFreq = shadowFreq_ - newFreq;
@@ -130,14 +130,14 @@ namespace dmge
 
 	// LengthCounter
 
-	LengthCounter::LengthCounter(ChannelBase* channel)
+	LengthCounter::LengthCounter(Channel* channel)
 		: channel_{ channel }
 	{
 	}
 
 	void LengthCounter::step()
 	{
-		if (enableLength_)
+		if (enabled_)
 		{
 			if (lengthTimer_ > 0)
 			{
@@ -167,19 +167,19 @@ namespace dmge
 		// 長さカウンタはデクリメントされます。
 		// Refer: https://gbdev.gg8.se/wiki/articles/Gameboy_sound_hardware#Obscure_Behavior
 
-		if (not enableLength_ && enable && extraLengthClockCond_)
+		if (not enabled_ && enable && extraLengthClockCond_)
 		{
-			enableLength_ = enable;
+			enabled_ = enable;
 			step();
 			return;
 		}
 
-		enableLength_ = enable;
+		enabled_ = enable;
 	}
 
 	bool LengthCounter::getEnable() const
 	{
-		return enableLength_;
+		return enabled_;
 	}
 
 	void LengthCounter::setLengthTimer(int value)
@@ -193,14 +193,14 @@ namespace dmge
 	}
 
 
-	// ChannelBase
+	// Channel
 
-	bool ChannelBase::getEnable() const
+	bool Channel::getEnable() const
 	{
 		return enabled_;
 	}
 
-	void ChannelBase::setEnable(bool enable)
+	void Channel::setEnable(bool enable)
 	{
 		enabled_ = enable;
 	}
@@ -374,11 +374,11 @@ namespace dmge
 	{
 		if (--freqTimer_ <= 0)
 		{
-			freqTimer_ = (divisor > 0 ? (divisor * 16) : 8) << divisorShift;
+			freqTimer_ = (divisor_ > 0 ? (divisor_ * 16) : 8) << divisorShift_;
 
 			uint16 xorResult = (lfsr_ & 0b01) ^ ((lfsr_ & 0b10) >> 1);
 			lfsr_ = (lfsr_ >> 1) | (xorResult << 14);
-			if (counterWidth == 1)
+			if (counterWidth_ == 1)
 			{
 				lfsr_ &= ~(1 << 6);
 				lfsr_ |= xorResult << 6;
@@ -436,9 +436,9 @@ namespace dmge
 
 	void NoiseChannel::setRandomness(uint8 NRx3)
 	{
-		divisorShift = NRx3 >> 4;
-		counterWidth = (NRx3 >> 3) & 1;
-		divisor = NRx3 & 0b111;
+		divisorShift_ = NRx3 >> 4;
+		counterWidth_ = (NRx3 >> 3) & 1;
+		divisor_ = NRx3 & 0b111;
 	}
 
 }

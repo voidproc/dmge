@@ -81,10 +81,10 @@ namespace dmge
 
 		Audio audio_;
 
-		SquareChannel ch1__;
-		SquareChannel ch2__;
-		WaveChannel ch3__;
-		NoiseChannel ch4__;
+		SquareChannel ch1_;
+		SquareChannel ch2_;
+		WaveChannel ch3_;
+		NoiseChannel ch4_;
 
 		// Frame Seq. Clock
 		uint64 fsClock_ = 0;

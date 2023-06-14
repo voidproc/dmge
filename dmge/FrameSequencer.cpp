@@ -4,9 +4,19 @@ namespace dmge
 {
 	void FrameSequencer::step(uint8 div)
 	{
+		onVolumeClock_ = false;
+		onSweepClock_ = false;
+		onLengthClock_ = false;
+		onExtraLengthClock_ = false;
+
 		if ((prevDiv_ & 0b10000) && (div & 0b10000) == 0)
 		{
 			clock_++;
+
+			if ((clock_ % 8) == 7) onVolumeClock_ = true;
+			if ((clock_ & 3) == 2) onSweepClock_ = true;
+			if ((clock_ % 2) == 0) onLengthClock_ = true;
+			if (((clock_ + 1) % 2) != 0) onExtraLengthClock_ = true;
 		}
 
 		prevDiv_ = div;
@@ -14,21 +24,21 @@ namespace dmge
 
 	bool FrameSequencer::onVolumeClock() const
 	{
-		return (clock_ % 8) == 7;
+		return onVolumeClock_;
 	}
 
 	bool FrameSequencer::onSweepClock() const
 	{
-		return (clock_ & 3) == 2;
+		return onSweepClock_;
 	}
 
 	bool FrameSequencer::onLengthClock() const
 	{
-		return (clock_ & 3) == 2;
+		return onLengthClock_;
 	}
 
 	bool FrameSequencer::onExtraLengthClock() const
 	{
-		return ((clock_ + 1) % 2) != 0;
+		return onExtraLengthClock_;
 	}
 }

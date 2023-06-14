@@ -81,11 +81,6 @@ namespace dmge
 
 		Audio audio_;
 
-		Channel ch1_;
-		Channel ch2_;
-		Channel ch3_;
-		Channel ch4_;
-
 		SquareChannel ch1__;
 		SquareChannel ch2__;
 		WaveChannel ch3__;

@@ -72,10 +72,6 @@ namespace dmge
 		:
 		mem_{ mem },
 		sampleRate_{ sampleRate },
-		ch1_{ mem, Channels::Ch1 },
-		ch2_{ mem, Channels::Ch2 },
-		ch3_{ mem, Channels::Ch3 },
-		ch4_{ mem, Channels::Ch4 },
 		apuStream_{ std::make_shared<APUStream>() },
 		audio_{ apuStream_ },
 
@@ -105,16 +101,6 @@ namespace dmge
 			return 0;
 		}
 
-		ch1_.fetch();
-		ch2_.fetch();
-		ch3_.fetch();
-		ch4_.fetch();
-
-		ch1_.updateFrequencyTimer();
-		ch2_.updateFrequencyTimer();
-		ch3_.updateFrequencyTimer();
-		ch4_.updateFrequencyTimer();
-
 		ch1__.step();
 		ch2__.step();
 		ch3__.step();
@@ -139,13 +125,9 @@ namespace dmge
 			if ((fsClock_ % 2) == 0) onLengthClock = true;
 
 			const bool extraLengthClockCond = ((fsClock_ + 1) % 2) != 0;
-			ch1_.setExtraLengthClockCondition(extraLengthClockCond);
 			ch1__.setExtraLengthClockCondition(extraLengthClockCond);
-			ch2_.setExtraLengthClockCondition(extraLengthClockCond);
 			ch2__.setExtraLengthClockCondition(extraLengthClockCond);
-			ch3_.setExtraLengthClockCondition(extraLengthClockCond);
 			ch3__.setExtraLengthClockCondition(extraLengthClockCond);
-			ch4_.setExtraLengthClockCondition(extraLengthClockCond);
 			ch4__.setExtraLengthClockCondition(extraLengthClockCond);
 
 			//if (onLengthClock)
@@ -156,7 +138,6 @@ namespace dmge
 
 		if (onSweepClock)
 		{
-			ch1_.stepSweep();
 			ch1__.stepSweep();
 		}
 
@@ -164,13 +145,9 @@ namespace dmge
 
 		if (onLengthClock)
 		{
-			ch1_.stepLength();
 			ch1__.stepLength();
-			ch2_.stepLength();
 			ch2__.stepLength();
-			ch3_.stepLength();
 			ch3__.stepLength();
-			ch4_.stepLength();
 			ch4__.stepLength();
 		}
 
@@ -178,11 +155,8 @@ namespace dmge
 
 		if (onVolumeClock)
 		{
-			ch1_.stepEnvelope();
 			ch1__.stepEnvelope();
-			ch2_.stepEnvelope();
 			ch2__.stepEnvelope();
-			ch4_.stepEnvelope();
 			ch4__.stepEnvelope();
 		}
 
@@ -271,11 +245,6 @@ namespace dmge
 
 		if (addr == Address::NR52)
 		{
-			ch1_.setEnable(((value >> 0) & 1) == 1);
-			ch2_.setEnable(((value >> 1) & 1) == 1);
-			ch3_.setEnable(((value >> 2) & 1) == 1);
-			ch4_.setEnable(((value >> 3) & 1) == 1);
-
 			ch1__.setEnable(((value >> 0) & 1) == 1);
 			ch2__.setEnable(((value >> 1) & 1) == 1);
 			ch3__.setEnable(((value >> 2) & 1) == 1);
@@ -308,24 +277,20 @@ namespace dmge
 
 		else if (addr == Address::NR11)
 		{
-			ch1_.setLengthTimer(value);
 			ch1__.setLengthTimer(value);
 			ch1__.setDuty(value);
 		}
 		else if (addr == Address::NR21)
 		{
-			ch2_.setLengthTimer(value);
 			ch2__.setLengthTimer(value);
 			ch2__.setDuty(value);
 		}
 		else if (addr == Address::NR31)
 		{
-			ch3_.setLengthTimer(value);
 			ch3__.setLengthTimer(value);
 		}
 		else if (addr == Address::NR41)
 		{
-			ch4_.setLengthTimer(value);
 			ch4__.setLengthTimer(value);
 		}
 
@@ -337,7 +302,6 @@ namespace dmge
 
 			if ((value & 0xf8) == 0)
 			{
-				ch1_.setEnable(false);
 				ch1__.setEnable(false);
 			}
 		}
@@ -347,7 +311,6 @@ namespace dmge
 
 			if ((value & 0xf8) == 0)
 			{
-				ch2_.setEnable(false);
 				ch2__.setEnable(false);
 			}
 		}
@@ -355,7 +318,6 @@ namespace dmge
 		{
 			if ((value >> 7) == 0)
 			{
-				ch3_.setEnable(false);
 				ch3__.setEnable(false);
 			}
 		}
@@ -365,7 +327,6 @@ namespace dmge
 
 			if ((value & 0xf8) == 0)
 			{
-				ch4_.setEnable(false);
 				ch4__.setEnable(false);
 			}
 		}
@@ -381,17 +342,14 @@ namespace dmge
 
 		else if (addr == Address::NR13)
 		{
-			ch1_.setFrequencyLow(value);
 			ch1__.setFrequencyLow(value);
 		}
 		else if (addr == Address::NR23)
 		{
-			ch2_.setFrequencyLow(value);
 			ch2__.setFrequencyLow(value);
 		}
 		else if (addr == Address::NR33)
 		{
-			ch3_.setFrequencyLow(value);
 			ch3__.setFrequencyLow(value);
 		}
 
@@ -406,54 +364,43 @@ namespace dmge
 
 		else if (addr == Address::NR14)
 		{
-			ch1_.setFrequencyHigh(value);
 			ch1__.setFrequencyHigh(value);
 
-			ch1_.setEnableLength((value & 0x40) == 0x40);
 			ch1__.setEnableLength((value & 0x40) == 0x40);
 
 			if (value & 0x80)
 			{
-				ch1_.trigger();
 				ch1__.trigger();
 			}
 		}
 		else if (addr == Address::NR24)
 		{
-			ch2_.setFrequencyHigh(value);
 			ch2__.setFrequencyHigh(value);
 
-			ch2_.setEnableLength((value & 0x40) == 0x40);
 			ch2__.setEnableLength((value & 0x40) == 0x40);
 
 			if (value & 0x80)
 			{
-				ch2_.trigger();
 				ch2__.trigger();
 			}
 		}
 		else if (addr == Address::NR34)
 		{
-			ch3_.setFrequencyHigh(value);
 			ch3__.setFrequencyHigh(value);
 
-			ch3_.setEnableLength((value & 0x40) == 0x40);
 			ch3__.setEnableLength((value & 0x40) == 0x40);
 
 			if (value & 0x80)
 			{
-				ch3_.trigger();
 				ch3__.trigger();
 			}
 		}
 		else if (addr == Address::NR44)
 		{
-			ch4_.setEnableLength((value & 0x40) == 0x40);
 			ch4__.setEnableLength((value & 0x40) == 0x40);
 
 			if (value & 0x80)
 			{
-				ch4_.trigger();
 				ch4__.trigger();
 			}
 		}

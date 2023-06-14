@@ -222,9 +222,6 @@ private:
 				for (int i : step(cpu_.consumedCycles()))
 				{
 					bufferedSamples += apu_.run();
-
-					// [DEBUG]
-					dmge::g_clock++;
 				}
 			}
 

@@ -160,6 +160,7 @@ namespace dmge
 		case Channels::Ch2:
 			dutyPos_ = 0;
 			currentVolume_ = data_.envVol;
+			periodTimer_ = data_.envPeriod;
 
 			if (lengthTimer_ == 0)
 				lengthTimer_ = 64;
@@ -282,29 +283,6 @@ namespace dmge
 		}
 
 		return 0;
-	}
-
-	bool Channel::getDACEnable() const
-	{
-		switch (ch_)
-		{
-		case Channels::Ch1:
-			return (mem_->read(Address::NR12) & 0xf8) != 0;
-
-		case Channels::Ch2:
-			return (mem_->read(Address::NR22) & 0xf8) != 0;
-
-		case Channels::Ch3:
-			return (mem_->read(Address::NR30) & 0x80) != 0;
-
-		case Channels::Ch4:
-			return (mem_->read(Address::NR42) & 0xf8) != 0;
-
-		default:
-			break;
-		}
-
-		return false;
 	}
 
 	bool Channel::getEnable() const

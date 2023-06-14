@@ -1,21 +1,34 @@
 ﻿#pragma once
 
+#include "Address.h"
+
 namespace dmge
 {
 	class Memory;
 
 	struct ChannelData
 	{
-		int outputLevel;
+		// NR10
 
 		int sweepPeriod;
 		int sweepDir;
 		int sweepShift;
 
+		// NR11, NR21
+
 		int duty;
+
+		// NR12, NR22, NR42
+
 		int envVol;
 		int envDir;
 		int envPeriod;
+
+		// NR32
+
+		int outputLevel;
+
+		// NR43
 
 		int divisorShift;
 		int counterWidth;
@@ -53,8 +66,6 @@ namespace dmge
 		void doLength();
 
 		int amplitude() const;
-
-		bool getDACEnable() const;
 
 		bool getEnable() const;
 

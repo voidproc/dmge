@@ -1,5 +1,10 @@
 ﻿#include "Cartridge.h"
 #include "Address.h"
+#include "DebugPrint.h"
+
+#define MAGIC_ENUM_RANGE_MIN 0
+#define MAGIC_ENUM_RANGE_MAX 256
+#include "lib/magic_enum/magic_enum.hpp"
 
 namespace dmge
 {
@@ -37,5 +42,20 @@ namespace dmge
 			case 4: ramSizeKB = 128; break;
 			case 5: ramSizeKB = 64; break;
 		}
+	}
+
+	void CartridgeHeader::dump()
+	{
+		DebugPrint::Writeln(U"* Cartridge Info:");
+		DebugPrint::Writeln(U"Title={}"_fmt(title));
+
+		const auto cgbFlagStr = magic_enum::enum_name(cgbFlag);
+		DebugPrint::Writeln(U"CGBFlag={}"_fmt(Unicode::WidenAscii(cgbFlagStr)));
+
+		const auto typeStr = magic_enum::enum_name(type);
+		DebugPrint::Writeln(U"Type={}"_fmt(Unicode::WidenAscii(typeStr)));
+
+		DebugPrint::Writeln(U"RomSize={}KB"_fmt(romSizeKB));
+		DebugPrint::Writeln(U"RamSize={}KB"_fmt(ramSizeKB));
 	}
 }

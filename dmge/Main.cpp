@@ -170,9 +170,6 @@ private:
 				apu_.pause();
 
 				dmge::DebugPrint::Writeln(U"Break: pc={:04X}"_fmt(cpu_.currentPC()));
-
-				//
-				//Console.writeln(U"{:10d}"_fmt(dmge::g_clock));
 			}
 
 
@@ -320,13 +317,6 @@ private:
 				{
 					DrawStatusText(U"FPS:{:3d}"_fmt(Profiler::FPS()));
 				}
-
-				// Wait
-
-				//if (not Graphics::IsVSyncEnabled())
-				//{
-				//	fpsKeeper.sleep(60.0 * 70224 / Max(cyclesFromPreviousDraw, 1ull));
-				//}
 
 				shouldDraw = false;
 				cyclesFromPreviousDraw = 0;

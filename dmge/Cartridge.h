@@ -61,5 +61,7 @@ namespace dmge
 		CartridgeHeader() = default;
 
 		CartridgeHeader(FilePath cartridgePath);
+
+		void dump();
 	};
 }

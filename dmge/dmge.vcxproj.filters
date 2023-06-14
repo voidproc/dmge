@@ -222,6 +222,9 @@
     <ClCompile Include="NoiseChannel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="FrameSequencer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Image Include="App\icon.ico">
@@ -946,6 +949,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="NoiseChannel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FrameSequencer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

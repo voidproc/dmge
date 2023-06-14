@@ -15,7 +15,8 @@ namespace dmge
 		ch1_{},
 		ch2_{},
 		ch3_{ mem_ },
-		ch4_{}
+		ch4_{},
+		frameSeq_{}
 	{
 	}
 
@@ -38,46 +39,33 @@ namespace dmge
 			return 0;
 		}
 
+		// 各チャンネルの Frequency Timer を進める
+
 		ch1_.step();
 		ch2_.step();
 		ch3_.step();
 		ch4_.step();
 
-		// Frame Sequencer (FS)
+		// Frame Sequencer
 
-		const uint8 div = mem_->read(Address::DIV);
+		frameSeq_.step(mem_->read(Address::DIV));
 
-		// FS clocks
-
-		bool onVolumeClock = false;
-		bool onSweepClock = false;
-		bool onLengthClock = false;
-
-		if ((prevDiv_ & 0b10000) && (div & 0b10000) == 0)
-		{
-			fsClock_++;
-
-			if ((fsClock_ % 8) == 7) onVolumeClock = true;
-			if ((fsClock_ & 3) == 2) onSweepClock = true;
-			if ((fsClock_ % 2) == 0) onLengthClock = true;
-
-			const bool extraLengthClockCond = ((fsClock_ + 1) % 2) != 0;
-			ch1_.setExtraLengthClockCondition(extraLengthClockCond);
-			ch2_.setExtraLengthClockCondition(extraLengthClockCond);
-			ch3_.setExtraLengthClockCondition(extraLengthClockCond);
-			ch4_.setExtraLengthClockCondition(extraLengthClockCond);
-		}
+		const bool onExtraLengthClock = frameSeq_.onExtraLengthClock();
+		ch1_.setExtraLengthClockCondition(onExtraLengthClock);
+		ch2_.setExtraLengthClockCondition(onExtraLengthClock);
+		ch3_.setExtraLengthClockCondition(onExtraLengthClock);
+		ch4_.setExtraLengthClockCondition(onExtraLengthClock);
 
 		// スイープ
 
-		if (onSweepClock)
+		if (frameSeq_.onSweepClock())
 		{
 			ch1_.stepSweep();
 		}
 
-		// Length
+		// Length control
 
-		if (onLengthClock)
+		if (frameSeq_.onLengthClock())
 		{
 			ch1_.stepLength();
 			ch2_.stepLength();
@@ -87,15 +75,12 @@ namespace dmge
 
 		// エンベロープ
 
-		if (onVolumeClock)
+		if (frameSeq_.onVolumeClock())
 		{
 			ch1_.stepEnvelope();
 			ch2_.stepEnvelope();
 			ch4_.stepEnvelope();
 		}
-
-		// Save previous state
-		prevDiv_ = div;
 
 		// Output audio
 		// (CPUFreq / SampleRate) ==> 4194304 / 44100 ==> Every 95.1 T-cycles

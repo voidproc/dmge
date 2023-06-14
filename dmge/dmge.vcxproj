@@ -125,6 +125,7 @@
     <ClCompile Include="Channel.cpp" />
     <ClCompile Include="CPU.cpp" />
     <ClCompile Include="DebugMonitor.cpp" />
+    <ClCompile Include="FrameSequencer.cpp" />
     <ClCompile Include="Frequency.cpp" />
     <ClCompile Include="FrequencySweep.cpp" />
     <ClCompile Include="Joypad.cpp" />
@@ -357,6 +358,7 @@
     <ClInclude Include="CPU.h" />
     <ClInclude Include="DebugMonitor.h" />
     <ClInclude Include="DebugPrint.h" />
+    <ClInclude Include="FrameSequencer.h" />
     <ClInclude Include="Frequency.h" />
     <ClInclude Include="FrequencySweep.h" />
     <ClInclude Include="Joypad.h" />

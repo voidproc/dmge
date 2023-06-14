@@ -3,6 +3,7 @@
 #include "SquareChannel.h"
 #include "WaveChannel.h"
 #include "NoiseChannel.h"
+#include "FrameSequencer.h"
 
 namespace dmge
 {
@@ -14,6 +15,7 @@ namespace dmge
 
 
 	class Memory;
+
 	class APUStream;
 
 	class APU
@@ -58,12 +60,9 @@ namespace dmge
 		WaveChannel ch3_;
 		NoiseChannel ch4_;
 
-		// Frame Seq. Clock
-		uint64 fsClock_ = 0;
+		FrameSequencer frameSeq_;
 
 		// Count T-cycles
 		double cycles_ = 0;
-
-		uint8 prevDiv_ = 0;
 	};
 }

@@ -349,7 +349,7 @@ private:
 				break;
 			}
 
-			ppu_.drawCache(Point{ 0, 0 }, config_.scale);
+			ppu_.draw(Point{ 0, 0 }, config_.scale);
 
 			// デバッグ用モニタ表示
 			if (showDebugMonitor_)

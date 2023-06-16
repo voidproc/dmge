@@ -6,6 +6,8 @@
 
 namespace dmge
 {
+	constexpr Size LCDSize{ 160, 144 };
+
 	// OAMバッファ
 	struct BufferedOAM
 	{
@@ -58,21 +60,15 @@ namespace dmge
 		uint8 value;
 	};
 
-	void DrawRenderTexture(const RenderTexture& renderTexture, const Point& pos, int scale)
-	{
-		const ScopedRenderStates2D renderState{ SamplerState::ClampNearest };
-
-		const Transformer2D transformer{ Mat3x2::Scale(scale).translated(pos) };
-
-		renderTexture.draw();
-	}
-
-
 	PPU::PPU(Memory* mem)
-		: mem_{ mem }, lcd_{ std::make_unique<LCD>(mem) }, renderTexture_{ 160, 144 }
+		:
+		mem_{ mem },
+		lcd_{ std::make_unique<LCD>(mem) },
+		canvas_{ LCDSize.x + 8, LCDSize.y },
+		texture_{ canvas_.size() }
 	{
 		dot_ = 70224 - 52 + 4;
-		canvas_.resize(160 + 8, 144, Palette::White);
+		canvas_.fill(Palette::White);
 		oamBuffer_.reserve(10);
 
 		for (int pal = 0; pal < 8; pal++)
@@ -116,7 +112,7 @@ namespace dmge
 
 		if (mode_ == PPUMode::Drawing)
 		{
-			if (fetcherX_ < 160 && canvasX_ < 160)
+			if (fetcherX_ < LCDSize.x && canvasX_ < LCDSize.x)
 			{
 				scanline_();
 			}
@@ -125,7 +121,7 @@ namespace dmge
 		if (modeChangedToHBlank())
 		{
 			// 右端の残りのドットを描画
-			while (canvasX_ < 160)
+			while (canvasX_ < LCDSize.x)
 			{
 				scanline_();
 			}
@@ -189,28 +185,12 @@ namespace dmge
 	{
 		if (not lcd_->isEnabled()) return;
 
-		renderTexture_.clear(Scene::GetBackground());
+		const ScopedRenderStates2D renderState{ SamplerState::ClampNearest };
 
-		{
-			const ScopedRenderTarget2D target{ renderTexture_ };
+		const Transformer2D transformer{ Mat3x2::Scale(scale).translated(pos) };
 
-			for (int y : step(144))
-			{
-				for (int x : step(160 + 8))
-				{
-					Rect{ x, y, 1, 1 }.draw(canvas_.at(y, x));
-				}
-			}
-		}
-
-		DrawRenderTexture(renderTexture_, pos, scale);
-	}
-
-	void PPU::drawCache(const Point& pos, int scale)
-	{
-		if (not lcd_->isEnabled()) return;
-
-		DrawRenderTexture(renderTexture_, pos, scale);
+		texture_.fill(canvas_);
+		texture_.draw();
 	}
 
 	PPUMode PPU::mode() const
@@ -220,17 +200,17 @@ namespace dmge
 
 	bool PPU::modeChangedToOAMScan() const
 	{
-		return (dot_ < 144 * 456) && ((dot_ % 456) == 0);
+		return (dot_ < LCDSize.y * 456) && ((dot_ % 456) == 0);
 	}
 
 	bool PPU::modeChangedToHBlank() const
 	{
-		return (dot_ < 144 * 456) && ((dot_ % 456) == 370);
+		return (dot_ < LCDSize.y * 456) && ((dot_ % 456) == 370);
 	}
 
 	bool PPU::modeChangedToVBlank() const
 	{
-		return dot_ == 144 * 456;
+		return dot_ == LCDSize.y * 456;
 	}
 
 	int PPU::dot() const
@@ -325,7 +305,7 @@ namespace dmge
 	{
 		// Set PPU Mode
 
-		if (lcd_->ly() > 143)
+		if (lcd_->ly() >= LCDSize.y)
 		{
 			mode_ = PPUMode::VBlank;
 		}
@@ -440,7 +420,7 @@ namespace dmge
 		// (DMG) BGとWindowが無効なので、ピクセルを1つ進めて終了
 		if (not cgbMode_ && not lcdc0)
 		{
-			canvas_.at(lcd_->ly(), canvasX_) = displayColorPalette_[0];
+			canvas_[lcd_->ly()][canvasX_] = displayColorPalette_[0];
 
 			fetcherX_++;
 			canvasX_++;
@@ -598,7 +578,7 @@ namespace dmge
 			}
 		}
 
-		canvas_.at(ly, canvasX_) = dispColor;
+		canvas_[ly][canvasX_] = dispColor;
 
 		fetcherX_++;
 		canvasX_++;

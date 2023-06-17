@@ -1,6 +1,5 @@
 ﻿#include "PPU.h"
 #include "Memory.h"
-#include "LCD.h"
 #include "TileData.h"
 #include "BitMask/InterruptFlag.h"
 
@@ -63,7 +62,7 @@ namespace dmge
 	PPU::PPU(Memory* mem)
 		:
 		mem_{ mem },
-		lcd_{ std::make_unique<LCD>(mem) },
+		lcd_{ mem },
 		canvas_{ LCDSize.x + 8, LCDSize.y },
 		texture_{ canvas_.size() }
 	{
@@ -153,19 +152,19 @@ namespace dmge
 		// STAT割り込み要求
 
 		bool statInt = false;
-		if (lcd_->isEnabledLYCInterrupt() && lcd_->lycFlag())
+		if (lcd_.isEnabledLYCInterrupt() && lcd_.lycFlag())
 		{
 			statInt = true;
 		}
-		if (lcd_->isEnabledOAMScanInterrupt() && modeChangedToOAMScan())
+		if (lcd_.isEnabledOAMScanInterrupt() && modeChangedToOAMScan())
 		{
 			statInt = true;
 		}
-		if (lcd_->isEnabledHBlankInterrupt() && modeChangedToHBlank())
+		if (lcd_.isEnabledHBlankInterrupt() && modeChangedToHBlank())
 		{
 			statInt = true;
 		}
-		if (lcd_->isEnabledVBlankInterrupt() && modeChangedToVBlank())
+		if (lcd_.isEnabledVBlankInterrupt() && modeChangedToVBlank())
 		{
 			statInt = true;
 		}
@@ -183,7 +182,7 @@ namespace dmge
 
 	void PPU::draw(const Point& pos, int scale)
 	{
-		if (not lcd_->isEnabled()) return;
+		if (not lcd_.isEnabled()) return;
 
 		const ScopedRenderStates2D renderState{ SamplerState::ClampNearest };
 
@@ -290,22 +289,27 @@ namespace dmge
 		}
 	}
 
+	void PPU::writeRegister(uint16 addr, uint8 value)
+	{
+		lcd_.writeRegister(addr, value);
+	}
+
 	void PPU::updateLY_()
 	{
-		if (not lcd_->isEnabled())
+		if (not lcd_.isEnabled())
 		{
 			dot_ = 0;
 		}
 
 		uint8 ly = static_cast<uint8>(dot_ / 456);
-		lcd_->ly(ly);
+		lcd_.ly(ly);
 	}
 
 	void PPU::updateMode_()
 	{
 		// Set PPU Mode
 
-		if (lcd_->ly() >= LCDSize.y)
+		if (lcd_.ly() >= LCDSize.y)
 		{
 			mode_ = PPUMode::VBlank;
 		}
@@ -328,8 +332,8 @@ namespace dmge
 		// Set STAT.1-0 (PPU Mode)
 		// LCDがOFFの場合は mode=0 をセットする
 
-		const uint8 stat = lcd_->stat();
-		mem_->write(Address::STAT, 0x80 | (stat & ~3) | (lcd_->isEnabled() ? (uint8)mode_ : 0));
+		const uint8 stat = lcd_.stat();
+		mem_->write(Address::STAT, 0x80 | (stat & ~3) | (lcd_.isEnabled() ? (uint8)mode_ : 0));
 	}
 
 	void PPU::updateSTAT_()
@@ -338,12 +342,12 @@ namespace dmge
 		// LYが更新されるかLYCが設定されるときにSTAT.2をセットする
 
 		const bool changedLy = dot_ % 456 == 0;
-		const uint8 lyc = lcd_->lyc();
+		const uint8 lyc = lcd_.lyc();
 
 		if (changedLy || lyc != prevLYC_)
 		{
-			const uint8 ly = lcd_->ly();
-			const uint8 stat = lcd_->stat();
+			const uint8 ly = lcd_.ly();
+			const uint8 stat = lcd_.stat();
 			mem_->write(Address::STAT, 0x80 | (stat & ~4) | (ly == lyc ? 4 : 0));
 		}
 
@@ -352,8 +356,8 @@ namespace dmge
 
 	void PPU::scanOAM_()
 	{
-		const uint8 ly = lcd_->ly();
-		const int spriteSize = lcd_->isEnabledTallSprite() ? 16 : 8;
+		const uint8 ly = lcd_.ly();
+		const int spriteSize = lcd_.isEnabledTallSprite() ? 16 : 8;
 
 		// X座標が同じOAMをバッファに追加しないよう、
 		// バッファに追加したOAMのX座標を記録しておく
@@ -415,12 +419,12 @@ namespace dmge
 	{
 		// DMG: BGとWindow無効
 		// CGB: BGとWindowの優先度無効
-		const bool lcdc0 = lcd_->isEnabledBgAndWindow();
+		const bool lcdc0 = lcd_.isEnabledBgAndWindow();
 
 		// (DMG) BGとWindowが無効なので、ピクセルを1つ進めて終了
 		if (not cgbMode_ && not lcdc0)
 		{
-			canvas_[lcd_->ly()][canvasX_] = displayColorPalette_[0];
+			canvas_[lcd_.ly()][canvasX_] = displayColorPalette_[0];
 
 			fetcherX_++;
 			canvasX_++;
@@ -428,12 +432,12 @@ namespace dmge
 		}
 
 		// 現在の状態
-		const uint8 ly = lcd_->ly();
-		const uint8 scy = lcd_->scy();
-		const uint8 scx = lcd_->scx();
-		const uint8 wy = lcd_->wy();
-		const uint8 wx = lcd_->wx();
-		const bool enabledWindow = lcd_->isEnabledWindow();
+		const uint8 ly = lcd_.ly();
+		const uint8 scy = lcd_.scy();
+		const uint8 scx = lcd_.scx();
+		const uint8 wy = lcd_.wy();
+		const uint8 wx = lcd_.wx();
+		const bool enabledWindow = lcd_.isEnabledWindow();
 		const uint8 opri = mem_->read(Address::OPRI) & 1;
 
 		// ※スクロール処理
@@ -468,14 +472,14 @@ namespace dmge
 
 		if (drawingWindow_)
 		{
-			const uint16 tileMapAddrBase = lcd_->windowTileMapAddress();
+			const uint16 tileMapAddrBase = lcd_.windowTileMapAddress();
 			const uint16 addrOffsetX = x / 8;
 			const uint16 addrOffsetY = 32 * (windowLine_ / 8);
 			tileAddr = tileMapAddrBase + ((addrOffsetX + addrOffsetY) & 0x3ff);
 		}
 		else
 		{
-			const uint16 tileMapAddrBase = lcd_->bgTileMapAddress();
+			const uint16 tileMapAddrBase = lcd_.bgTileMapAddress();
 			const uint16 addrOffsetX = ((x / 8) + (scx / 8)) & 0x1f;
 			const uint16 addrOffsetY = 32 * (((ly + scy) & 0xff) / 8);
 			tileAddr = tileMapAddrBase + ((addrOffsetX + addrOffsetY) & 0x3ff);
@@ -492,7 +496,7 @@ namespace dmge
 
 		// タイルデータのアドレスを得る
 		const uint8 tileId = mem_->read(tileAddr);
-		const uint16 tileDataAddr = TileData::GetAddress(lcd_->tileDataAddress(), tileId, drawingWindow_ ? (windowLine_ % 8) : ((ly + scy) % 8), tileMapAttr.attr.yFlip);
+		const uint16 tileDataAddr = TileData::GetAddress(lcd_.tileDataAddress(), tileId, drawingWindow_ ? (windowLine_ % 8) : ((ly + scy) % 8), tileMapAttr.attr.yFlip);
 
 		// タイルデータを参照
 		const uint16 tileData = mem_->read16VRAMBank(tileDataAddr, tileMapAttr.attr.bank);
@@ -501,13 +505,13 @@ namespace dmge
 		// 実際の描画色
 		Color dispColor;
 		if (not cgbMode_)
-			dispColor = displayColorPalette_[(int)lcd_->bgp(color)];
+			dispColor = displayColorPalette_[(int)lcd_.bgp(color)];
 		else
 			dispColor = displayBGColorPalette_[tileMapAttr.attr.palette][color];
 
 
 		// スプライトをフェッチ
-		if (lcd_->isEnabledSprite())
+		if (lcd_.isEnabledSprite())
 		{
 			int oamPriorityVal = 999;
 			int oamIndex = 0;
@@ -535,7 +539,7 @@ namespace dmge
 				{
 					if (oamColor != 0 && not (oam.priority == 1 && color != 0))
 					{
-						dispColor = displayColorPalette_[(int)lcd_->obp(oam.palette, oamColor)];
+						dispColor = displayColorPalette_[(int)lcd_.obp(oam.palette, oamColor)];
 					}
 				}
 				else

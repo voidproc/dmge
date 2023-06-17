@@ -6,7 +6,7 @@ namespace dmge
 {
 	class Memory;
 
-	// LCDレジスタ（0xff40-0xff4b）の表示・制御のためのユーティリティクラス
+	// LCDレジスタ（0xff40-0xff4b）の表示・制御
 
 	class LCD
 	{
@@ -14,29 +14,62 @@ namespace dmge
 		LCD(Memory* mem);
 
 		// LCD Control (0xff40)
+		uint8 lcdc() const;
+
+		// LCDC.7 - LCD enable
 		bool isEnabled() const;
+
+		// LCDC.6 - Window tile map area
+		// 0x9800 or 0x9C00
 		uint16 windowTileMapAddress() const;
+
+		// LCDC.5 - Window enable
 		bool isEnabledWindow() const;
+
+		// LCDC.4 - BG and Window tile data area
+		// 0x8000 or 0x9000
 		uint16 tileDataAddress() const;
+
+		// LCDC.3 - BG tile map area
+		// 0x9800 or 0x9C00
 		uint16 bgTileMapAddress() const;
+
+		// LCDC.2 - OBJ size
 		bool isEnabledTallSprite() const;
+
+		// LCDC.1 - OBJ enable
 		bool isEnabledSprite() const;
+
+		// LCDC.0 - BG and Window enable/priority
 		bool isEnabledBgAndWindow() const;
 
 		// LCD Status (0xff41)
 		uint8 stat() const;
+
+		// STAT.6 - LYC=LY STAT Interrupt source
 		bool isEnabledLYCInterrupt() const;
+
+		// STAT.5 - Mode 2 OAM STAT Interrupt source
 		bool isEnabledOAMScanInterrupt() const;
+
+		// STAT.4 - Mode 1 VBlank STAT Interrupt source
 		bool isEnabledVBlankInterrupt() const;
+
+		// STAT.3 - Mode 0 HBlank STAT Interrupt source
 		bool isEnabledHBlankInterrupt() const;
+
+		// STAT.2 - LYC = LY Flag
 		bool lycFlag() const;
 
-		// SCY, SCX (0xff42-43)
+		// SCY (0xff42)
 		uint8 scy() const;
+
+		// SCX (0xff43)
 		uint8 scx() const;
 
 		// LY (0xff44)
 		uint8 ly() const;
+
 		void ly(uint8 value);
 
 		// LYC (0xff45)
@@ -49,11 +82,27 @@ namespace dmge
 		// palette: 0=OBP0, 1=OBP1
 		Colors::Gray obp(int palette, int n);
 
-		// WY, WX (0xff4a-4b)
+		// WY (0xff4a)
 		uint8 wy() const;
+
+		// WX (0xff4b)
 		uint8 wx() const;
+
+		void writeRegister(uint16 addr, uint8 value);
 
 	private:
 		Memory* mem_;
+
+		uint8 lcdc_ = 0;
+		uint8 stat_ = 0;
+		uint8 scy_ = 0;
+		uint8 scx_ = 0;
+		uint8 ly_ = 0;
+		uint8 lyc_ = 0;
+		uint8 bgp_ = 0;
+		uint8 obp0_ = 0;
+		uint8 obp1_ = 0;
+		uint8 wy_ = 0;
+		uint8 wx_ = 0;
 	};
 }

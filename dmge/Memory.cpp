@@ -57,14 +57,14 @@ namespace dmge
 		writeDirect(0xff24, 0x77); // NR50
 		writeDirect(0xff25, 0xf3); // NR51
 		writeDirect(0xff26, 0xf1); // NR52 (GB:0xf1, SGB:0xf0)
-		writeDirect(0xff40, 0x91); // LCDC
+		write(0xff40, 0x91); // LCDC
 		writeDirect(0xff42, 0x00); // SCY
 		writeDirect(0xff43, 0x00); // SCX
 		writeDirect(0xff45, 0x00); // LYC
 		writeDirect(0xff46, cgb ? 0x00 : 0xff); // DMA
-		writeDirect(0xff47, 0xfc); // BGP
-		writeDirect(0xff48, 0xff); // OBP0
-		writeDirect(0xff49, 0xff); // OBP1
+		write(0xff47, 0xfc); // BGP
+		write(0xff48, 0xff); // OBP0
+		write(0xff49, 0xff); // OBP1
 		writeDirect(0xff4a, 0x00); // WY
 		writeDirect(0xff4b, 0x00); // WX
 		writeDirect(0xffff, 0x00); // IE
@@ -192,6 +192,16 @@ namespace dmge
 			{
 				value &= 0x80;
 			}
+		}
+
+		// PPU
+
+		else if (
+			(addr >= Address::LCDC && addr <= Address::LYC) ||
+			(addr >= Address::BGP && addr <= Address::OBP1) ||
+			(addr >= Address::WY && addr <= Address::WX))
+		{
+			ppu_->writeRegister(addr, value);
 		}
 
 		// DMA

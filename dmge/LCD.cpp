@@ -11,133 +11,173 @@ namespace dmge
 	{
 	}
 
+	uint8 LCD::lcdc() const
+	{
+		return lcdc_;
+	}
+
 	bool LCD::isEnabled() const
 	{
-		const uint8 lcdc = mem_->read(Address::LCDC);
-		return (lcdc & BitMask::LCDC::LCDEnable) > 0;
+		return (lcdc_ & BitMask::LCDC::LCDEnable) > 0;
 	}
 
 	uint16 LCD::windowTileMapAddress() const
 	{
-		const uint8 lcdc = mem_->read(Address::LCDC);
-		return (lcdc & BitMask::LCDC::WindowTileMapArea) > 0 ? Address::TileMap1 : Address::TileMap0;
+		return (lcdc_ & BitMask::LCDC::WindowTileMapArea) > 0 ? Address::TileMap1 : Address::TileMap0;
 	}
 
 	bool LCD::isEnabledWindow() const
 	{
-		const uint8 lcdc = mem_->read(Address::LCDC);
-		return (lcdc & BitMask::LCDC::WindowEnable) > 0;
+		return (lcdc_ & BitMask::LCDC::WindowEnable) > 0;
 	}
 
 	uint16 LCD::tileDataAddress() const
 	{
-		const uint8 lcdc = mem_->read(Address::LCDC);
-		return (lcdc & BitMask::LCDC::BGAndWindowTileDataArea) > 0 ? Address::TileData0 : Address::TileData2;
+		return (lcdc_ & BitMask::LCDC::BGAndWindowTileDataArea) > 0 ? Address::TileData0 : Address::TileData2;
 	}
 
 	uint16 LCD::bgTileMapAddress() const
 	{
-		const uint8 lcdc = mem_->read(Address::LCDC);
-		return (lcdc & BitMask::LCDC::BGTileMapArea) > 0 ? Address::TileMap1 : Address::TileMap0;
+		return (lcdc_ & BitMask::LCDC::BGTileMapArea) > 0 ? Address::TileMap1 : Address::TileMap0;
 	}
 
 	bool LCD::isEnabledTallSprite() const
 	{
-		const uint8 lcdc = mem_->read(Address::LCDC);
-		return (lcdc & BitMask::LCDC::OBJSize) > 0;
+		return (lcdc_ & BitMask::LCDC::OBJSize) > 0;
 	}
 
 	bool LCD::isEnabledSprite() const
 	{
-		const uint8 lcdc = mem_->read(Address::LCDC);
-		return (lcdc & BitMask::LCDC::OBJEnable) > 0;
+		return (lcdc_ & BitMask::LCDC::OBJEnable) > 0;
 	}
 
 	bool LCD::isEnabledBgAndWindow() const
 	{
-		const uint8 lcdc = mem_->read(Address::LCDC);
-		return (lcdc & BitMask::LCDC::BGAndWindowEnable) > 0;
+		return (lcdc_ & BitMask::LCDC::BGAndWindowEnable) > 0;
 	}
 
 	uint8 LCD::stat() const
 	{
-		return mem_->read(Address::STAT);
+		return stat_;
 	}
 
 	bool LCD::isEnabledLYCInterrupt() const
 	{
-		const uint8 stat = mem_->read(Address::STAT);
-		return (stat & BitMask::STAT::LYCInterruptEnable) > 0;
+		return (stat_ & BitMask::STAT::LYCInterruptEnable) > 0;
 	}
 
 	bool LCD::isEnabledOAMScanInterrupt() const
 	{
-		const uint8 stat = mem_->read(Address::STAT);
-		return (stat & BitMask::STAT::OAMInterruptEnable) > 0;
+		return (stat_ & BitMask::STAT::OAMInterruptEnable) > 0;
 	}
 
 	bool LCD::isEnabledVBlankInterrupt() const
 	{
-		const uint8 stat = mem_->read(Address::STAT);
-		return (stat & BitMask::STAT::VBlankInterruptEnable) > 0;
+		return (stat_ & BitMask::STAT::VBlankInterruptEnable) > 0;
 	}
 
 	bool LCD::isEnabledHBlankInterrupt() const
 	{
-		const uint8 stat = mem_->read(Address::STAT);
-		return (stat & BitMask::STAT::HBlankInterruptEnable) > 0;
+		return (stat_ & BitMask::STAT::HBlankInterruptEnable) > 0;
 	}
 
 	bool LCD::lycFlag() const
 	{
-		const uint8 stat = mem_->read(Address::STAT);
-		return (stat & BitMask::STAT::LYCFlag) > 0;
+		return (stat_ & BitMask::STAT::LYCFlag) > 0;
 	}
 
 	uint8 LCD::scy() const
 	{
-		return mem_->read(Address::SCY);
+		return scy_;
 	}
 
 	uint8 LCD::scx() const
 	{
-		return mem_->read(Address::SCX);
+		return scx_;
 	}
 
 	uint8 LCD::ly() const
 	{
-		return mem_->read(Address::LY);
+		return ly_;
 	}
 
 	void LCD::ly(uint8 value)
 	{
-		mem_->write(Address::LY, value);
+		ly_ = value;
+		mem_->writeDirect(Address::LY, value);
 	}
 
 	uint8 LCD::lyc() const
 	{
-		return mem_->read(Address::LYC);
+		return lyc_;
 	}
 
 	Colors::Gray LCD::bgp(int n)
 	{
-		const uint8 paletteData = mem_->read(Address::BGP);
-		return static_cast<Colors::Gray>((paletteData >> (n * 2)) & 0b11);
+		return static_cast<Colors::Gray>((bgp_ >> (n * 2)) & 0b11);
 	}
 
 	Colors::Gray LCD::obp(int palette, int n)
 	{
-		const uint8 paletteData = mem_->read(palette == 0 ? Address::OBP0 : Address::OBP1);
+		const uint8& paletteData = palette == 0 ? obp0_ : obp1_;
 		return static_cast<Colors::Gray>((paletteData >> (n * 2)) & 0b11);
 	}
 
 	uint8 LCD::wy() const
 	{
-		return mem_->read(Address::WY);
+		return wy_;
 	}
 
 	uint8 LCD::wx() const
 	{
-		return mem_->read(Address::WX);
+		return wx_;
+	}
+
+	void LCD::writeRegister(uint16 addr, uint8 value)
+	{
+		if (addr == Address::LCDC)
+		{
+			lcdc_ = value;
+		}
+		else if (addr == Address::STAT)
+		{
+			stat_ = value;
+		}
+		else if (addr == Address::SCY)
+		{
+			scy_ = value;
+		}
+		else if (addr == Address::SCX)
+		{
+			scx_ = value;
+		}
+		else if (addr == Address::LY)
+		{
+			ly_ = value;
+		}
+		else if (addr == Address::LYC)
+		{
+			lyc_ = value;
+		}
+		else if (addr == Address::BGP)
+		{
+			bgp_ = value;
+		}
+		else if (addr == Address::OBP0)
+		{
+			obp0_ = value;
+		}
+		else if (addr == Address::OBP1)
+		{
+			obp1_ = value;
+		}
+		else if (addr == Address::WY)
+		{
+			wy_ = value;
+		}
+		else if (addr == Address::WX)
+		{
+			wx_ = value;
+		}
 	}
 }

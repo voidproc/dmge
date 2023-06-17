@@ -1,12 +1,12 @@
 ﻿#pragma once
 
+#include "LCD.h"
 #include "PPUMode.h"
 #include "Colors.h"
 
 namespace dmge
 {
 	class Memory;
-	class LCD;
 	struct BufferedOAM;
 
 	class PPU
@@ -61,9 +61,11 @@ namespace dmge
 		// [DEBUG]
 		void drawCGBPalette();
 
+		void writeRegister(uint16 addr, uint8 value);
+
 	private:
 		Memory* mem_;
-		std::unique_ptr<LCD> lcd_;
+		LCD lcd_;
 
 		// このフレームの描画ドット数
 		int dot_ = 0;

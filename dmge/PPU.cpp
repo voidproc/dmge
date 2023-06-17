@@ -82,7 +82,7 @@ namespace dmge
 
 	void PPU::run()
 	{
-		// 1ドット進める
+		// 1ドット進めてLYを更新
 		dot_ = (dot_ + 1) % 70224;
 		updateLY_();
 
@@ -92,13 +92,16 @@ namespace dmge
 		// LCDの状態を更新
 		updateSTAT_();
 
+		// 現在の行に存在するOAMを探す
+		// OAMScanモードへの移行直後に行うと意図した結果にならない気がするので、モード終盤まで待つ
 
-		// スキャンラインの更新
 		if (mode_ == PPUMode::OAMScan && (dot_ % 456) == 79)
 		{
 			oamBuffer_.clear();
 			scanOAM_();
 		}
+
+		// 行の描画
 
 		if (mode_ == PPUMode::Drawing)
 		{
@@ -107,6 +110,8 @@ namespace dmge
 				scanline_();
 			}
 		}
+
+		// 右端まで行ったらフェッチャーの状態をリセットして次の行へ
 
 		if (modeChangedToHBlank())
 		{
@@ -143,22 +148,10 @@ namespace dmge
 		// STAT割り込み要求
 
 		bool statInt = false;
-		if (lcd_.isEnabledLYCInterrupt() && lcd_.lycFlag())
-		{
-			statInt = true;
-		}
-		if (lcd_.isEnabledOAMScanInterrupt() && modeChangedToOAMScan())
-		{
-			statInt = true;
-		}
-		if (lcd_.isEnabledHBlankInterrupt() && modeChangedToHBlank())
-		{
-			statInt = true;
-		}
-		if (lcd_.isEnabledVBlankInterrupt() && modeChangedToVBlank())
-		{
-			statInt = true;
-		}
+		statInt |= (lcd_.isEnabledLYCInterrupt() && lcd_.lycFlag());
+		statInt |= (lcd_.isEnabledOAMScanInterrupt() && modeChangedToOAMScan());
+		statInt |= (lcd_.isEnabledHBlankInterrupt() && modeChangedToHBlank());
+		statInt |= (lcd_.isEnabledVBlankInterrupt() && modeChangedToVBlank());
 
 		if (statInt && !prevStatInt_)
 		{
@@ -168,7 +161,6 @@ namespace dmge
 		prevStatInt_ = statInt;
 
 		mem_->write(Address::IF, intFlag);
-
 	}
 
 	void PPU::draw(const Point& pos, int scale)

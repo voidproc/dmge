@@ -46,18 +46,6 @@ namespace dmge
 		// （「色番号から実際の色への変換テーブル」を置き換える）
 		void setDisplayColorPalette(const std::array<Color, 4>& palette);
 
-		// (CGB) BGパレットインデックスを設定する
-		//void setBGPaletteIndex(uint8 index, bool autoIncrement);
-
-		// (CGB) BGパレットデータを設定する
-		//void setBGPaletteData(uint8 value);
-
-		// (CGB) OBJパレットインデックスを設定する
-		//void setOBJPaletteIndex(uint8 index, bool autoIncrement);
-
-		// (CGB) OBJパレットデータを設定する
-		//void setOBJPaletteData(uint8 value);
-
 		void writeRegister(uint16 addr, uint8 value);
 
 	private:

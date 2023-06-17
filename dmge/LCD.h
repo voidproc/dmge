@@ -6,7 +6,7 @@ namespace dmge
 {
 	class Memory;
 
-	// LCDレジスタ（0xff40-0xff4b）の表示・制御
+	// LCDレジスタ（0xff40-0xff4b, 0xff68-0xff6c）の表示・制御
 
 	class LCD
 	{
@@ -88,10 +88,33 @@ namespace dmge
 		// WX (0xff4b)
 		uint8 wx() const;
 
+		// BGPI
+		uint8 bgPaletteIndex() const;
+
+		// BGPD
+		bool bgPaletteIndexAutoIncrement() const;
+
+		// OBPI
+		uint8 objPaletteIndex() const;
+
+		// OBPD
+		bool objPaletteIndexAutoIncrement() const;
+
+		// OPRI
+		uint8 opri() const;
+
+		// (CGB) 実際の描画色
+		Color bgPaletteColor(uint8 palette, uint8 color) const;
+
+		// (CGB) 実際の描画色
+		Color objPaletteColor(uint8 palette, uint8 color) const;
+
 		void writeRegister(uint16 addr, uint8 value);
 
 	private:
 		Memory* mem_;
+
+		// LCD Registers
 
 		uint8 lcdc_ = 0;
 		uint8 stat_ = 0;
@@ -104,5 +127,23 @@ namespace dmge
 		uint8 obp1_ = 0;
 		uint8 wy_ = 0;
 		uint8 wx_ = 0;
+		uint8 opri_ = 0;
+
+		// (CGB) BG/OBJ Palette Index
+
+		uint8 bgPaletteIndex_ = 0;
+		bool bgPaletteIndexAutoIncr_ = false;
+		uint8 objPaletteIndex_ = 0;
+		bool objPaletteIndexAutoIncr_ = false;
+
+		// (CGB) BG/OBJ Palette
+
+		std::array<uint8, 64> bgPalette_{};
+		std::array<uint8, 64> objPalette_{};
+
+		// (CGB) 色番号から実際の色への変換テーブル
+
+		std::array<std::array<ColorF, 4>, 8> displayBGColorPalette_{};
+		std::array<std::array<ColorF, 4>, 8> displayOBJColorPalette_{};
 	};
 }

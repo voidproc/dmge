@@ -133,6 +133,41 @@ namespace dmge
 		return wx_;
 	}
 
+	uint8 LCD::bgPaletteIndex() const
+	{
+		return bgPaletteIndex_;
+	}
+
+	bool LCD::bgPaletteIndexAutoIncrement() const
+	{
+		return bgPaletteIndexAutoIncr_;
+	}
+
+	uint8 LCD::objPaletteIndex() const
+	{
+		return objPaletteIndex_;
+	}
+
+	bool LCD::objPaletteIndexAutoIncrement() const
+	{
+		return objPaletteIndexAutoIncr_;
+	}
+
+	uint8 LCD::opri() const
+	{
+		return opri_;
+	}
+
+	Color LCD::bgPaletteColor(uint8 palette, uint8 color) const
+	{
+		return displayBGColorPalette_[palette][color];
+	}
+
+	Color LCD::objPaletteColor(uint8 palette, uint8 color) const
+	{
+		return displayOBJColorPalette_[palette][color];
+	}
+
 	void LCD::writeRegister(uint16 addr, uint8 value)
 	{
 		if (addr == Address::LCDC)
@@ -178,6 +213,58 @@ namespace dmge
 		else if (addr == Address::WX)
 		{
 			wx_ = value;
+		}
+		else if (addr == Address::BCPS)
+		{
+			bgPaletteIndex_ = value & 0x3f;
+			bgPaletteIndexAutoIncr_ = value >> 7;
+		}
+		else if (addr == Address::BCPD)
+		{
+			bgPalette_[bgPaletteIndex_] = value;
+
+			const int pal = bgPaletteIndex_ / 8;
+			const int nColor = (bgPaletteIndex_ / 2) % 4;
+			const uint16 color = bgPalette_[pal * 8 + nColor * 2] | (bgPalette_[pal * 8 + nColor * 2 + 1] << 8);
+
+			displayBGColorPalette_[pal][nColor].set(
+				((color >> 0) & 0x1f) * 1.0 / 0x1f,
+				((color >> 5) & 0x1f) * 1.0 / 0x1f,
+				((color >> 10) & 0x1f) * 1.0 / 0x1f);
+
+			if (bgPaletteIndexAutoIncr_)
+			{
+				bgPaletteIndex_ = (bgPaletteIndex_ + 1) % 64;
+				mem_->writeDirect(Address::BCPS, ((uint8)bgPaletteIndexAutoIncr_ << 7) | bgPaletteIndex_);
+			}
+		}
+		else if (addr == Address::OCPS)
+		{
+			objPaletteIndex_ = value & 0x3f;
+			objPaletteIndexAutoIncr_ = value >> 7;
+		}
+		else if (addr == Address::OCPD)
+		{
+			objPalette_[objPaletteIndex_] = value;
+
+			const int pal = objPaletteIndex_ / 8;
+			const int nColor = (objPaletteIndex_ / 2) % 4;
+			const uint16 color = objPalette_[pal * 8 + nColor * 2] | (objPalette_[pal * 8 + nColor * 2 + 1] << 8);
+
+			displayOBJColorPalette_[pal][nColor].set(
+				((color >> 0) & 0x1f) * 1.0 / 0x1f,
+				((color >> 5) & 0x1f) * 1.0 / 0x1f,
+				((color >> 10) & 0x1f) * 1.0 / 0x1f);
+
+			if (objPaletteIndexAutoIncr_)
+			{
+				objPaletteIndex_ = (objPaletteIndex_ + 1) % 64;
+				mem_->writeDirect(Address::OCPS, ((uint8)objPaletteIndexAutoIncr_ << 7) | objPaletteIndex_);
+			}
+		}
+		else if (addr == Address::OPRI)
+		{
+			opri_ = value;
 		}
 	}
 }

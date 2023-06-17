@@ -199,7 +199,8 @@ namespace dmge
 		else if (
 			(addr >= Address::LCDC && addr <= Address::LYC) ||
 			(addr >= Address::BGP && addr <= Address::OBP1) ||
-			(addr >= Address::WY && addr <= Address::WX))
+			(addr >= Address::WY && addr <= Address::WX) ||
+			(addr >= Address::BCPS && addr <= Address::OPRI))
 		{
 			ppu_->writeRegister(addr, value);
 		}
@@ -240,38 +241,6 @@ namespace dmge
 
 			// TODO: 転送モード（bit7）を考慮していないので、転送が終わったことにする
 			value = 0xff;
-		}
-
-		// BCPS/BGPI
-		// 0xff68
-
-		if (addr == Address::BCPS)
-		{
-			ppu_->setBGPaletteIndex(value & 0x3f, value >> 7);
-		}
-
-		// BCPD/BGPD
-		// 0xff69
-
-		if (addr == Address::BCPD)
-		{
-			ppu_->setBGPaletteData(value);
-		}
-
-		// OCPS/OBPI
-		// 0xff6a
-
-		if (addr == Address::OCPS)
-		{
-			ppu_->setOBJPaletteIndex(value & 0x3f, value >> 7);
-		}
-
-		// OCPD/OBPD
-		// 0xff6b
-
-		if (addr == Address::OCPD)
-		{
-			ppu_->setOBJPaletteData(value);
 		}
 
 		// WRAM Bank (SVBK)

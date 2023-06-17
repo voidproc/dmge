@@ -47,19 +47,16 @@ namespace dmge
 		void setDisplayColorPalette(const std::array<Color, 4>& palette);
 
 		// (CGB) BGパレットインデックスを設定する
-		void setBGPaletteIndex(uint8 index, bool autoIncrement);
+		//void setBGPaletteIndex(uint8 index, bool autoIncrement);
 
 		// (CGB) BGパレットデータを設定する
-		void setBGPaletteData(uint8 value);
+		//void setBGPaletteData(uint8 value);
 
 		// (CGB) OBJパレットインデックスを設定する
-		void setOBJPaletteIndex(uint8 index, bool autoIncrement);
+		//void setOBJPaletteIndex(uint8 index, bool autoIncrement);
 
 		// (CGB) OBJパレットデータを設定する
-		void setOBJPaletteData(uint8 value);
-
-		// [DEBUG]
-		void drawCGBPalette();
+		//void setOBJPaletteData(uint8 value);
 
 		void writeRegister(uint16 addr, uint8 value);
 
@@ -106,30 +103,12 @@ namespace dmge
 		// スキャンラインのはじめのあたり（OAMScanモード時）に構築される
 		Array<BufferedOAM> oamBuffer_;
 
-		// (DMG) 色番号から実際の色への変換テーブル
-		std::array<Color, 4> displayColorPalette_{
-			Color{ 221, 255, 212 },
-			Palette::Lightgreen,
-			Color{ 29, 114, 61 },
-			Color{ 0, 51, 0 },
-		};
-
 		// CGB Mode
 		bool cgbMode_ = false;
 
-		// CGB BG/OBJ Palette Index
-		uint8 bgPaletteIndex_ = 0;
-		bool bgPaletteIndexAutoIncr_ = false;
-		uint8 objPaletteIndex_ = 0;
-		bool objPaletteIndexAutoIncr_ = false;
+		// (DMG) 色番号から実際の色への変換テーブル
+		std::array<Color, 4> displayColorPalette_{};
 
-		// CGB BG/OBJ Palette
-		std::array<uint8, 64> bgPalette_{};
-		std::array<uint8, 64> objPalette_{};
-
-		// (CGB) 色番号から実際の色への変換テーブル
-		std::array<std::array<ColorF, 4>, 8> displayBGColorPalette_{};
-		std::array<std::array<ColorF, 4>, 8> displayOBJColorPalette_{};
 
 		void updateLY_();
 		void updateMode_();

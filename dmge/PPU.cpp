@@ -495,7 +495,7 @@ namespace dmge
 		}
 
 		// タイルデータのアドレスを得る
-		const uint8 tileId = mem_->read(tileAddr);
+		const uint8 tileId = mem_->readVRAMBank(tileAddr, 0);
 		const uint16 tileDataAddr = TileData::GetAddress(lcd_.tileDataAddress(), tileId, drawingWindow_ ? (windowLine_ % 8) : ((ly + scy) % 8), tileMapAttr.attr.yFlip);
 
 		// タイルデータを参照

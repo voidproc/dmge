@@ -50,6 +50,18 @@ namespace dmge
 		return false;
 	}
 
+	bool HasRTC(CartridgeType type)
+	{
+		switch (type)
+		{
+		case CartridgeType::MBC3_TIMER_BATTERY:
+		case CartridgeType::MBC3_TIMER_RAM_BATTERY_2:
+			return true;
+		}
+
+		return false;
+	}
+
 	MBC::MBC(FilePath cartridgePath)
 	{
 		loadCartridge_(cartridgePath);
@@ -345,7 +357,11 @@ namespace dmge
 	{
 		if (ADDRESS_IN_RANGE(addr, Address::MBC_RAMEnable))
 		{
-			MBC1::write(addr, value);
+			// RAM and Timer Enable
+
+			bool enabled = (value & 0xf) == 0xa;
+			ramEnabled_ = enabled;
+			rtc_.setEnable(enabled);
 		}
 		else if (ADDRESS_IN_RANGE(addr, Address::MBC_ROMBank))
 		{
@@ -363,20 +379,47 @@ namespace dmge
 		}
 		else if (ADDRESS_IN_RANGE(addr, Address::MBC_RAMBank))
 		{
-			MBC1::write(addr, value);
+			// RAM Bank Number / RTC Register Select
+			if (value <= 3)
+			{
+				MBC1::write(addr, value);
+
+				rtc_.unselect();
+			}
+			else
+			{
+				// Map the RTC register
+				rtc_.select(value);
+			}
+		}
+		else if (ADDRESS_IN_RANGE(addr, Address::MBC_LatchClock))
+		{
+			rtc_.writeLatchClock(value);
 		}
 		else if (ADDRESS_IN_RANGE(addr, Address::SRAM))
 		{
-			// External RAM
-			// write to external RAM if it is enabled. If it is not,  >>> the write is ignored <<<
-			if (not ramEnabled_)
+			if (rtc_.selected())
 			{
-				return;
+				rtc_.writeRegister(value);
 			}
+			else
+			{
+				// External RAM
+				// write to external RAM if it is enabled. If it is not,  >>> the write is ignored <<<
+				if (not ramEnabled_)
+				{
+					return;
+				}
 
-			const uint16 offset = addr - Address::SRAM;
-			sram_[ramBank_ * 0x2000 + offset] = value;
+				const uint16 offset = addr - Address::SRAM;
+				sram_[ramBank_ * 0x2000 + offset] = value;
+			}
 		}
+	}
+
+	void MBC3::update(int cycles)
+	{
+		rtc_.update(cycles);
 	}
 
 	uint8 MBC3::read(uint16 addr) const
@@ -393,10 +436,17 @@ namespace dmge
 		}
 		else if (addr <= Address::SRAM_End)
 		{
-			// External RAM
+			// External RAM or RTC Register
 
-			const uint16 offset = addr - Address::SRAM;
-			return sram_[ramBank_ * 0x2000 + offset];
+			if (rtc_.selected())
+			{
+				return rtc_.readRegister();
+			}
+			else
+			{
+				const uint16 offset = addr - Address::SRAM;
+				return sram_[ramBank_ * 0x2000 + offset];
+			}
 		}
 
 		return 0;

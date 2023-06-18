@@ -38,6 +38,8 @@ namespace dmge
 
 		uint16 read16VRAMBank(uint16 addr, int bank) const;
 
+		void update(int cycles);
+
 		bool isCGBMode() const;
 
 		int romBank() const;

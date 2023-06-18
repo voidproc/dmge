@@ -193,6 +193,9 @@ private:
 				traceLoop_();
 			}
 
+			// RTC
+			mem_.update(cpu_.consumedCycles());
+
 			// CPUコマンドを1回実行する
 
 			cpu_.applyScheduledIME();

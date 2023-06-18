@@ -350,6 +350,11 @@ namespace dmge
 		return vram_[bank][addr - Address::VRAM] | (vram_[bank][addr + 1 - Address::VRAM] << 8);
 	}
 
+	void Memory::update(int cycles)
+	{
+		mbc_->update(cycles);
+	}
+
 	bool Memory::isCGBMode() const
 	{
 		return (static_cast<uint8>(mbc_->cgbFlag()) & 0x80) == 0x80;

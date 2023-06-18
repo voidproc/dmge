@@ -71,6 +71,9 @@ namespace dmge
 			MBC_BankingMode = 0x6000,
 			MBC_BankingMode_End = 0x7fff,
 
+			MBC_LatchClock = 0x6000,
+			MBC_LatchClock_End = 0x7fff,
+
 			// Switchable ROM Bank
 
 			SwitchableROMBank = 0x4000,

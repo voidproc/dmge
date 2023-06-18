@@ -141,6 +141,7 @@
     <ClCompile Include="Memory.cpp" />
     <ClCompile Include="PPU.cpp" />
     <ClCompile Include="PPUMode.cpp" />
+    <ClCompile Include="RTC.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
@@ -374,6 +375,7 @@
     <ClInclude Include="Address.h" />
     <ClInclude Include="PPU.h" />
     <ClInclude Include="PPUMode.h" />
+    <ClInclude Include="RTC.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="TileData.h" />
     <ClInclude Include="Timer.h" />

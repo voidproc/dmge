@@ -231,6 +231,9 @@
     <ClCompile Include="APU\WaveChannel.cpp">
       <Filter>Source Files\APU</Filter>
     </ClCompile>
+    <ClCompile Include="RTC.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Image Include="App\icon.ico">
@@ -959,6 +962,9 @@
     </ClInclude>
     <ClInclude Include="APU\WaveChannel.h">
       <Filter>Header Files\APU</Filter>
+    </ClInclude>
+    <ClInclude Include="RTC.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Cartridge.h"
+#include "RTC.h"
 
 namespace dmge
 {
@@ -14,6 +15,8 @@ namespace dmge
 		virtual void write(uint16 addr, uint8 value) = 0;
 
 		virtual uint8 read(uint16 addr) const = 0;
+
+		virtual void update(int cycles) {}
 
 		static std::unique_ptr<MBC> LoadCartridge(FilePath cartridgePath);
 
@@ -69,9 +72,9 @@ namespace dmge
 	public:
 		using MBC::MBC;
 
-		virtual void write(uint16 addr, uint8 value) override;
+		void write(uint16 addr, uint8 value) override;
 
-		virtual uint8 read(uint16 addr) const override;
+		uint8 read(uint16 addr) const override;
 	};
 
 	class MBC2 : public MBC1
@@ -79,9 +82,9 @@ namespace dmge
 	public:
 		using MBC1::MBC1;
 
-		virtual void write(uint16 addr, uint8 value) override;
+		void write(uint16 addr, uint8 value) override;
 
-		virtual uint8 read(uint16 addr) const override;
+		uint8 read(uint16 addr) const override;
 	};
 
 	class MBC3 : public MBC1
@@ -89,8 +92,13 @@ namespace dmge
 	public:
 		using MBC1::MBC1;
 
-		virtual void write(uint16 addr, uint8 value) override;
+		void write(uint16 addr, uint8 value) override;
 
-		virtual uint8 read(uint16 addr) const override;
+		uint8 read(uint16 addr) const override;
+
+		void update(int cycles) override;
+
+	private:
+		RTC rtc_;
 	};
 }

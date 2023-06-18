@@ -83,7 +83,7 @@ namespace dmge
 
 		switch (*selected_)
 		{
-		case RTCRegisters::S:  regInternal_.s = value & MaskS; break;
+		case RTCRegisters::S:  regInternal_.s = value & MaskS; cycles_ = 0; break;
 		case RTCRegisters::M:  regInternal_.m = value & MaskM; break;
 		case RTCRegisters::H:  regInternal_.h = value & MaskH; break;
 		case RTCRegisters::DL: regInternal_.d = (regInternal_.d & 0xff00) | value; break;
@@ -122,20 +122,21 @@ namespace dmge
 
 		cycles_ -= ClockFrequency;
 
+		if (++regInternal_.s != 60) goto mask;
+		regInternal_.s = 0;
+		if (++regInternal_.m != 60) goto mask;
+		regInternal_.m = 0;
+		if (++regInternal_.h != 24) goto mask;
+		regInternal_.h = 0;
+		if (++regInternal_.d != 512) goto mask;
+		regInternal_.d = 0;
+		carry_ = true;
+
+	mask:
 		regInternal_.s &= MaskS;
 		regInternal_.m &= MaskM;
 		regInternal_.h &= MaskH;
 		regInternal_.d &= MaskD;
-
-		if (++regInternal_.s != 60) return;
-		regInternal_.s = 0;
-		if (++regInternal_.m != 60) return;
-		regInternal_.m = 0;
-		if (++regInternal_.h != 24) return;
-		regInternal_.h = 0;
-		if (++regInternal_.d != 512) return;
-		regInternal_.d = 0;
-		carry_ = true;
 	}
 
 	void RTC::latch_()

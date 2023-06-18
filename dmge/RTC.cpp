@@ -122,17 +122,8 @@ namespace dmge
 
 		cycles_ -= ClockFrequency;
 
-		if (++regInternal_.s != 60) goto mask;
-		regInternal_.s = 0;
-		if (++regInternal_.m != 60) goto mask;
-		regInternal_.m = 0;
-		if (++regInternal_.h != 24) goto mask;
-		regInternal_.h = 0;
-		if (++regInternal_.d != 512) goto mask;
-		regInternal_.d = 0;
-		carry_ = true;
+		add1Second_();
 
-	mask:
 		regInternal_.s &= MaskS;
 		regInternal_.m &= MaskM;
 		regInternal_.h &= MaskH;
@@ -142,5 +133,18 @@ namespace dmge
 	void RTC::latch_()
 	{
 		regLatched_ = regInternal_;
+	}
+
+	void RTC::add1Second_()
+	{
+		if (++regInternal_.s != 60) return;
+		regInternal_.s = 0;
+		if (++regInternal_.m != 60) return;
+		regInternal_.m = 0;
+		if (++regInternal_.h != 24) return;
+		regInternal_.h = 0;
+		if (++regInternal_.d != 512) return;
+		regInternal_.d = 0;
+		carry_ = true;
 	}
 }

@@ -63,5 +63,7 @@ namespace dmge
 		int cycles_ = 0;
 
 		void latch_();
+
+		void add1Second_();
 	};
 }

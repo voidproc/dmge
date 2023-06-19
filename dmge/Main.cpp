@@ -35,6 +35,8 @@ void InitScene(int scale, bool showDebugMonitor)
 {
 	SetWindowSize(scale, showDebugMonitor);
 
+	Window::SetTitle(U"dmge");
+
 	Scene::SetBackground(Palette::Whitesmoke);
 
 	Scene::SetTextureFilter(TextureFilter::Nearest);

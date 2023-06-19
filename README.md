@@ -2,8 +2,7 @@
 
 C++ / OpenSiv3D でゲームボーイのエミュレータを作っています。
 
-![top](screenshot/top.png)
-
+<img src="screenshot/top.png" width="400">
 
 ## 目次
 

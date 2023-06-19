@@ -34,8 +34,8 @@ C++ / OpenSiv3D でゲームボーイのエミュレータを作っています�
 
 - CPU
   - [x] 一般的な命令の実装
+  - [x] テスト ROM (cpu_instrs / instr_timing) による検証
   - [ ] STOP
-  - [ ] テスト ROM (cpu_instrs / instr_timing) による検証
 - MBC
   - [x] ROM Only
   - [x] MBC1

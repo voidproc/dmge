@@ -9,29 +9,29 @@ namespace dmge
 
 		INI ini{ U"config.ini" };
 
-		config.cartridgePath = ParseOr<String>(ini[U"cartridge"], U"");
+		config.cartridgePath = ParseOr<String>(ini[U"Cartridge"], U"");
 
-		config.breakpoints = ParseOr<String>(ini[U"breakpoint"], U"")
+		config.breakpoints = ParseOr<String>(ini[U"Breakpoint"], U"")
 			.split(U',')
 			.map([](const String& s) { return ParseInt<uint16>(s, 16); });
 
-		config.breakpointsMemWrite = ParseOr<String>(ini[U"breakpointmemw"], U"")
+		config.breakpointsMemWrite = ParseOr<String>(ini[U"BreakpointMemW"], U"")
 			.split(U',')
 			.map([](const String& s) { return ParseInt<uint16>(s, 16); });
 
-		config.dumpAddress = ParseOr<String>(ini[U"dumpaddress"], U"")
+		config.dumpAddress = ParseOr<String>(ini[U"DumpAddress"], U"")
 			.split(U',')
 			.map([](const String& s) { return ParseInt<uint16>(s, 16); });
 
-		config.enableBreakpoint = ParseOr<int>(ini[U"enablebreakpoint"], false);
+		config.enableBreakpoint = ParseOr<int>(ini[U"EnableBreakpoint"], false);
 
-		config.showFPS = ParseOr<int>(ini[U"showfps"], true);
+		config.showFPS = ParseOr<int>(ini[U"ShowFPS"], true);
 
-		config.scale = ParseOr<int>(ini[U"scale"], 3);
+		config.scale = ParseOr<int>(ini[U"Scale"], 3);
 
-		config.showConsole = ParseOr<int>(ini[U"showconsole"], true);
+		config.showConsole = ParseOr<int>(ini[U"ShowConsole"], true);
 
-		config.showDebugMonitor = ParseOr<int>(ini[U"showdebugmonitor"], true);
+		config.showDebugMonitor = ParseOr<int>(ini[U"ShowDebugMonitor"], true);
 
 		return config;
 	}
@@ -40,14 +40,14 @@ namespace dmge
 	{
 		DebugPrint::Writeln(U"* AppConfig:");
 
-		DebugPrint::Writeln(U"cartridgePath={}"_fmt(cartridgePath));
+		DebugPrint::Writeln(U"Cartridge={}"_fmt(cartridgePath));
 
 		if (not breakpoints.empty())
 		{
 			const auto breakpointsText = breakpoints
 				.map([](auto x) { return U"{:04X}"_fmt(x); })
 				.join(U","_sv, U""_sv, U""_sv);
-			DebugPrint::Writeln(U"breakpoints={}"_fmt(breakpointsText));
+			DebugPrint::Writeln(U"Breakpoint={}"_fmt(breakpointsText));
 		}
 
 		if (not breakpointsMemWrite.empty())
@@ -55,7 +55,7 @@ namespace dmge
 			const auto breakpointsText = breakpointsMemWrite
 				.map([](auto x) { return U"{:04X}"_fmt(x); })
 				.join(U","_sv, U""_sv, U""_sv);
-			DebugPrint::Writeln(U"breakpointsMemWrite={}"_fmt(breakpointsText));
+			DebugPrint::Writeln(U"BreakpointMemW={}"_fmt(breakpointsText));
 		}
 
 		if (not dumpAddress.empty())
@@ -63,13 +63,13 @@ namespace dmge
 			const auto addrText = dumpAddress
 				.map([](auto x) { return U"{:04X}"_fmt(x); })
 				.join(U","_sv, U""_sv, U""_sv);
-			DebugPrint::Writeln(U"dumpAddress={}"_fmt(addrText));
+			DebugPrint::Writeln(U"DumpAddress={}"_fmt(addrText));
 		}
 
-		DebugPrint::Writeln(U"enableBreakpoint={}"_fmt(enableBreakpoint));
-		DebugPrint::Writeln(U"showFPS={}"_fmt(showFPS));
-		DebugPrint::Writeln(U"scale={}"_fmt(scale));
-		DebugPrint::Writeln(U"showConsole={}"_fmt(showConsole));
-		DebugPrint::Writeln(U"showDebugMonitor={}"_fmt(showDebugMonitor));
+		DebugPrint::Writeln(U"EnableBreakpoint={}"_fmt(enableBreakpoint));
+		DebugPrint::Writeln(U"ShowFPS={}"_fmt(showFPS));
+		DebugPrint::Writeln(U"Scale={}"_fmt(scale));
+		DebugPrint::Writeln(U"ShowConsole={}"_fmt(showConsole));
+		DebugPrint::Writeln(U"ShowDebugMonitor={}"_fmt(showDebugMonitor));
 	}
 }

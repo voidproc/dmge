@@ -129,7 +129,7 @@ namespace dmge
 
 			// バッファが十分なら書き込まない
 
-			if (apuStream_->bufferRemain() <= sampleRate_ / 8)
+			if (apuStream_->bufferRemain() > sampleRate_ / 8)
 			{
 				return 0;
 			}

@@ -4,6 +4,7 @@ C++ / OpenSiv3D でゲームボーイのエミュレータを作っています�
 
 <img src="screenshot/top.png" width="400">
 
+
 ## 目次
 
 - [dmge - DMG Emulator](#dmge---dmg-emulator)
@@ -16,6 +17,7 @@ C++ / OpenSiv3D でゲームボーイのエミュレータを作っています�
 
 
 ## 概要
+
 C++ / OpenSiv3D でゲームボーイのエミュレータを作っています。ゲームボーイの構造や動作原理、そしてエミュレータの開発に関する理解を深めるための、主に学習目的のプロジェクトです。
 
 正確性や効率性、ユーザーインターフェースに関することの優先度は低く、特筆すべき機能もありません。そのため、何かのカートリッジイメージを動作させることが目的であれば、[BGB](https://bgb.bircd.org/) や [SameBoy](https://sameboy.github.io/) のような優れたエミュレータの使用をおすすめします。とはいえ、ある程度の機能を実装した後に、実行可能ファイル（Windows のみ）の公開を予定しています。
@@ -55,6 +57,7 @@ C++ / OpenSiv3D でゲームボーイのエミュレータを作っています�
   - [ ] ゲームパッドによる操作
   - [x] ジョイコンによる操作（両手持ち）
 - その他
+  - [ ] 通信関係
   - [ ] CGB の倍速モード
   - [ ] etc.
 
@@ -73,6 +76,7 @@ C++ / OpenSiv3D でゲームボーイのエミュレータを作っています�
 |rtc3test<br>(Range tests)|![rtc3test_range](screenshot/test_result/rtc3test_range.png)|
 |rtc3test<br>(Sub-second writes)|![rtc3test_subsec](screenshot/test_result/rtc3test_subsec.png)|
 |❌ dmg_sound|Failed: 03#3, 05#4, 07#5, 09, 10, 12 |
+
 
 ## スクリーンショット
 

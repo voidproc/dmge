@@ -177,8 +177,25 @@ namespace dmge
 				{
 					if (not cgbMode_)
 					{
-						if (not (apuReg == Address::NR11 || apuReg == Address::NR21 || apuReg == Address::NR31 || apuReg == Address::NR41))
+						switch (apuReg)
+						{
+						case Address::NR11:
+							ch1_.setDuty(0);
+							mem_->writeDirect(apuReg, mem_->read(apuReg) & 0x3f);
+							break;
+
+						case Address::NR21:
+							ch2_.setDuty(0);
+							mem_->writeDirect(apuReg, mem_->read(apuReg) & 0x3f);
+							break;
+
+						case Address::NR31:
+						case Address::NR41:
+							break;
+
+						default:
 							mem_->write(apuReg, 0);
+						}
 					}
 				}
 			}

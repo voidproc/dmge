@@ -20,7 +20,8 @@ namespace dmge
 
 	void WaveChannel::trigger()
 	{
-		setEnable(true);
+		if (getDACEnable())
+			setEnable(true);
 
 		length_.trigger(256);
 

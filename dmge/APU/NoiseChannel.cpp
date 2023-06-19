@@ -20,7 +20,8 @@ namespace dmge
 
 	void NoiseChannel::trigger()
 	{
-		setEnable(true);
+		if (getDACEnable())
+			setEnable(true);
 
 		envelope_.trigger();
 

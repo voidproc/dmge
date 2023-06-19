@@ -15,7 +15,8 @@ namespace dmge
 
 	void SquareChannel::trigger()
 	{
-		setEnable(true);
+		if (getDACEnable())
+			setEnable(true);
 
 		sweep_.trigger(freq_);
 

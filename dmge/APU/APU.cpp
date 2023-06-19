@@ -208,7 +208,10 @@ namespace dmge
 		{
 			ch1_.setEnvelope(value);
 
-			if ((value & 0xf8) == 0)
+			bool dacEnable = (value & 0xf8) != 0;
+			ch1_.setDACEnable(dacEnable);
+
+			if (not dacEnable)
 			{
 				ch1_.setEnable(false);
 			}
@@ -217,14 +220,20 @@ namespace dmge
 		{
 			ch2_.setEnvelope(value);
 
-			if ((value & 0xf8) == 0)
+			bool dacEnable = (value & 0xf8) != 0;
+			ch2_.setDACEnable(dacEnable);
+
+			if (not dacEnable)
 			{
 				ch2_.setEnable(false);
 			}
 		}
 		else if (addr == Address::NR30)
 		{
-			if ((value >> 7) == 0)
+			bool dacEnable = (value >> 7) != 0;
+			ch3_.setDACEnable(dacEnable);
+
+			if (not dacEnable)
 			{
 				ch3_.setEnable(false);
 			}
@@ -233,7 +242,10 @@ namespace dmge
 		{
 			ch4_.setEnvelope(value);
 
-			if ((value & 0xf8) == 0)
+			bool dacEnable = (value & 0xf8) != 0;
+			ch4_.setDACEnable(dacEnable);
+
+			if (not dacEnable)
 			{
 				ch4_.setEnable(false);
 			}

@@ -12,4 +12,14 @@ namespace dmge
 	{
 		enabled_ = enable;
 	}
+
+	bool Channel::getDACEnable() const
+	{
+		return dacEnabled_;
+	}
+
+	void Channel::setDACEnable(bool enable)
+	{
+		dacEnabled_ = enable;
+	}
 }

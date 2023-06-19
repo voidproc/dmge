@@ -72,7 +72,7 @@ C++ / OpenSiv3D でゲームボーイのエミュレータを作っています�
 |rtc3test<br>(Basic tests)|![rtc3test_basic](screenshot/test_result/rtc3test_basic.png)|
 |rtc3test<br>(Range tests)|![rtc3test_range](screenshot/test_result/rtc3test_range.png)|
 |rtc3test<br>(Sub-second writes)|![rtc3test_subsec](screenshot/test_result/rtc3test_subsec.png)|
-|❌ dmg_sound|01-registers: passed<br>02-len ctr: passed|
+|❌ dmg_sound|Failed: 03#3, 05#4, 07#5, 08, 09, 10, 11, 12 |
 
 ## スクリーンショット
 

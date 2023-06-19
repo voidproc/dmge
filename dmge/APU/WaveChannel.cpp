@@ -25,7 +25,7 @@ namespace dmge
 
 		length_.trigger(256);
 
-		waveRAMOffset_ = 0;
+		waveRAMOffset_ = 1;
 	}
 
 	int WaveChannel::amplitude() const
@@ -78,6 +78,6 @@ namespace dmge
 
 	void WaveChannel::resetWaveRAMOffset()
 	{
-		waveRAMOffset_ = 0;
+		waveRAMOffset_ = 1;
 	}
 }

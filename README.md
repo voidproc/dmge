@@ -2,6 +2,8 @@
 
 C++ / OpenSiv3D でゲームボーイのエミュレータを作っています。
 
+![top](screenshot/top.png)
+
 
 ## 目次
 
@@ -68,9 +70,9 @@ C++ / OpenSiv3D でゲームボーイのエミュレータを作っています�
 |❌ interrupt_time|![interrupt_time](screenshot/test_result/interrupt_time.png)|
 |dmg-acid2|![dmg-acid2](screenshot/test_result/dmg-acid2.png)|
 |cgb-acid2|![cgb-acid2](screenshot/test_result/cgb-acid2.png)|
-|rtc3test_basic|![rtc3test_basic](screenshot/test_result/rtc3test_basic.png)|
-|rtc3test_range|![rtc3test_range](screenshot/test_result/rtc3test_range.png)|
-|rtc3test_subsec|![rtc3test_subsec](screenshot/test_result/rtc3test_subsec.png)|
+|rtc3test<br>(Basic tests)|![rtc3test_basic](screenshot/test_result/rtc3test_basic.png)|
+|rtc3test<br>(Range tests)|![rtc3test_range](screenshot/test_result/rtc3test_range.png)|
+|rtc3test<br>(Sub-second writes)|![rtc3test_subsec](screenshot/test_result/rtc3test_subsec.png)|
 
 
 ## スクリーンショット

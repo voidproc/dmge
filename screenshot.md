@@ -42,15 +42,3 @@ https://tangramgames.dk/tobutobugirl/
 
 ![Pokemon Silver](screenshot/pokemons.png)
 
-
-## Test ROMs
-
-![cpu_instrs](screenshot/cpu_instrs.png)
-
-![instr_timing](screenshot/instr_timing.png)
-
-![dmg-acid2](screenshot/dmg-acid2.png)
-
-![cgb-acid2](screenshot/cgb-acid2.png)
-
-![bgbtest](screenshot/bgbtest.png)

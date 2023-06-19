@@ -55,8 +55,9 @@ namespace dmge
 		// このフレームの描画ドット数
 		int dot_ = 0;
 
-		// 前回のLYC
+		// 前回のLY, LYC
 		// STAT更新用
+		uint8 prevLY_ = 0;
 		uint8 prevLYC_ = 0;
 
 		// PPUのモード

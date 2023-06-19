@@ -218,6 +218,13 @@ namespace dmge
 		}
 
 		uint8 ly = static_cast<uint8>(dot_ / 456);
+
+		// "scanline 153 quirk"
+		if (ly == 153 && (dot_ % 456) >= 4)
+		{
+			ly = 0;
+		}
+
 		lcd_.ly(ly);
 	}
 
@@ -225,7 +232,7 @@ namespace dmge
 	{
 		// Set PPU Mode
 
-		if (lcd_.ly() >= LCDSize.y)
+		if (dot_ >= 456 * 144)
 		{
 			mode_ = PPUMode::VBlank;
 		}
@@ -257,16 +264,16 @@ namespace dmge
 		// Set STAT.2 (Coincidence Flag)
 		// LYが更新されるかLYCが設定されるときにSTAT.2をセットする
 
-		const bool changedLy = dot_ % 456 == 0;
+		const uint8 ly = lcd_.ly();
 		const uint8 lyc = lcd_.lyc();
 
-		if (changedLy || lyc != prevLYC_)
+		if ((ly != prevLY_) || lyc != prevLYC_)
 		{
-			const uint8 ly = lcd_.ly();
 			const uint8 stat = lcd_.stat();
 			mem_->write(Address::STAT, 0x80 | (stat & ~4) | (ly == lyc ? 4 : 0));
 		}
 
+		prevLY_ = ly;
 		prevLYC_ = lyc;
 	}
 

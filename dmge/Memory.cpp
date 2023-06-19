@@ -187,7 +187,12 @@ namespace dmge
 		else if (addr >= Address::NR10 && addr <= Address::NR51)
 		{
 			// Ignore if APU is off
-			if ((mem_[Address::NR52] & 0x80) == 0) return;
+			// (except on the DMG, where length counters are unaffected by power and can still be written while off)
+			if ((mem_[Address::NR52] & 0x80) == 0)
+			{
+				if (not isCGBMode() && not (addr == Address::NR11 || addr == Address::NR21 || addr == Address::NR31 || addr == Address::NR41))
+					return;
+			}
 
 			apu_->writeRegister(addr, value);
 		}

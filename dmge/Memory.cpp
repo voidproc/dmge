@@ -184,14 +184,17 @@ namespace dmge
 		// APU
 		// 0xff10 - 0xff26
 
-		else if (addr >= Address::NR10 && addr <= Address::NR52)
+		else if (addr >= Address::NR10 && addr <= Address::NR51)
+		{
+			// Ignore if APU is off
+			if ((mem_[Address::NR52] & 0x80) == 0) return;
+
+			apu_->writeRegister(addr, value);
+		}
+		else if (addr == Address::NR52)
 		{
 			apu_->writeRegister(addr, value);
-
-			if (addr == Address::NR52)
-			{
-				value &= 0x80;
-			}
+			value &= 0x80;
 		}
 
 		// PPU

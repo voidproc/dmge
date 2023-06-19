@@ -164,12 +164,6 @@ namespace dmge
 
 		if (addr == Address::NR52)
 		{
-			ch1_.setEnable(((value >> 0) & 1) == 1);
-			ch2_.setEnable(((value >> 1) & 1) == 1);
-			ch3_.setEnable(((value >> 2) & 1) == 1);
-			ch4_.setEnable(((value >> 3) & 1) == 1);
-
-
 			// APUがoffになったとき、APUレジスタが全てクリアされる
 			if ((value & 0x80) == 0)
 			{
@@ -178,11 +172,6 @@ namespace dmge
 					mem_->write(apuReg, 0);
 				}
 			}
-		}
-		else if ((mem_->read(Address::NR52) & 0x80) == 0)
-		{
-			// Ignore if APU is off
-			return;
 		}
 
 		// Sweep

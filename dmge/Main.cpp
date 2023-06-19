@@ -149,8 +149,6 @@ private:
 
 		bool shouldDraw = false;
 
-		bool alwaysDump = false;
-
 		bool enableAPU = true;
 
 		int bufferedSamples = 0;
@@ -174,7 +172,7 @@ private:
 
 
 			// [DEBUG]
-			if (alwaysDump)
+			if (alwaysDump_)
 			{
 				cpu_.dump();
 			}
@@ -275,12 +273,6 @@ private:
 					apu_.pause();
 				}
 
-				// [DEBUG]常にダンプ
-				if (KeyD.down())
-				{
-					alwaysDump = not alwaysDump;
-				}
-
 				// [DEBUG]
 				if (Key1.down())
 				{
@@ -373,6 +365,12 @@ private:
 		{
 			showDebugMonitor_ = not showDebugMonitor_;
 			SetWindowSize(config_.scale, showDebugMonitor_);
+		}
+
+		// [DEBUG]常にダンプ
+		if (KeyD.down())
+		{
+			alwaysDump_ = not alwaysDump_;
 		}
 
 		// パレット切り替え
@@ -470,6 +468,9 @@ private:
 
 	// デバッグ用モニタを表示する
 	bool showDebugMonitor_ = true;
+
+	// [DEBUG] 常にダンプする
+	bool alwaysDump_ = false;
 
 	// メモリダンプするアドレス設定用
 	uint16 dumpAddress_ = 0;

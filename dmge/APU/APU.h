@@ -23,6 +23,8 @@ namespace dmge
 	public:
 		APU(Memory* mem, int sampleRate = 44100);
 
+		void setCGBMode(bool value);
+
 		// サウンド処理を1クロック分実行し、
 		// サンプリングレートの周期にある場合はオーディオストリームにサンプルを書き込む
 		// バッファに書き込んだサンプル数を返却する
@@ -64,5 +66,8 @@ namespace dmge
 
 		// Count T-cycles
 		double cycles_ = 0;
+
+		// CGB Mode
+		bool cgbMode_ = false;
 	};
 }

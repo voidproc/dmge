@@ -15,6 +15,8 @@ namespace dmge
 
 		bool onExtraLengthClock() const;
 
+		void reset();
+
 	private:
 		uint64 clock_ = 0;
 

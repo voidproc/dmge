@@ -133,6 +133,7 @@ public:
 
 		// CGBモードの適用
 		ppu_.setCGBMode(mem_.isCGBMode());
+		apu_.setCGBMode(mem_.isCGBMode());
 		cpu_.setCGBMode(mem_.isCGBMode());
 		cpu_.reset();
 

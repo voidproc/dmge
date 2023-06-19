@@ -21,6 +21,8 @@ namespace dmge
 
 		void setDuty(uint8 NRx1);
 
+		void resetDutyPosition();
+
 		// Envelope
 
 		void stepEnvelope();

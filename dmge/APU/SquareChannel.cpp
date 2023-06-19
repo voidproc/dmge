@@ -35,6 +35,11 @@ namespace dmge
 		duty_ = NRx1 >> 6;
 	}
 
+	void SquareChannel::resetDutyPosition()
+	{
+		dutyPos_ = 0;
+	}
+
 	void SquareChannel::stepEnvelope()
 	{
 		envelope_.step();

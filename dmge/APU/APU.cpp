@@ -20,15 +20,13 @@ namespace dmge
 	{
 	}
 
+	void APU::setCGBMode(bool value)
+	{
+		cgbMode_ = value;
+	}
+
 	int APU::run()
 	{
-		// バッファが十分なら書き込まない
-
-		if (apuStream_->bufferRemain() > sampleRate_ / 8)
-		{
-			return 0;
-		}
-
 		// マスタースイッチがOffならAPUを停止する
 
 		const uint8 NR52 = mem_->read(Address::NR52);
@@ -129,6 +127,13 @@ namespace dmge
 			const double leftVolume = (((NR50 >> 4) & 0b111) + 1) / 8.0;
 			const double rightVolume = (((NR50 >> 0) & 0b111) + 1) / 8.0;
 
+			// バッファが十分なら書き込まない
+
+			if (apuStream_->bufferRemain() <= sampleRate_ / 8)
+			{
+				return 0;
+			}
+
 			apuStream_->pushSample(left * leftVolume / 4.0, right * rightVolume / 4.0);
 
 			return 1;
@@ -165,12 +170,27 @@ namespace dmge
 		if (addr == Address::NR52)
 		{
 			// APUがoffになったとき、APUレジスタが全てクリアされる
+			// (except on the DMG, where length counters are unaffected by power and can still be written while off).
 			if ((value & 0x80) == 0)
 			{
 				for (uint16 apuReg = Address::NR10; apuReg <= Address::NR51; apuReg++)
 				{
-					mem_->write(apuReg, 0);
+					if (not cgbMode_)
+					{
+						if (not (apuReg == Address::NR11 || apuReg == Address::NR21 || apuReg == Address::NR31 || apuReg == Address::NR41))
+							mem_->write(apuReg, 0);
+					}
 				}
+			}
+			else
+			{
+				// When powered on:
+				// - the frame sequencer is reset so that the next step will be 0
+				// - the square duty units are reset to the first step of the waveform
+				// - the wave channel's sample buffer is reset to 0
+				frameSeq_.reset();
+				ch1_.resetDutyPosition();
+				ch3_.resetWaveRAMOffset(); // ?
 			}
 		}
 

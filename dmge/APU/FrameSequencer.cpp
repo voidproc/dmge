@@ -41,4 +41,9 @@ namespace dmge
 	{
 		return onExtraLengthClock_;
 	}
+
+	void FrameSequencer::reset()
+	{
+		clock_ = -1;
+	}
 }

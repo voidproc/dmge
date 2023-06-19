@@ -75,4 +75,9 @@ namespace dmge
 	{
 		waveOutputLevel_ = (NRx2 >> 5) & 0b11;
 	}
+
+	void WaveChannel::resetWaveRAMOffset()
+	{
+		waveRAMOffset_ = 0;
+	}
 }

@@ -41,6 +41,8 @@ namespace dmge
 
 		void setWaveOutputLevel(uint8 NRx2);
 
+		void resetWaveRAMOffset();
+
 	private:
 		Memory* mem_;
 

@@ -167,6 +167,12 @@ namespace dmge
 		}
 		else if (addr == Address::TIMA)
 		{
+			// TMA からのリロードが発生するのと同じ T-cycle で TIMA に書き込まれた場合、書き込みは無視される
+			if (timer_->isReloading())
+			{
+				return;
+			}
+
 			timer_->abortInterrupt();
 		}
 		else if (addr == Address::TAC)

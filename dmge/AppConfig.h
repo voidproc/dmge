@@ -34,6 +34,9 @@ namespace dmge
 		// デバッグモニタを表示する
 		bool showDebugMonitor = true;
 
+		// LD B,B 実行時にブレークする
+		bool breakOnLDBB = false;
+
 		// config.ini のパース結果を返す
 		static AppConfig LoadConfig();
 

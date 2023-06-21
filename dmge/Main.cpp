@@ -161,6 +161,8 @@ private:
 
 		while (not quitApp_)
 		{
+			bool shouldDumpCPU = false;
+
 			// ブレークポイントが有効で、ブレークポイントに達していたら
 			// トレースモードに切り替える
 
@@ -173,11 +175,18 @@ private:
 				dmge::DebugPrint::Writeln(U"Break: pc={:04X}"_fmt(cpu_.currentPC()));
 			}
 
+			// LD B,B 実行時にブレークする
+			if (config_.breakOnLDBB && mem_.read(cpu_.currentPC()) == 0x40)
+			{
+				mode_ = Mode::Trace;
+
+				apu_.pause();
+			}
 
 			// [DEBUG]
 			if (alwaysDump_)
 			{
-				cpu_.dump();
+				shouldDumpCPU = true;
 			}
 
 			// トレースモードなら、専用のループへ
@@ -192,6 +201,13 @@ private:
 				cpu_.dump();
 
 				traceLoop_();
+			}
+			else
+			{
+				if (shouldDumpCPU)
+				{
+					cpu_.dump();
+				}
 			}
 
 			// RTC

@@ -33,6 +33,8 @@ namespace dmge
 
 		config.showDebugMonitor = ParseOr<int>(ini[U"ShowDebugMonitor"], true);
 
+		config.breakOnLDBB = ParseOr<int>(ini[U"BreakOnLDBB"], true);
+
 		return config;
 	}
 

@@ -128,7 +128,8 @@ public:
 			return;
 		}
 
-		// [DEBUG]
+		dmge::DebugPrint::Writeln(U"* Cartridge loaded:");
+		dmge::DebugPrint::Writeln(U"FileName={}"_fmt(FileSystem::FileName(cartridgePath)));
 		mem_.dumpCartridgeInfo();
 
 		// CGBモードの適用

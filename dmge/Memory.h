@@ -2,6 +2,7 @@
 
 #include "Cartridge.h"
 #include "Address.h"
+#include "DMA.h"
 
 namespace dmge
 {
@@ -75,6 +76,9 @@ namespace dmge
 		// WRAM
 		std::array<std::array<uint8, 0x1000>, 8> wram_{};
 		int wramBank_ = 1;
+
+		// OAM DMA
+		DMA dma_{ this };
 
 		// メモリ書き込み時フック
 		Array<std::function<void(uint16, uint8)>> writeHooks_{};

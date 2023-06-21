@@ -234,6 +234,9 @@
     <ClCompile Include="RTC.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="DMA.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Image Include="App\icon.ico">
@@ -964,6 +967,9 @@
       <Filter>Header Files\APU</Filter>
     </ClInclude>
     <ClInclude Include="RTC.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DMA.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

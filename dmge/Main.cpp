@@ -211,13 +211,13 @@ private:
 				}
 			}
 
-			// RTC
-			mem_.update(cpu_.consumedCycles());
-
 			// CPUコマンドを1回実行する
 
 			cpu_.applyScheduledIME();
 			cpu_.run();
+
+			// RTC, DMA
+			mem_.update(cpu_.consumedCycles());
 
 			// タイマーを更新
 

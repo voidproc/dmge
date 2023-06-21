@@ -232,11 +232,7 @@ namespace dmge
 
 		else if (addr == Address::DMA)
 		{
-			uint16 srcAddr = value * 0x100;
-			for (uint16 offset = 0; offset <= 0x9f; offset++)
-			{
-				mem_[0xfe00 + offset] = read(srcAddr + offset);
-			}
+			dma_.start(value);
 		}
 
 		// VBK (VRAM Bank)
@@ -315,16 +311,9 @@ namespace dmge
 			return mem_[addr] | mask[addr - Address::NR10];
 		}
 
-		// Others
-
-		if (addr > Address::WRAM1_End)
-		{
-			return mem_[addr];
-		}
-
 		// ROM
 
-		else if (addr <= Address::SwitchableROMBank_End)
+		if (addr <= Address::SwitchableROMBank_End)
 		{
 			return mbc_->read(addr);
 		}
@@ -354,6 +343,17 @@ namespace dmge
 			return wram_[wramBank_][addr - Address::WRAM1];
 		}
 
+		// OAM
+		// DMA転送中に読むと $FF となる？
+
+		else if (addr >= Address::OAMTable && addr <= Address::OAMTable_End)
+		{
+			if (dma_.running())
+			{
+				return 0xff;
+			}
+		}
+
 		return mem_[addr];
 	}
 
@@ -375,6 +375,8 @@ namespace dmge
 	void Memory::update(int cycles)
 	{
 		mbc_->update(cycles);
+
+		dma_.update(cycles);
 	}
 
 	bool Memory::isCGBMode() const

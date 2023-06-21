@@ -336,6 +336,11 @@ namespace dmge
 
 			oamBuffer_.push_back(oam);
 		}
+
+		if (not cgbMode_)
+		{
+			oamBuffer_.sort_by([](const auto& a, const auto& b) { return a.x > b.x; });
+		}
 	}
 
 	void PPU::scanline_()
@@ -439,13 +444,15 @@ namespace dmge
 			int oamPriorityVal = 999;
 			int oamIndex = 0;
 
-			for (const auto& oam : oamBuffer_)
+			const auto filteredOAMs = oamBuffer_.filter([&](const auto& o) { return o.x <= canvasX_ + 8 && o.x + 8 > canvasX_ + 8; });
+
+			for (const auto& oam : filteredOAMs)
 			{
 				// 0xff6c(OPRI)を反映
 				if (oamPriorityVal != 999 && ((opri && oamPriorityVal < oam.x) || (not opri && oamPriorityVal < oamIndex))) continue;
 
 				// 描画中のドットがスプライトに重なっているか？
-				if (not (oam.x <= canvasX_ + 8 && oam.x + 8 > canvasX_ + 8)) continue;
+				//if (not (oam.x <= canvasX_ + 8 && oam.x + 8 > canvasX_ + 8)) continue;
 
 				// スプライトの、左から oamX 個目のドットを描画する
 				const int oamX = canvasX_ + 8 - oam.x;

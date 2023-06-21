@@ -66,16 +66,16 @@ C++ / OpenSiv3D でゲームボーイのエミュレータを作っています�
 
 |Test|Result|
 |---|---|
-|hello world|![hello](screenshot/test_result/hello.png)|
-|cpu_instrs|![cpu_instrs](screenshot/test_result/cpu_instrs.png)|
-|instr_timing|![instr_timing](screenshot/test_result/instr_timing.png)|
-|❌ interrupt_time|![interrupt_time](screenshot/test_result/interrupt_time.png)|
-|dmg-acid2|![dmg-acid2](screenshot/test_result/dmg-acid2.png)|
-|cgb-acid2|![cgb-acid2](screenshot/test_result/cgb-acid2.png)|
-|rtc3test<br>(Basic tests)|![rtc3test_basic](screenshot/test_result/rtc3test_basic.png)|
-|rtc3test<br>(Range tests)|![rtc3test_range](screenshot/test_result/rtc3test_range.png)|
-|rtc3test<br>(Sub-second writes)|![rtc3test_subsec](screenshot/test_result/rtc3test_subsec.png)|
-|❌ dmg_sound|Failed: 03#3, 05#4, 07#5, 09, 10, 12 |
+|✅ blarg/​cpu_instrs|![cpu_instrs](screenshot/test_result/cpu_instrs.png)|
+|✅ blarg/instr_timing|![instr_timing](screenshot/test_result/instr_timing.png)|
+|❌ blarg/interrupt_time|![interrupt_time](screenshot/test_result/interrupt_time.png)|
+|❌ blarg/dmg_sound|Failed: 03#3, 05#4, 07#5, 09, 10, 12 |
+|✅ acid/dmg-acid2|![dmg-acid2](screenshot/test_result/dmg-acid2.png)|
+|✅ acid/cgb-acid2|![cgb-acid2](screenshot/test_result/cgb-acid2.png)|
+|✅ ax6/​rtc3test-1|![rtc3test_basic](screenshot/test_result/rtc3test_basic.png)|
+|✅ ax6/​rtc3test-2|![rtc3test_range](screenshot/test_result/rtc3test_range.png)|
+|✅ ax6/​rtc3test-3|![rtc3test_subsec](screenshot/test_result/rtc3test_subsec.png)|
+|✅ mooneye/​acceptance/​timer|Pass|
 
 
 ## スクリーンショット

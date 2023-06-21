@@ -113,5 +113,4 @@ namespace dmge
 	{
 		return reloadingCount_ > 0;
 	}
-	}
 }

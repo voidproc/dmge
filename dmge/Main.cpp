@@ -157,8 +157,12 @@ private:
 
 		int bufferedSamples = 0;
 
-		//dmge::FPSKeeper fpsKeeper{};
+		dmge::FPSKeeper fpsKeeper{};
 
+		if (System::GetCurrentMonitor().refreshRate == 60)
+		{
+			fpsKeeper.setEnable(false);
+		}
 
 		while (not quitApp_)
 		{
@@ -332,6 +336,8 @@ private:
 				{
 					DrawStatusText(U"FPS:{:3d}"_fmt(Profiler::FPS()));
 				}
+
+				fpsKeeper.sleep();
 
 				shouldDraw = false;
 				cyclesFromPreviousDraw = 0;

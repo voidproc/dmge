@@ -8,9 +8,14 @@ namespace dmge
 	{
 	}
 
+	void FPSKeeper::setEnable(bool enable)
+	{
+		enabled_ = enable;
+	}
+
 	void FPSKeeper::sleep(double fps)
 	{
-		while (true)
+		while (enabled_)
 		{
 			const auto t = Time::GetMicrosec();
 

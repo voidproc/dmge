@@ -64,4 +64,6 @@ namespace dmge
 
 		void dump();
 	};
+
+	bool IsValidCartridgePath(StringView path);
 }

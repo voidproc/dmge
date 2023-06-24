@@ -58,4 +58,10 @@ namespace dmge
 		DebugPrint::Writeln(U"RomSize={}KB"_fmt(romSizeKB));
 		DebugPrint::Writeln(U"RamSize={}KB"_fmt(ramSizeKB));
 	}
+
+	bool IsValidCartridgePath(StringView path)
+	{
+		return FileSystem::Exists(path) && FileSystem::IsFile(path);
+
+	}
 }

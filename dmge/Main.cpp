@@ -1,6 +1,7 @@
 ﻿# include <Siv3D.hpp> // OpenSiv3D v0.6.10
 
 #include "Memory.h"
+#include "Cartridge.h"
 #include "CPU.h"
 #include "PPU.h"
 #include "APU/APU.h"
@@ -57,25 +58,21 @@ void DrawStatusText(StringView text)
 }
 
 
+enum class DmgeAppMode
+{
+	Default,
+	Trace,
+	Reset,
+};
+
 class DmgeApp
 {
-	enum class Mode
-	{
-		Default,
-		Trace,
-	};
-
 public:
-	DmgeApp()
+	DmgeApp(dmge::AppConfig& config)
 	{
-		if (config_.showConsole)
-		{
-			dmge::DebugPrint::EnableConsole();
-		}
+		config_ = config;
 
 		showDebugMonitor_ = config_.showDebugMonitor;
-
-		config_.print();
 
 		mem_.init(&ppu_, &apu_, &timer_, &joypad_);
 
@@ -87,49 +84,52 @@ public:
 			});
 		}
 
-		// フォントなどのアセット読み込み
-		LoadAssets();
-
-		// Siv3Dのシーン・ウィンドウなどの初期化
-		InitScene(config_.scale, showDebugMonitor_);
-
 		// 画面表示用パレット初期化
 		setPPUPalette_(0);
+	}
 
+	Optional<String> chooseCartridge()
+	{
+		const auto cartDir = FileSystem::PathAppend(FileSystem::InitialDirectory(), U"cartridges");
+		return Dialog::OpenFile({ FileFilter{.name = U"GAMEBOY Cartridge", .patterns = {U"gb?"} } }, cartDir, U"ファイルを開く");
+	}
 
+	void setCartridgePath()
+	{
+	}
+
+	void setCartridgePath(const String& cartridgePath)
+	{
+		currentCartridgePath_ = cartridgePath;
 	}
 
 	void run()
 	{
-		String cartridgePath = config_.cartridgePath;
-
 		// 設定ファイルでカートリッジが指定されていない場合は
 		// ファイルを開くダイアログで選択する
-		// ファイルが存在しない or キャンセルされた場合は終了する
-		if (not FileSystem::Exists(cartridgePath) || not FileSystem::IsFile(cartridgePath))
+		if (not dmge::IsValidCartridgePath(currentCartridgePath_.value_or(U"")))
 		{
-			const auto cartDir = FileSystem::PathAppend(FileSystem::InitialDirectory(), U"cartridges");
-			const auto openPath = Dialog::OpenFile({ FileFilter{ .name = U"GAMEBOY Cartridge", .patterns = {U"gb?"} } }, cartDir, U"ファイルを開く");
+			currentCartridgePath_ = chooseCartridge();
+		}
 
-			if (not openPath)
-			{
-				dmge::DebugPrint::Writeln(U"Cartridge not found");
-				return;
-			}
-
-			cartridgePath = *openPath;
+		// ファイルが開けない場合は終了する
+		if (not dmge::IsValidCartridgePath(currentCartridgePath_.value_or(U"")))
+		{
+			dmge::DebugPrint::Writeln(U"* Cartridge not found");
+			return;
 		}
 
 		// カートリッジ読み込み
 		// 対応するMBCがカートリッジとSRAMをロードする
 		// 対応するMBCがない場合は終了する
-		if (not mem_.loadCartridge(cartridgePath))
+		if (not mem_.loadCartridge(*currentCartridgePath_))
 		{
+			dmge::DebugPrint::Writeln(U"* Cannot open cartridge");
 			return;
 		}
 
 		dmge::DebugPrint::Writeln(U"* Cartridge loaded:");
-		dmge::DebugPrint::Writeln(U"FileName={}"_fmt(FileSystem::FileName(cartridgePath)));
+		dmge::DebugPrint::Writeln(U"FileName={}"_fmt(FileSystem::FileName(*currentCartridgePath_)));
 		mem_.dumpCartridgeInfo();
 
 		// CGBモードの適用
@@ -142,6 +142,16 @@ public:
 
 		// アプリケーション終了時にSRAMを保存する
 		mem_.saveSRAM();
+	}
+
+	StringView currentCartridgePath() const
+	{
+		return currentCartridgePath_.value_or(U"");
+	}
+
+	DmgeAppMode mode() const
+	{
+		return mode_;
 	}
 
 private:
@@ -173,7 +183,7 @@ private:
 
 			if (reachedBreakpoint_())
 			{
-				mode_ = Mode::Trace;
+				mode_ = DmgeAppMode::Trace;
 
 				apu_.pause();
 
@@ -183,7 +193,7 @@ private:
 			// LD B,B 実行時にブレークする
 			if (config_.breakOnLDBB && mem_.read(cpu_.currentPC()) == 0x40)
 			{
-				mode_ = Mode::Trace;
+				mode_ = DmgeAppMode::Trace;
 
 				apu_.pause();
 			}
@@ -196,7 +206,7 @@ private:
 
 			// トレースモードなら、専用のループへ
 
-			if (mode_ == Mode::Trace)
+			if (mode_ == DmgeAppMode::Trace)
 			{
 				for (const uint16 addr : config_.dumpAddress)
 				{
@@ -292,7 +302,7 @@ private:
 				// トレースモードに移行
 				if (KeyP.down())
 				{
-					mode_ = Mode::Trace;
+					mode_ = DmgeAppMode::Trace;
 
 					apu_.pause();
 				}
@@ -318,7 +328,7 @@ private:
 				ppu_.draw(Point{ 0, 0 }, config_.scale);
 
 				// APU
-				if (enableAPU && mode_ != Mode::Trace)
+				if (enableAPU && mode_ != DmgeAppMode::Trace)
 				{
 					apu_.playIfBufferEnough(2000);
 					apu_.pauseIfBufferNotEnough(512);
@@ -347,7 +357,7 @@ private:
 
 	void traceLoop_()
 	{
-		while (mode_ == Mode::Trace)
+		while (mode_ == DmgeAppMode::Trace)
 		{
 			if (not System::Update())
 			{
@@ -366,7 +376,7 @@ private:
 			// トレースモード終了
 			if (KeyF5.down())
 			{
-				mode_ = Mode::Default;
+				mode_ = DmgeAppMode::Default;
 				break;
 			}
 
@@ -405,12 +415,31 @@ private:
 			currentPalette_ = (currentPalette_ + 1) % paletteList_.size();
 			setPPUPalette_(currentPalette_);
 		}
+
+		// リセット (Ctrl+R)
+		if (KeyR.down() && KeyControl.pressed())
+		{
+			mode_ = DmgeAppMode::Reset;
+			quitApp_ = true;
+		}
+
+		// 開く (Ctrl+O)
+		if (KeyO.down() && KeyControl.pressed())
+		{
+			if (const auto openPath = chooseCartridge();
+				openPath)
+			{
+				currentCartridgePath_ = openPath;
+				mode_ = DmgeAppMode::Reset;
+				quitApp_ = true;
+			}
+		}
 	}
 
 	// メモリ書き込み時フック
 	void onMemoryWrite_(uint16 addr, uint8 value)
 	{
-		if (not config_.enableBreakpoint || mode_ == Mode::Trace)
+		if (not config_.enableBreakpoint || mode_ == DmgeAppMode::Trace)
 		{
 			return;
 		}
@@ -419,7 +448,7 @@ private:
 		{
 			if (addr == mem)
 			{
-				mode_ = Mode::Trace;
+				mode_ = DmgeAppMode::Trace;
 
 				apu_.pause();
 
@@ -454,7 +483,7 @@ private:
 	}
 
 
-	dmge::AppConfig config_ = dmge::AppConfig::LoadConfig();
+	dmge::AppConfig config_;/* = dmge::AppConfig::LoadConfig();*/
 
 	dmge::Memory mem_{};
 
@@ -471,10 +500,10 @@ private:
 
 	dmge::Joypad joypad_{ &mem_ };
 
-	dmge::DebugMonitor debugMonitor_{ &mem_, &cpu_, &apu_ };
+	dmge::DebugMonitor debugMonitor_{ &mem_, & cpu_, & apu_ };
 
 	// モード（通常 or トレース）
-	Mode mode_ = Mode::Default;
+	DmgeAppMode mode_ = DmgeAppMode::Default;
 
 	// アプリケーションを終了する
 	bool quitApp_ = false;
@@ -501,10 +530,45 @@ private:
 	// メモリダンプするアドレス設定用
 	uint16 dumpAddress_ = 0;
 
+	// ロードしているカートリッジのパス
+	Optional<String> currentCartridgePath_{};
 };
 
 void Main()
 {
-	auto app = std::make_unique<DmgeApp>();
-	app->run();
+	dmge::AppConfig config = dmge::AppConfig::LoadConfig();
+
+	if (config.showConsole)
+	{
+		dmge::DebugPrint::EnableConsole();
+	}
+
+	// [DEBUG]
+	config.print();
+
+	// フォントなどのアセット読み込み
+	LoadAssets();
+
+	// Siv3Dのシーン・ウィンドウなどの初期化
+	InitScene(config.scale, config.showDebugMonitor);
+
+
+	Optional<String> cartridgePath = config.cartridgePath;
+
+	while (true)
+	{
+		auto app = std::make_unique<DmgeApp>(config);
+
+		if (cartridgePath)
+		{
+			app->setCartridgePath(*cartridgePath);
+		}
+
+		app->run();
+
+		const auto mode = app->mode();
+		if (mode != DmgeAppMode::Reset) break;
+
+		cartridgePath = app->currentCartridgePath();
+	}
 }

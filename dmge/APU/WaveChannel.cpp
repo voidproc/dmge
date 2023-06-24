@@ -4,9 +4,36 @@
 
 namespace dmge
 {
-	WaveChannel::WaveChannel(Memory* mem)
-		: mem_{ mem }
+	uint8 WaveChannel::readRegister(uint16 addr) const
 	{
+		if (addr == Address::NR30)
+		{
+			return (uint8)getDACEnable() << 7;
+		}
+		else if (addr == Address::NR32)
+		{
+			return waveOutputLevel_ << 5;
+		}
+		else if (addr == Address::NR34)
+		{
+			return (uint8)length_.getEnable() << 6;
+		}
+		else if (addr >= Address::WaveRAM)
+		{
+			return readWaveData(addr);
+		}
+
+		return 0;
+	}
+
+	void WaveChannel::writeWaveData(uint16 addr, uint8 value)
+	{
+		waveData_[addr - Address::WaveRAM] = value;
+	}
+
+	uint8 WaveChannel::readWaveData(uint16 addr) const
+	{
+		return waveData_[addr - Address::WaveRAM];
 	}
 
 	void WaveChannel::step()
@@ -30,7 +57,7 @@ namespace dmge
 
 	int WaveChannel::amplitude() const
 	{
-		uint8 wave = mem_->read(Address::WaveRAM + waveRAMOffset_ / 2);
+		uint8 wave = readWaveData(Address::WaveRAM + waveRAMOffset_ / 2);
 		uint8 amp3 = (wave >> ((1 - (waveRAMOffset_ % 2)) * 4)) & 0xf;
 		constexpr int shift[4] = { 4, 0, 1, 2 };
 		return amp3 >> shift[waveOutputLevel_];

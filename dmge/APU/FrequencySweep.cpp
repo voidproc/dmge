@@ -48,6 +48,11 @@ namespace dmge
 		shift_ = NRx0 & 0b111;
 	}
 
+	uint8 FrequencySweep::get() const
+	{
+		return (period_ << 4) | (direction_ << 3) | (shift_);
+	}
+
 	int FrequencySweep::calcSweepFrequency_()
 	{
 		int newFreq = shadowFreq_ >> shift_;

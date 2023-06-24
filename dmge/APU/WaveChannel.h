@@ -10,7 +10,11 @@ namespace dmge
 	class WaveChannel : public Channel
 	{
 	public:
-		WaveChannel(Memory* mem);
+		uint8 readRegister(uint16 addr) const;
+
+		void writeWaveData(uint16 addr, uint8 value);
+
+		uint8 readWaveData(uint16 addr) const;
 
 		// Frequency Timer を進める
 		void step();
@@ -44,8 +48,6 @@ namespace dmge
 		void resetWaveRAMOffset();
 
 	private:
-		Memory* mem_;
-
 		LengthCounter length_{ this };
 
 		// Frequency timer
@@ -59,5 +61,8 @@ namespace dmge
 
 		// Wave volume
 		int waveOutputLevel_ = 0;
+
+		// Wave data
+		std::array<uint8, 16> waveData_{};
 	};
 }

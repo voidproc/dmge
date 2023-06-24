@@ -42,6 +42,9 @@ namespace dmge
 		// IOレジスタへの書き込み
 		void writeRegister(uint16 addr, uint8 value);
 
+		// IOレジスタからの読み込み
+		uint8 readRegister(uint16 addr);
+
 		// NR52の下位4bit
 		uint8 getChannelsEnabledState() const;
 
@@ -63,6 +66,14 @@ namespace dmge
 		NoiseChannel ch4_;
 
 		FrameSequencer frameSeq_;
+
+		// NR50, NR51
+
+		uint8 nr50_ = 0;
+		uint8 nr51_ = 0;
+
+		// Master switch (NR52.7)
+		bool masterSwitch_ = false;
 
 		// Count T-cycles
 		double cycles_ = 0;

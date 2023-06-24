@@ -15,6 +15,8 @@ namespace dmge
 
 		void set(uint8 NRx0);
 
+		uint8 get() const;
+
 	private:
 		Channel* channel_;
 

@@ -1,9 +1,32 @@
 ﻿#include "SquareChannel.h"
 #include "SquareWave.h"
 #include "Frequency.h"
+#include "../Address.h"
 
 namespace dmge
 {
+	uint8 SquareChannel::readRegister(uint16 addr) const
+	{
+		if (addr == Address::NR10)
+		{
+			return sweep_.get();
+		}
+		else if (addr == Address::NR11 || addr == Address::NR21)
+		{
+			return duty_ << 6;
+		}
+		else if (addr == Address::NR12 || addr == Address::NR22)
+		{
+			return envelope_.get();
+		}
+		else if (addr == Address::NR14 || addr == Address::NR24)
+		{
+			return (uint8)length_.getEnable() << 6;
+		}
+
+		return 0;
+	}
+
 	void SquareChannel::step()
 	{
 		if (--freqTimer_ <= 0)

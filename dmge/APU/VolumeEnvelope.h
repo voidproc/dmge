@@ -11,6 +11,8 @@ namespace dmge
 
 		void set(uint8 NRx2);
 
+		uint8 get() const;
+
 		int volume() const;
 
 		int initialVolume() const;

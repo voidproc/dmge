@@ -9,6 +9,8 @@ namespace dmge
 	class NoiseChannel : public Channel
 	{
 	public:
+		uint8 readRegister(uint16 addr) const;
+
 		// Frequency Timer を進める
 		void step();
 

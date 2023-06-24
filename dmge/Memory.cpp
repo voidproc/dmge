@@ -54,9 +54,9 @@ namespace dmge
 		writeDirect(0xff21, 0x00); // NR42
 		writeDirect(0xff22, 0x00); // NR43
 		writeDirect(0xff23, 0xbf); // NR44
-		writeDirect(0xff24, 0x77); // NR50
-		writeDirect(0xff25, 0xf3); // NR51
-		writeDirect(0xff26, 0xf1); // NR52 (GB:0xf1, SGB:0xf0)
+		write(0xff24, 0x77); // NR50
+		write(0xff25, 0xf3); // NR51
+		write(0xff26, 0xf1); // NR52 (GB:0xf1, SGB:0xf0)
 		write(0xff40, 0x91); // LCDC
 		writeDirect(0xff42, 0x00); // SCY
 		writeDirect(0xff43, 0x00); // SCX
@@ -188,12 +188,13 @@ namespace dmge
 		}
 
 		// APU
-		// 0xff10 - 0xff26
+		// 0xff10 - 0xff26,
+		// 0xff30 - 0xff3f
 
 		else if (addr >= Address::NR10 && addr <= Address::NR51)
 		{
 			// Ignore if APU is off
-			if ((mem_[Address::NR52] & 0x80) == 0)
+			if ((apu_->readRegister(Address::NR52) & 0x80) == 0)
 			{
 				if (not isCGBMode())
 				{
@@ -214,6 +215,10 @@ namespace dmge
 		{
 			apu_->writeRegister(addr, value);
 			value &= 0x80;
+		}
+		else if (addr >= Address::WaveRAM && addr <= Address::WaveRAM + 15)
+		{
+			apu_->writeRegister(addr, value);
 		}
 
 		// PPU
@@ -289,28 +294,6 @@ namespace dmge
 
 	uint8 Memory::read(uint16 addr) const
 	{
-		// APU
-
-		if (addr == Address::NR52)
-		{
-			return mem_[addr] | 0x70 | apu_->getChannelsEnabledState();
-		}
-
-		if (addr >= Address::NR10 && addr < Address::NR10 + 48)
-		{
-			static constexpr std::array<uint8, 48> mask = {
-				0x80,0x3F,0x00,0xFF,0xBF,
-				0xFF,0x3F,0x00,0xFF,0xBF,
-				0x7F,0xFF,0x9F,0xFF,0xBF,
-				0xFF,0xFF,0x00,0x00,0xBF,
-				0x00,0x00,0x70,
-				0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
-				0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-				0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-			};
-			return mem_[addr] | mask[addr - Address::NR10];
-		}
-
 		// ROM
 
 		if (addr <= Address::SwitchableROMBank_End)
@@ -353,6 +336,19 @@ namespace dmge
 				return 0xff;
 			}
 		}
+
+		// I/O Registers
+		// 0xff00 - 0xffff
+
+		// APU
+		// 0xff10 - 0xff26,
+		// 0xff30 - 0xff3f
+
+		else if (addr >= Address::NR10 && addr < Address::NR10 + 48)
+		{
+			return apu_->readRegister(addr);
+		}
+
 
 		return mem_[addr];
 	}

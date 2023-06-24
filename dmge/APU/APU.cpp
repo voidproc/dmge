@@ -14,7 +14,7 @@ namespace dmge
 		audio_{ apuStream_ },
 		ch1_{},
 		ch2_{},
-		ch3_{ mem_ },
+		ch3_{},
 		ch4_{},
 		frameSeq_{}
 	{
@@ -29,9 +29,7 @@ namespace dmge
 	{
 		// マスタースイッチがOffならAPUを停止する
 
-		const uint8 NR52 = mem_->read(Address::NR52);
-		const uint8 masterSwitch = NR52 >> 7;
-		if (masterSwitch == 0)
+		if (not masterSwitch_)
 		{
 			audio_.pause();
 			return 0;
@@ -101,12 +99,10 @@ namespace dmge
 			std::array<int, 4> leftInput = { 0, 0, 0, 0 };
 			std::array<int, 4> rightInput = { 0, 0, 0, 0 };
 
-			const uint8 NR51 = mem_->read(Address::NR51);
-
 			for (int i : step(4))
 			{
-				if ((NR51 >> i) & 1) rightInput[i] = chAmp[i];
-				if ((NR51 >> (i + 4)) & 1) leftInput[i] = chAmp[i];
+				if ((nr51_ >> i) & 1) rightInput[i] = chAmp[i];
+				if ((nr51_ >> (i + 4)) & 1) leftInput[i] = chAmp[i];
 			}
 
 			// DAC Output
@@ -122,10 +118,8 @@ namespace dmge
 
 			// Master Volume
 
-			const uint8 NR50 = mem_->read(Address::NR50);
-
-			const double leftVolume = (((NR50 >> 4) & 0b111) + 1) / 8.0;
-			const double rightVolume = (((NR50 >> 0) & 0b111) + 1) / 8.0;
+			const double leftVolume = (((nr50_ >> 4) & 0b111) + 1) / 8.0;
+			const double rightVolume = (((nr50_ >> 0) & 0b111) + 1) / 8.0;
 
 			// バッファが十分なら書き込まない
 
@@ -169,6 +163,8 @@ namespace dmge
 
 		if (addr == Address::NR52)
 		{
+			masterSwitch_ = (value & 0x80) != 0;
+
 			// APUがoffになったとき、APUレジスタが全てクリアされる
 			// (except on the DMG, where length counters are unaffected by power and can still be written while off).
 			if ((value & 0x80) == 0)
@@ -361,6 +357,69 @@ namespace dmge
 				ch4_.trigger();
 			}
 		}
+		else if (addr == Address::NR50)
+		{
+			nr50_ = value;
+		}
+		else if (addr == Address::NR51)
+		{
+			nr51_ = value;
+		}
+		else if (addr >= Address::WaveRAM && addr <= Address::WaveRAM + 15)
+		{
+			ch3_.writeWaveData(addr, value);
+		}
+	}
+
+	uint8 APU::readRegister(uint16 addr)
+	{
+		static constexpr std::array<uint8, 48> RegisterMasks = {
+			0x80,0x3F,0x00,0xFF,0xBF,
+			0xFF,0x3F,0x00,0xFF,0xBF,
+			0x7F,0xFF,0x9F,0xFF,0xBF,
+			0xFF,0xFF,0x00,0x00,0xBF,
+			0x00,0x00,0x70,
+			0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
+			0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+			0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+		};
+
+		const uint8 mask = RegisterMasks[addr - Address::NR10];
+
+		if (addr == Address::NR50)
+		{
+			return nr50_;
+		}
+		else if (addr == Address::NR51)
+		{
+			return nr51_;
+		}
+		else if (addr == Address::NR52)
+		{
+			return ((uint8)masterSwitch_ << 7) | getChannelsEnabledState() | mask;
+		}
+		else if (addr >= Address::NR10 && addr <= Address::NR14)
+		{
+			return ch1_.readRegister(addr) | mask;
+		}
+		else if (addr >= Address::NR21 && addr <= Address::NR24)
+		{
+			return ch2_.readRegister(addr) | mask;
+		}
+		else if (addr >= Address::NR30 && addr <= Address::NR34)
+		{
+			return ch3_.readRegister(addr) | mask;
+		}
+		else if (addr >= Address::NR41 && addr <= Address::NR44)
+		{
+			return ch4_.readRegister(addr) | mask;
+		}
+		else if (addr >= Address::WaveRAM && addr <= Address::WaveRAM + 15)
+		{
+			return ch3_.readRegister(addr) | mask;
+		}
+
+		return mask;
 	}
 
 	uint8 APU::getChannelsEnabledState() const

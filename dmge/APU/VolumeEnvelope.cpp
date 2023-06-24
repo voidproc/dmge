@@ -33,6 +33,11 @@ namespace dmge
 		period_ = NRx2 & 0b111;
 	}
 
+	uint8 VolumeEnvelope::get() const
+	{
+		return (initialVolume_ << 4) | (direction_ << 3) | period_;
+	}
+
 	int VolumeEnvelope::volume() const
 	{
 		return currentVolume_;

@@ -1,7 +1,26 @@
 ﻿#include "NoiseChannel.h"
+#include "../Address.h"
 
 namespace dmge
 {
+	uint8 NoiseChannel::readRegister(uint16 addr) const
+	{
+		if (addr == Address::NR42)
+		{
+			return envelope_.get();
+		}
+		else if (addr == Address::NR43)
+		{
+			return (divisorShift_ << 4) | (counterWidth_ << 3) | divisor_;
+		}
+		else if (addr == Address::NR44)
+		{
+			return (uint8)length_.getEnable() << 6;
+		}
+
+		return 0;
+	}
+
 	void NoiseChannel::step()
 	{
 		if (--freqTimer_ <= 0)

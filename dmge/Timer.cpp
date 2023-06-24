@@ -11,21 +11,63 @@ namespace dmge
 	{
 	}
 
+	void Timer::writeRegister(uint16 addr, uint8 value)
+	{
+		if (addr == Address::DIV)
+		{
+			divInternal_ = 0;
+		}
+		else if (addr == Address::TIMA)
+		{
+			if (isReloading_()) return;
+
+			abortInterrupt_();
+			tima_ = value;
+		}
+		else if (addr == Address::TMA)
+		{
+			tma_ = value;
+		}
+		else if (addr == Address::TAC)
+		{
+			tac_ = value & 0b111;
+		}
+	}
+
+	uint8 Timer::readRegister(uint16 addr) const
+	{
+		if (addr == Address::DIV)
+		{
+			return divInternal_ >> 8;
+		}
+		else if (addr == Address::TIMA)
+		{
+			return tima_;
+		}
+		else if (addr == Address::TMA)
+		{
+			return tma_;
+		}
+		else if (addr == Address::TAC)
+		{
+			return tac_ | 0xf8;
+		}
+
+		return 0;
+	}
+
 	void Timer::update()
 	{
 		// DIV
 
 		divInternal_ += 1;
-		mem_->writeDirect(Address::DIV, divInternal_ >> 8);
 
 		// TAC
 
-		const uint8 tac = mem_->read(Address::TAC);
-
-		uint8 timerEnable = (tac & BitMask::TAC::TimerEnable) ? 1 : 0;
+		uint8 timerEnable = (tac_ & BitMask::TAC::TimerEnable) ? 1 : 0;
 		uint8 divBit = 0;
 
-		switch (tac & BitMask::TAC::Clock)
+		switch (tac_ & BitMask::TAC::Clock)
 		{
 		case 0: divBit = (divInternal_ >> 9) & 1; break;
 		case 1: divBit = (divInternal_ >> 3) & 1; break;
@@ -40,8 +82,8 @@ namespace dmge
 
 		if (tmaCount_ == 0 && divBit == 0 && divBitPrev_ == 1)
 		{
-			const uint8 tima = mem_->read(Address::TIMA);
-			mem_->writeDirect(Address::TIMA, tima + 1);
+			const uint8 tima = tima_;
+			++tima_;
 
 			// - オーバーフローする場合、0xff + 1 == 0 が書き込まれる → OK
 			// - そこから 4 T-cycles の間、TIMA は TMA でなく 0 になる必要がある
@@ -94,22 +136,16 @@ namespace dmge
 			--reloadingCount_;
 
 			// TMA からのリロード
-			const uint8 tma = mem_->read(Address::TMA);
-			mem_->writeDirect(Address::TIMA, tma);
+			tima_ = tma_;
 		}
 	}
 
-	void Timer::resetInternalDIV()
-	{
-		divInternal_ = 0;
-	}
-
-	void Timer::abortInterrupt()
+	void Timer::abortInterrupt_()
 	{
 		tmaCount_ = 0;
 	}
 
-	bool Timer::isReloading() const
+	bool Timer::isReloading_() const
 	{
 		return reloadingCount_ > 0;
 	}

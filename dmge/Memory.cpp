@@ -183,24 +183,10 @@ namespace dmge
 		// Timer
 		// 0xff04 - 0xff07
 
-		else if (addr == Address::DIV)
+		else if (addr >= Address::DIV && addr <= Address::TAC)
 		{
-			timer_->resetInternalDIV();
+			timer_->writeRegister(addr, value);
 			return;
-		}
-		else if (addr == Address::TIMA)
-		{
-			// TMA からのリロードが発生するのと同じ T-cycle で TIMA に書き込まれた場合、書き込みは無視される
-			if (timer_->isReloading())
-			{
-				return;
-			}
-
-			timer_->abortInterrupt();
-		}
-		else if (addr == Address::TAC)
-		{
-			value = 0xf8 | (value & 0x07);
 		}
 
 		// IF (Interrupt Flag)
@@ -401,6 +387,14 @@ namespace dmge
 
 		// I/O Registers
 		// 0xff00 - 0xffff
+
+		// Timer
+		// 0xff04 - 0xff07
+
+		else if (addr >= Address::DIV && addr <= Address::TAC)
+		{
+			return timer_->readRegister(addr);
+		}
 
 		// APU
 		// 0xff10 - 0xff26,

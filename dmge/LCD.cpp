@@ -5,6 +5,19 @@
 
 namespace dmge
 {
+	namespace
+	{
+		ColorF ConvertColorFrom555(uint16 color)
+		{
+			return ColorF{
+				((color >> 0) & 0x1f) * 1.0 / 0x1f,
+				((color >> 5) & 0x1f) * 1.0 / 0x1f,
+				((color >> 10) & 0x1f) * 1.0 / 0x1f
+			};
+		}
+	}
+
+
 	uint8 LCD::lcdc() const
 	{
 		return lcdc_;
@@ -220,10 +233,7 @@ namespace dmge
 			const int nColor = (bgPaletteIndex_ / 2) % 4;
 			const uint16 color = bgPalette_[pal * 8 + nColor * 2] | (bgPalette_[pal * 8 + nColor * 2 + 1] << 8);
 
-			displayBGColorPalette_[pal][nColor].set(
-				((color >> 0) & 0x1f) * 1.0 / 0x1f,
-				((color >> 5) & 0x1f) * 1.0 / 0x1f,
-				((color >> 10) & 0x1f) * 1.0 / 0x1f);
+			displayBGColorPalette_[pal][nColor] = ConvertColorFrom555(color);
 
 			if (bgPaletteIndexAutoIncr_)
 			{
@@ -243,10 +253,7 @@ namespace dmge
 			const int nColor = (objPaletteIndex_ / 2) % 4;
 			const uint16 color = objPalette_[pal * 8 + nColor * 2] | (objPalette_[pal * 8 + nColor * 2 + 1] << 8);
 
-			displayOBJColorPalette_[pal][nColor].set(
-				((color >> 0) & 0x1f) * 1.0 / 0x1f,
-				((color >> 5) & 0x1f) * 1.0 / 0x1f,
-				((color >> 10) & 0x1f) * 1.0 / 0x1f);
+			displayOBJColorPalette_[pal][nColor] = ConvertColorFrom555(color);
 
 			if (objPaletteIndexAutoIncr_)
 			{

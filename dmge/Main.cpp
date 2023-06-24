@@ -483,7 +483,7 @@ private:
 	}
 
 
-	dmge::AppConfig config_;/* = dmge::AppConfig::LoadConfig();*/
+	dmge::AppConfig config_;
 
 	dmge::Memory mem_{};
 

@@ -1,18 +1,18 @@
 ﻿#pragma once
 
-#include "LCD.h"
 #include "PPUMode.h"
 #include "Colors.h"
 
 namespace dmge
 {
 	class Memory;
+	class LCD;
 	struct BufferedOAM;
 
 	class PPU
 	{
 	public:
-		PPU(Memory* mem);
+		PPU(Memory* mem, LCD* lcd);
 
 		~PPU();
 
@@ -46,11 +46,9 @@ namespace dmge
 		// （「色番号から実際の色への変換テーブル」を置き換える）
 		void setDisplayColorPalette(const std::array<Color, 4>& palette);
 
-		void writeRegister(uint16 addr, uint8 value);
-
 	private:
 		Memory* mem_;
-		LCD lcd_;
+		LCD* lcd_;
 
 		// このフレームの描画ドット数
 		int dot_ = 0;

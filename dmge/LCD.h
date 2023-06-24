@@ -4,15 +4,11 @@
 
 namespace dmge
 {
-	class Memory;
-
 	// LCDレジスタ（0xff40-0xff4b, 0xff68-0xff6c）の表示・制御
 
 	class LCD
 	{
 	public:
-		LCD(Memory* mem);
-
 		// LCD Control (0xff40)
 		uint8 lcdc() const;
 
@@ -109,11 +105,14 @@ namespace dmge
 		// (CGB) 実際の描画色
 		Color objPaletteColor(uint8 palette, uint8 color) const;
 
+		// IOレジスタへの書き込み
 		void writeRegister(uint16 addr, uint8 value);
 
-	private:
-		Memory* mem_;
+		// IOレジスタからの読み込み
+		uint8 readRegister(uint16 addr) const;
 
+
+	private:
 		// LCD Registers
 
 		uint8 lcdc_ = 0;

@@ -1,6 +1,7 @@
 ﻿#include "Memory.h"
 #include "MBC.h"
 #include "PPU.h"
+#include "LCD.h"
 #include "APU/APU.h"
 #include "Timer.h"
 #include "Joypad.h"
@@ -16,12 +17,13 @@ namespace dmge
 	{
 	}
 
-	void Memory::init(PPU* ppu, APU* apu, dmge::Timer* timer, dmge::Joypad* joypad)
+	void Memory::init(PPU* ppu, APU* apu, dmge::Timer* timer, dmge::Joypad* joypad, LCD* lcd)
 	{
 		ppu_ = ppu;
 		apu_ = apu;
 		timer_ = timer;
 		joypad_ = joypad;
+		lcd_ = lcd;
 	}
 
 	void Memory::reset()
@@ -58,15 +60,15 @@ namespace dmge
 		write(0xff25, 0xf3); // NR51
 		write(0xff26, 0xf1); // NR52 (GB:0xf1, SGB:0xf0)
 		write(0xff40, 0x91); // LCDC
-		writeDirect(0xff42, 0x00); // SCY
-		writeDirect(0xff43, 0x00); // SCX
-		writeDirect(0xff45, 0x00); // LYC
+		write(0xff42, 0x00); // SCY
+		write(0xff43, 0x00); // SCX
+		write(0xff45, 0x00); // LYC
 		writeDirect(0xff46, cgb ? 0x00 : 0xff); // DMA
 		write(0xff47, 0xfc); // BGP
 		write(0xff48, 0xff); // OBP0
 		write(0xff49, 0xff); // OBP1
-		writeDirect(0xff4a, 0x00); // WY
-		writeDirect(0xff4b, 0x00); // WX
+		write(0xff4a, 0x00); // WY
+		write(0xff4b, 0x00); // WX
 		writeDirect(0xffff, 0x00); // IE
 
 		write(0xff50, 0x01); // Boot ROM enable/disable
@@ -236,7 +238,7 @@ namespace dmge
 
 		else if (addr >= Address::LCDC && addr <= Address::LYC)
 		{
-			ppu_->writeRegister(addr, value);
+			lcd_->writeRegister(addr, value);
 		}
 
 		// DMA
@@ -254,7 +256,7 @@ namespace dmge
 			(addr >= Address::BGP && addr <= Address::OBP1) ||
 			(addr >= Address::WY && addr <= Address::WX))
 		{
-			ppu_->writeRegister(addr, value);
+			lcd_->writeRegister(addr, value);
 		}
 
 		// (CGB) KEY1
@@ -303,7 +305,7 @@ namespace dmge
 		// 0xff68 - 0xff6c
 		else if (addr >= Address::BCPS && addr <= Address::OPRI)
 		{
-			ppu_->writeRegister(addr, value);
+			lcd_->writeRegister(addr, value);
 		}
 
 		// WRAM Bank (SVBK)
@@ -405,6 +407,30 @@ namespace dmge
 			return apu_->readRegister(addr);
 		}
 
+		// LCDC, STAT, Scroll, LY, LYC
+		// 0xff40 - 0xff45
+
+		else if (addr >= Address::LCDC && addr <= Address::LYC)
+		{
+			return lcd_->readRegister(addr);
+		}
+
+		// Palette, Window
+		// 0xff47 - 0xff4b
+
+		else if (
+			(addr >= Address::BGP && addr <= Address::OBP1) ||
+			(addr >= Address::WY && addr <= Address::WX))
+		{
+			return lcd_->readRegister(addr);
+		}
+
+		// (CGB) Palette, OBJ priority mode
+		// 0xff68 - 0xff6c
+		else if (addr >= Address::BCPS && addr <= Address::OPRI)
+		{
+			return lcd_->readRegister(addr);
+		}
 
 		return mem_[addr];
 	}

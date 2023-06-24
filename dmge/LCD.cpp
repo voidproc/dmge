@@ -1,16 +1,10 @@
 ﻿#include "LCD.h"
-#include "Memory.h"
 #include "Address.h"
 #include "BitMask/LCDC.h"
 #include "BitMask/STAT.h"
 
 namespace dmge
 {
-	LCD::LCD(Memory* mem)
-		: mem_{ mem }
-	{
-	}
-
 	uint8 LCD::lcdc() const
 	{
 		return lcdc_;
@@ -104,7 +98,6 @@ namespace dmge
 	void LCD::ly(uint8 value)
 	{
 		ly_ = value;
-		mem_->writeDirect(Address::LY, value);
 	}
 
 	uint8 LCD::lyc() const
@@ -235,7 +228,6 @@ namespace dmge
 			if (bgPaletteIndexAutoIncr_)
 			{
 				bgPaletteIndex_ = (bgPaletteIndex_ + 1) % 64;
-				mem_->writeDirect(Address::BCPS, ((uint8)bgPaletteIndexAutoIncr_ << 7) | bgPaletteIndex_);
 			}
 		}
 		else if (addr == Address::OCPS)
@@ -259,12 +251,81 @@ namespace dmge
 			if (objPaletteIndexAutoIncr_)
 			{
 				objPaletteIndex_ = (objPaletteIndex_ + 1) % 64;
-				mem_->writeDirect(Address::OCPS, ((uint8)objPaletteIndexAutoIncr_ << 7) | objPaletteIndex_);
 			}
 		}
 		else if (addr == Address::OPRI)
 		{
 			opri_ = value;
 		}
+	}
+
+	uint8 LCD::readRegister(uint16 addr) const
+	{
+		if (addr == Address::LCDC)
+		{
+			return lcdc_;
+		}
+		else if (addr == Address::STAT)
+		{
+			return stat_;
+		}
+		else if (addr == Address::SCY)
+		{
+			return scy_;
+		}
+		else if (addr == Address::SCX)
+		{
+			return scx_;
+		}
+		else if (addr == Address::LY)
+		{
+			return ly_;
+		}
+		else if (addr == Address::LYC)
+		{
+			return lyc_;
+		}
+		else if (addr == Address::BGP)
+		{
+			return bgp_;
+		}
+		else if (addr == Address::OBP0)
+		{
+			return obp0_;
+		}
+		else if (addr == Address::OBP1)
+		{
+			return obp1_;
+		}
+		else if (addr == Address::WY)
+		{
+			return wy_;
+		}
+		else if (addr == Address::WX)
+		{
+			return wx_;
+		}
+		else if (addr == Address::BCPS)
+		{
+			return (bgPaletteIndex_ & 0x3f) | ((uint8)bgPaletteIndexAutoIncr_ << 7);
+		}
+		else if (addr == Address::BCPD)
+		{
+			return bgPalette_[bgPaletteIndex_];
+		}
+		else if (addr == Address::OCPS)
+		{
+			return (objPaletteIndex_ & 0x3f) | ((uint8)objPaletteIndexAutoIncr_ << 7);
+		}
+		else if (addr == Address::OCPD)
+		{
+			return objPalette_[objPaletteIndex_];
+		}
+		else if (addr == Address::OPRI)
+		{
+			return opri_;
+		}
+
+		return 0;
 	}
 }

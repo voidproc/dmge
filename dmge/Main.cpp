@@ -4,6 +4,7 @@
 #include "Cartridge.h"
 #include "CPU.h"
 #include "PPU.h"
+#include "LCD.h"
 #include "APU/APU.h"
 #include "Timer.h"
 #include "Joypad.h"
@@ -74,7 +75,7 @@ public:
 
 		showDebugMonitor_ = config_.showDebugMonitor;
 
-		mem_.init(&ppu_, &apu_, &timer_, &joypad_);
+		mem_.init(&ppu_, &apu_, &timer_, &joypad_, &lcd_);
 
 		// メモリ書き込み時フックを設定
 		if (config_.enableBreakpoint && not config_.breakpointsMemWrite.empty())
@@ -487,7 +488,9 @@ private:
 
 	dmge::Memory mem_{};
 
-	dmge::PPU ppu_{ &mem_ };
+	dmge::LCD lcd_{};
+
+	dmge::PPU ppu_{ &mem_, &lcd_ };
 
 	// (APU)サンプリングレート
 	int sampleRate_ = 44100;

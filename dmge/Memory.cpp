@@ -109,7 +109,7 @@ namespace dmge
 		// MBC
 		// 0x0000 - 0x7fff
 
-		if (addr <= Address::MBC_BankingMode_End)
+		if (addr <= Address::SwitchableROMBank_End)
 		{
 			mbc_->write(addr, value);
 			return;
@@ -147,10 +147,28 @@ namespace dmge
 			return;
 		}
 
-		// IO-Reg.
+		// Echo of WRAM
+		// 0xe000 - 0xfdff
+
+		else if (addr <= Address::EchoRAM_End)
+		{
+			write(addr - 0x2000, value);
+			return;
+		}
+
+		// OAM Table
+		// 0xfe00 - 0xfe9f
+		// ...
+
+		// Not usable
+		// 0xfea0 - 0xfeff
+		// ...
+
+		// I/O Registers
 		// 0xff00 - 0xffff
 
 		// Joypad
+		// 0xff00
 
 		else if (addr == Address::JOYP)
 		{
@@ -158,7 +176,12 @@ namespace dmge
 			return;
 		}
 
+		// Serial
+		// 0xff01 - 0xff02
+		// ...
+
 		// Timer
+		// 0xff04 - 0xff07
 
 		else if (addr == Address::DIV)
 		{
@@ -181,6 +204,7 @@ namespace dmge
 		}
 
 		// IF (Interrupt Flag)
+		// 0xff0f
 
 		else if (addr == Address::IF)
 		{
@@ -221,13 +245,10 @@ namespace dmge
 			apu_->writeRegister(addr, value);
 		}
 
-		// PPU
+		// LCDC, STAT, Scroll, LY, LYC
+		// 0xff40 - 0xff45
 
-		else if (
-			(addr >= Address::LCDC && addr <= Address::LYC) ||
-			(addr >= Address::BGP && addr <= Address::OBP1) ||
-			(addr >= Address::WY && addr <= Address::WX) ||
-			(addr >= Address::BCPS && addr <= Address::OPRI))
+		else if (addr >= Address::LCDC && addr <= Address::LYC)
 		{
 			ppu_->writeRegister(addr, value);
 		}
@@ -240,6 +261,20 @@ namespace dmge
 			dma_.start(value);
 		}
 
+		// Palette, Window
+		// 0xff47 - 0xff4b
+
+		else if (
+			(addr >= Address::BGP && addr <= Address::OBP1) ||
+			(addr >= Address::WY && addr <= Address::WX))
+		{
+			ppu_->writeRegister(addr, value);
+		}
+
+		// (CGB) KEY1
+		// 0xff4d
+		// ...
+
 		// VBK (VRAM Bank)
 		// 0xff4f
 
@@ -249,11 +284,20 @@ namespace dmge
 			value |= 0xfe;
 		}
 
+		// Boot ROM Enable
+		// 0xff50
+
+		else if (addr == Address::BANK)
+		{
+			//...
+		}
+
 		// HDMA
 		// 0xff51 - 0xff55
 
 		else if (addr == Address::HDMA5)
 		{
+			// 仮実装
 			const uint16 srcAddr = (read(Address::HDMA1) << 8) | (read(Address::HDMA2) & 0xf0);
 			const uint16 dstAddr = (((read(Address::HDMA3) << 8) | read(Address::HDMA4)) & 0x1ff0) + 0x8000;
 			const auto length = ((value & 0x7f) + 1) * 0x10;
@@ -262,8 +306,18 @@ namespace dmge
 				write(dstAddr + i, read(srcAddr + i));
 			}
 
-			// TODO: 転送モード（bit7）を考慮していないので、転送が終わったことにする
+			// FIXME: 転送モード（bit7）を考慮していないので、転送が終わったことにしている
 			value = 0xff;
+		}
+
+		// RP (Infrared communications port)
+		// ...
+
+		// (CGB) Palette, OBJ priority mode
+		// 0xff68 - 0xff6c
+		else if (addr >= Address::BCPS && addr <= Address::OPRI)
+		{
+			ppu_->writeRegister(addr, value);
 		}
 
 		// WRAM Bank (SVBK)
@@ -276,13 +330,8 @@ namespace dmge
 			value |= 0xf8;
 		}
 
-		// Boot ROM
-
-		else if (addr == Address::BANK)
-		{
-			// Enable Boot ROM
-			//...
-		}
+		// PCM
+		// ...
 
 		mem_[addr] = value;
 	}
@@ -295,6 +344,7 @@ namespace dmge
 	uint8 Memory::read(uint16 addr) const
 	{
 		// ROM
+		// 0x0000 - 0x7fff
 
 		if (addr <= Address::SwitchableROMBank_End)
 		{
@@ -302,6 +352,7 @@ namespace dmge
 		}
 
 		// VRAM
+		// 0x8000 - 0x9fff
 
 		else if (addr <= Address::VRAM_End)
 		{
@@ -309,6 +360,7 @@ namespace dmge
 		}
 
 		// SRAM
+		// 0xa000 - 0xbfff
 
 		else if (addr <= Address::SRAM_End)
 		{
@@ -316,6 +368,7 @@ namespace dmge
 		}
 
 		// WRAM
+		// 0xc000 - 0xdfff
 
 		else if (addr <= Address::WRAM0_End)
 		{
@@ -326,7 +379,16 @@ namespace dmge
 			return wram_[wramBank_][addr - Address::WRAM1];
 		}
 
-		// OAM
+		// Echo of WRAM
+		// 0xe000 - 0xfdff
+
+		else if (addr <= Address::EchoRAM_End)
+		{
+			return read(addr - 0x2000);
+		}
+
+		// OAM Table
+		// 0xfe00 - 0xfe9f
 		// DMA転送中に読むと $FF となる？
 
 		else if (addr >= Address::OAMTable && addr <= Address::OAMTable_End)

@@ -173,13 +173,11 @@ namespace dmge
 			BGP = 0xff47,
 			OBP0 = 0xff48,
 			OBP1 = 0xff49,
-
-			BANK = 0xff50,  // Enable Boot ROM
-
 			WY = 0xff4a,
 			WX = 0xff4b,
 			KEY1 = 0xff4d,
 			VBK = 0xff4f,
+			BANK = 0xff50,  // Enable Boot ROM
 			HDMA1 = 0xff51,
 			HDMA2 = 0xff52,
 			HDMA3 = 0xff53,

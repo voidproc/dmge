@@ -4,6 +4,18 @@ namespace dmge
 {
 	namespace BitMask
 	{
+		namespace InterruptFlagBit
+		{
+			enum : uint8
+			{
+				Joypad = 4,
+				Serial = 3,
+				Timer = 2,
+				STAT = 1,
+				VBlank = 0,
+			};
+		}
+
 		namespace InterruptFlag
 		{
 			enum : uint8

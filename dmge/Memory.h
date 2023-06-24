@@ -12,6 +12,7 @@ namespace dmge
 	class Timer;
 	class Joypad;
 	class LCD;
+	class Interrupt;
 
 	class Memory
 	{
@@ -20,7 +21,7 @@ namespace dmge
 
 		~Memory();
 
-		void init(PPU* ppu, APU* apu, dmge::Timer* timer, dmge::Joypad* joypad, LCD* lcd);
+		void init(PPU* ppu, APU* apu, dmge::Timer* timer, dmge::Joypad* joypad, LCD* lcd, Interrupt* interrupt);
 
 		void reset();
 
@@ -64,6 +65,7 @@ namespace dmge
 		Timer* timer_ = nullptr;
 		Joypad* joypad_ = nullptr;
 		LCD* lcd_ = nullptr;
+		Interrupt* interrupt_ = nullptr;
 
 		// MBC
 		std::unique_ptr<MBC> mbc_;

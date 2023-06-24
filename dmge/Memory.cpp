@@ -5,6 +5,7 @@
 #include "APU/APU.h"
 #include "Timer.h"
 #include "Joypad.h"
+#include "Interrupt.h"
 #include "DebugPrint.h"
 
 namespace dmge
@@ -17,13 +18,14 @@ namespace dmge
 	{
 	}
 
-	void Memory::init(PPU* ppu, APU* apu, dmge::Timer* timer, dmge::Joypad* joypad, LCD* lcd)
+	void Memory::init(PPU* ppu, APU* apu, dmge::Timer* timer, dmge::Joypad* joypad, LCD* lcd, Interrupt* interrupt)
 	{
 		ppu_ = ppu;
 		apu_ = apu;
 		timer_ = timer;
 		joypad_ = joypad;
 		lcd_ = lcd;
+		interrupt_ = interrupt;
 	}
 
 	void Memory::reset()
@@ -37,7 +39,7 @@ namespace dmge
 		write(0xff05, 0x00); // TIMA
 		write(0xff06, 0x00); // TMA
 		write(0xff07, 0xf8); // TAC, 0xff80 | (0x00 & ~0xff80)
-		writeDirect(0xff0f, 0xe0); // IF
+		write(0xff0f, 0xe0); // IF
 		write(0xff10, 0x80); // NR10
 		write(0xff11, 0xbf); // NR11
 		write(0xff12, 0xf3); // NR12
@@ -69,7 +71,7 @@ namespace dmge
 		write(0xff49, 0xff); // OBP1
 		write(0xff4a, 0x00); // WY
 		write(0xff4b, 0x00); // WX
-		writeDirect(0xffff, 0x00); // IE
+		write(0xffff, 0x00); // IE
 
 		write(0xff50, 0x01); // Boot ROM enable/disable
 	}
@@ -191,12 +193,12 @@ namespace dmge
 			return;
 		}
 
-		// IF (Interrupt Flag)
-		// 0xff0f
+		// Interrupt Flag (IF), Interrupt enable (IE)
+		// 0xff0f, 0xffff
 
-		else if (addr == Address::IF)
+		else if (addr == Address::IF || addr == Address::IE)
 		{
-			value |= 0b11100000;
+			interrupt_->writeRegister(addr, value);
 		}
 
 		// APU
@@ -396,6 +398,14 @@ namespace dmge
 		else if (addr >= Address::DIV && addr <= Address::TAC)
 		{
 			return timer_->readRegister(addr);
+		}
+
+		// Interrupt flag (IF), Interrupt enable (IE)
+		// 0xff0f, 0xffff
+
+		else if (addr == Address::IF || addr == Address::IE)
+		{
+			return interrupt_->readRegister(addr);
 		}
 
 		// APU

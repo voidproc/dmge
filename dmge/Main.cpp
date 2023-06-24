@@ -8,6 +8,7 @@
 #include "APU/APU.h"
 #include "Timer.h"
 #include "Joypad.h"
+#include "Interrupt.h"
 #include "Address.h"
 #include "Timing.h"
 #include "AppConfig.h"
@@ -75,7 +76,7 @@ public:
 
 		showDebugMonitor_ = config_.showDebugMonitor;
 
-		mem_.init(&ppu_, &apu_, &timer_, &joypad_, &lcd_);
+		mem_.init(&ppu_, &apu_, &timer_, &joypad_, &lcd_, &interrupt_);
 
 		// メモリ書き込み時フックを設定
 		if (config_.enableBreakpoint && not config_.breakpointsMemWrite.empty())
@@ -227,8 +228,6 @@ private:
 			}
 
 			// CPUコマンドを1回実行する
-
-			cpu_.applyScheduledIME();
 			cpu_.run();
 
 			// RTC, DMA
@@ -488,18 +487,20 @@ private:
 
 	dmge::Memory mem_{};
 
+	dmge::Interrupt interrupt_{};
+
 	dmge::LCD lcd_{};
 
-	dmge::PPU ppu_{ &mem_, &lcd_ };
+	dmge::PPU ppu_{ &mem_, &lcd_, &interrupt_ };
 
 	// (APU)サンプリングレート
 	int sampleRate_ = 44100;
 
 	dmge::APU apu_{ &mem_, sampleRate_ };
 
-	dmge::Timer timer_{ &mem_ };
+	dmge::Timer timer_{ &mem_, &interrupt_ };
 
-	dmge::CPU cpu_{ &mem_ };
+	dmge::CPU cpu_{ &mem_, &interrupt_ };
 
 	dmge::Joypad joypad_{ &mem_ };
 

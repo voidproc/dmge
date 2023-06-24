@@ -6,13 +6,14 @@
 namespace dmge
 {
 	class Memory;
+	class Interrupt;
 	class LCD;
 	struct BufferedOAM;
 
 	class PPU
 	{
 	public:
-		PPU(Memory* mem, LCD* lcd);
+		PPU(Memory* mem, LCD* lcd, Interrupt* interrupt);
 
 		~PPU();
 
@@ -49,6 +50,7 @@ namespace dmge
 	private:
 		Memory* mem_;
 		LCD* lcd_;
+		Interrupt* interrupt_;
 
 		// このフレームの描画ドット数
 		int dot_ = 0;

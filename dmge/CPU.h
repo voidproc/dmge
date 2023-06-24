@@ -3,6 +3,7 @@
 namespace dmge
 {
 	class Memory;
+	class Interrupt;
 	class CPU_detail;
 
 	struct RegisterValues
@@ -18,7 +19,7 @@ namespace dmge
 	class CPU
 	{
 	public:
-		CPU(Memory* mem);
+		CPU(Memory* mem, Interrupt* interrupt);
 
 		~CPU();
 
@@ -34,7 +35,7 @@ namespace dmge
 		void interrupt();
 
 		// IE命令の遅延のため(?)
-		void applyScheduledIME();
+		//void applyScheduledIME();
 
 		// [DEBUG]現在の状態を出力
 		void dump();

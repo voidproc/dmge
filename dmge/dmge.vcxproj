@@ -135,6 +135,7 @@
     <ClCompile Include="CPU.cpp" />
     <ClCompile Include="DebugMonitor.cpp" />
     <ClCompile Include="DMA.cpp" />
+    <ClCompile Include="Interrupt.cpp" />
     <ClCompile Include="Joypad.cpp" />
     <ClCompile Include="LCD.cpp" />
     <ClCompile Include="Main.cpp" />
@@ -370,6 +371,7 @@
     <ClInclude Include="DebugMonitor.h" />
     <ClInclude Include="DebugPrint.h" />
     <ClInclude Include="DMA.h" />
+    <ClInclude Include="Interrupt.h" />
     <ClInclude Include="Joypad.h" />
     <ClInclude Include="LCD.h" />
     <ClInclude Include="MBC.h" />

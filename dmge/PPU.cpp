@@ -1,6 +1,7 @@
 ﻿#include "PPU.h"
 #include "LCD.h"
 #include "Memory.h"
+#include "Interrupt.h"
 #include "TileData.h"
 #include "BitMask/InterruptFlag.h"
 
@@ -60,10 +61,11 @@ namespace dmge
 		uint8 value;
 	};
 
-	PPU::PPU(Memory* mem, LCD* lcd)
+	PPU::PPU(Memory* mem, LCD* lcd, Interrupt* interrupt)
 		:
 		mem_{ mem },
 		lcd_{ lcd },
+		interrupt_{ interrupt },
 		canvas_{ LCDSize.x + 8, LCDSize.y },
 		texture_{ canvas_.size() }
 	{
@@ -135,15 +137,11 @@ namespace dmge
 			windowLine_ = 0;
 		}
 
-		// 割り込み
-
-		uint8 intFlag = mem_->read(Address::IF);
-
 		// VBlank割り込み要求
 
 		if (modeChangedToVBlank())
 		{
-			intFlag |= BitMask::InterruptFlag::VBlank;
+			interrupt_->request(BitMask::InterruptFlagBit::VBlank);
 		}
 
 		// STAT割り込み要求
@@ -156,12 +154,10 @@ namespace dmge
 
 		if (statInt && !prevStatInt_)
 		{
-			intFlag |= BitMask::InterruptFlag::STAT;
+			interrupt_->request(BitMask::InterruptFlagBit::STAT);
 		}
 
 		prevStatInt_ = statInt;
-
-		mem_->write(Address::IF, intFlag);
 	}
 
 	void PPU::draw(const Point& pos, int scale)

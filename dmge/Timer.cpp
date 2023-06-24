@@ -1,13 +1,14 @@
 ﻿#include "Timer.h"
 #include "Memory.h"
+#include "Interrupt.h"
 #include "Address.h"
 #include "BitMask/TAC.h"
 #include "BitMask/InterruptFlag.h"
 
 namespace dmge
 {
-	Timer::Timer(Memory* mem)
-		: mem_{ mem }
+	Timer::Timer(Memory* mem, Interrupt* interrupt)
+		: mem_{ mem }, interrupt_{ interrupt }
 	{
 	}
 
@@ -122,8 +123,7 @@ namespace dmge
 				// オーバーフローからの待ち時間が終わったので、TMA からのリロードと割り込み要求をする
 
 				// Timer割り込みを要求
-				const uint8 intFlag = mem_->read(Address::IF);
-				mem_->write(Address::IF, intFlag | BitMask::InterruptFlag::Timer);
+				interrupt_->request(BitMask::InterruptFlagBit::Timer);
 
 				// リロードが発生している M-cycle が終わるまでカウントする
 				reloadingCount_ = 4 + 1;

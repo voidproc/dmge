@@ -1,5 +1,6 @@
 ﻿#include "CPU.h"
 #include "Memory.h"
+#include "Interrupt.h"
 #include "DebugPrint.h"
 
 namespace dmge
@@ -21,8 +22,8 @@ namespace dmge
 	public:
 		friend CPU;
 
-		CPU_detail(Memory* mem)
-			: mem_{ mem }
+		CPU_detail(Memory* mem, Interrupt* interrupt)
+			: mem_{ mem }, interrupt_{ interrupt }
 		{
 		}
 
@@ -49,6 +50,9 @@ namespace dmge
 				return;
 			}
 
+			// IMEがスケジュールされていたら有効化
+			interrupt_->updateIME();
+
 			// 現在のPCの命令をフェッチし、
 			// 次のPCと消費サイクルを計算、
 			// フェッチした命令を実行
@@ -70,14 +74,11 @@ namespace dmge
 
 		void interrupt()
 		{
-			const uint8 intEnable = mem_->read(Address::IE);
-			const uint8 intFlag = mem_->read(Address::IF);
-
 			// 低電力モードから抜ける？
 
-			if (not ime_)
+			if (not interrupt_->ime())
 			{
-				if ((intEnable & intFlag) != 0)
+				if (interrupt_->requested())
 				{
 					powerSavingMode_ = false;
 				}
@@ -97,12 +98,11 @@ namespace dmge
 
 			for (int i : step(5))
 			{
-				if (const auto flag = intEnable & intFlag;
-					flag & (1 << i))
+				if (interrupt_->requested(i))
 				{
 					// 割り込みを無効に
-					ime_ = false;
-					mem_->write(Address::IF, intFlag & ~(1 << i));
+					interrupt_->disableIME();
+					interrupt_->disableInterruptFlag(i);
 
 					// 現在のPCをスタックにプッシュし、割り込みベクタにジャンプ
 					mem_->write(--sp, pc >> 8);
@@ -115,15 +115,6 @@ namespace dmge
 					// 割り込みを１つ実行して、この回は終了
 					break;
 				}
-			}
-		}
-
-		void applyScheduledIME()
-		{
-			if (imeScheduled_)
-			{
-				ime_ = true;
-				imeScheduled_ = false;
 			}
 		}
 
@@ -149,6 +140,8 @@ namespace dmge
 
 	private:
 		Memory* mem_;
+
+		Interrupt* interrupt_;
 
 		// レジスタ (A,F,B,C,D,E,H,L)
 
@@ -275,8 +268,8 @@ namespace dmge
 		int consumedCycles_ = 0;
 
 		// IME: Interrupt master enable flag
-		bool ime_ = false;
-		bool imeScheduled_ = false;
+		//bool ime_ = false;
+		//bool imeScheduled_ = false;
 
 		// HALT
 		bool powerSavingMode_ = false;
@@ -1043,7 +1036,7 @@ namespace dmge
 			// HALT
 			// 割り込みの状況によって低電力モードになったりならなかったりする
 
-			if (ime_)
+			if (interrupt_->ime())
 			{
 				powerSavingMode_ = true;
 			}
@@ -1071,13 +1064,13 @@ namespace dmge
 		void di_(Memory*, const Instruction*)
 		{
 			// opcode: 0xf3
-			ime_ = false;
+			interrupt_->disableIME();
 		}
 
 		void ei_(Memory*, const Instruction*)
 		{
 			// opcode: 0xfb
-			imeScheduled_ = true;
+			interrupt_->reserveEnablingIME();
 		}
 
 		// Rotates & Shifts
@@ -1712,7 +1705,7 @@ namespace dmge
 			// opcode: 0xd9
 			pcNext_ = mem->read16(sp);
 			sp += 2;
-			ime_ = true;
+			interrupt_->reserveEnablingIME(); //?
 		}
 
 		// Other
@@ -2262,8 +2255,8 @@ namespace dmge
 	};
 
 
-	CPU::CPU(Memory* mem)
-		: mem_{ mem }, cpuDetail_{ std::make_unique<CPU_detail>(mem) }
+	CPU::CPU(Memory* mem, Interrupt* interrupt)
+		: mem_{ mem }, cpuDetail_{ std::make_unique<CPU_detail>(mem, interrupt) }
 	{
 		cpuDetail_->reset();
 	}
@@ -2292,10 +2285,10 @@ namespace dmge
 		cpuDetail_->interrupt();
 	}
 
-	void CPU::applyScheduledIME()
-	{
-		cpuDetail_->applyScheduledIME();
-	}
+	//void CPU::applyScheduledIME()
+	//{
+	//	cpuDetail_->applyScheduledIME();
+	//}
 
 	void CPU::dump()
 	{

@@ -449,7 +449,7 @@ namespace dmge
 			for (const auto& oam : filteredOAMs)
 			{
 				// 0xff6c(OPRI)を反映
-				if (oamPriorityVal != 999 && ((opri && oamPriorityVal < oam.x) || (not opri && oamPriorityVal < oamIndex))) continue;
+				if (cgbMode_ && oamPriorityVal != 999 && ((opri && oamPriorityVal < oam.x) || (not opri && oamPriorityVal < oamIndex))) continue;
 
 				// 描画中のドットがスプライトに重なっているか？
 				//if (not (oam.x <= canvasX_ + 8 && oam.x + 8 > canvasX_ + 8)) continue;

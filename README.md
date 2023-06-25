@@ -76,6 +76,7 @@ C++ / OpenSiv3D でゲームボーイのエミュレータを作っています�
 |✅ ax6/​rtc3test-2|![rtc3test_range](screenshot/test_result/rtc3test_range.png)|
 |✅ ax6/​rtc3test-3|![rtc3test_subsec](screenshot/test_result/rtc3test_subsec.png)|
 |✅ mooneye/​acceptance/​timer|Pass|
+|✅ mooneye/manual-only/sprite_priority|![sprite_priority](screenshot/test_result/sprite_priority.png)|
 
 
 ## スクリーンショット

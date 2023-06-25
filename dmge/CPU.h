@@ -34,9 +34,6 @@ namespace dmge
 		// 割り込みが有効かつ割り込み要求があれば実行する
 		void interrupt();
 
-		// IE命令の遅延のため(?)
-		//void applyScheduledIME();
-
 		// [DEBUG]現在の状態を出力
 		void dump();
 

@@ -267,10 +267,6 @@ namespace dmge
 		// 実際に消費したサイクル数
 		int consumedCycles_ = 0;
 
-		// IME: Interrupt master enable flag
-		//bool ime_ = false;
-		//bool imeScheduled_ = false;
-
 		// HALT
 		bool powerSavingMode_ = false;
 
@@ -2284,11 +2280,6 @@ namespace dmge
 	{
 		cpuDetail_->interrupt();
 	}
-
-	//void CPU::applyScheduledIME()
-	//{
-	//	cpuDetail_->applyScheduledIME();
-	//}
 
 	void CPU::dump()
 	{

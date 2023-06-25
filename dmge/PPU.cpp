@@ -12,6 +12,9 @@ namespace dmge
 	// OAMバッファ
 	struct BufferedOAM
 	{
+		// OAMTable内のアドレス
+		uint16 address;
+
 		// OAMのY座標
 		// 実際の描画位置は-16される
 		uint8 y;
@@ -274,10 +277,6 @@ namespace dmge
 		const uint8 ly = lcd_->ly();
 		const int spriteSize = lcd_->isEnabledTallSprite() ? 16 : 8;
 
-		// X座標が同じOAMをバッファに追加しないよう、
-		// バッファに追加したOAMのX座標を記録しておく
-		Array<uint8> xList;
-
 		// OAMメモリを走査して、描画対象のOAMをバッファに格納していく
 		for (uint16 addr = 0xfe00; addr <= 0xfe9f; addr += 4)
 		{
@@ -295,11 +294,6 @@ namespace dmge
 
 			// X座標が描画範囲にあるか？
 			if (oam.x == 0) continue;
-
-			// 同じX座標のOAMを複数描画しない
-			if (xList.contains(oam.x)) continue;
-
-			xList << oam.x;
 
 			oam.tile = mem_->read(addr + 2);
 
@@ -326,12 +320,16 @@ namespace dmge
 				}
 			}
 
+			oam.address = addr;
+
 			oamBuffer_.push_back(oam);
 		}
 
+		// DMGの場合、X座標が小さいOBJが優先される。X座標が等しい場合は、先に定義されているものが優先される
+
 		if (not cgbMode_)
 		{
-			oamBuffer_.sort_by([](const auto& a, const auto& b) { return a.x > b.x; });
+			oamBuffer_.sort_by([](const auto& a, const auto& b) { return (a.x == b.x) ? a.address > b.address : a.x > b.x; });
 		}
 	}
 

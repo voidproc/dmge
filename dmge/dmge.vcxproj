@@ -142,7 +142,6 @@
     <ClCompile Include="MBC.cpp" />
     <ClCompile Include="Memory.cpp" />
     <ClCompile Include="PPU.cpp" />
-    <ClCompile Include="PPUMode.cpp" />
     <ClCompile Include="RTC.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

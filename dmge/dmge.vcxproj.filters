@@ -165,9 +165,6 @@
     <ClCompile Include="PPU.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="PPUMode.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="LCD.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

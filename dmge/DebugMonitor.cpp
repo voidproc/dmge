@@ -237,6 +237,25 @@ namespace dmge
 			}
 
 			FontAsset(U"debug")(textL, textR).draw(10, joyconArea.x, joyconArea.y, FontColor);
+
+
+			// ProController
+			//   "ProCon=L0 D0 U0 R0 A0 B0 P0 M0" => 30 chars
+			//   h : (1 * LineHeight)
+			//   w : (40 * FontSize.x)
+
+			const Rect proconArea{ joyconArea.x, joyconArea.bl().y + LineHeight, 30 * FontSize.x, 1 * LineHeight };
+
+			const auto procon = ProController(0);
+			String textProcon = U"ProCon=(none)";
+
+			if (procon.isConnected())
+			{
+				textProcon = U"ProCon=L{:d} D{:d} U{:d} R{:d} A{:d} B{:d} P{:d} M{:d}"_fmt(
+					procon.povLeft.pressed(), procon.povDown.pressed(), procon.povUp.pressed(), procon.povRight.pressed(), procon.buttonA.pressed(), procon.buttonB.pressed(), procon.buttonPlus.pressed(), procon.buttonMinus.pressed());
+			}
+
+			FontAsset(U"debug")(textProcon).draw(10, proconArea.x, proconArea.y, FontColor);
 		}
 
 		if (showDumpAddressTextbox_)

@@ -46,24 +46,35 @@ namespace dmge
 		InputGroup inputSelect = KeyBackspace;
 		InputGroup inputStart = KeyEnter;
 
-		// ジョイコンL
+		// ジョイコンL,R（両手持ち）
 
-		if (const auto joyConL = JoyConL(0); joyConL.isConnected())
+		const auto joyConL = JoyConL(0);
+		const auto joyConR = JoyConR(0);
+
+		if (joyConL.isConnected() && joyConR.isConnected())
 		{
 			inputRight = inputRight | joyConL.button3;
 			inputLeft = inputLeft | joyConL.button0;
 			inputUp = inputUp | joyConL.button2;
 			inputDown = inputDown | joyConL.button1;
-		}
-
-		// ジョイコンR
-
-		if (const auto joyConR = JoyConR(0); joyConR.isConnected())
-		{
 			inputA = inputA | joyConR.button0;
 			inputB = inputB | joyConR.button2;
 			inputSelect = inputSelect | joyConR.button3;
 			inputStart = inputStart | joyConR.button1;
+		}
+
+		// プロコン
+
+		if (const auto procon = ProController(0); procon.isConnected())
+		{
+			inputRight = inputRight | procon.povRight;
+			inputLeft = inputLeft | procon.povLeft;
+			inputUp = inputUp | procon.povUp;
+			inputDown = inputDown | procon.povDown;
+			inputA = inputA | procon.buttonA;
+			inputB = inputB | procon.buttonB;
+			inputSelect = inputSelect | procon.buttonMinus;
+			inputStart = inputStart | procon.buttonPlus;
 		}
 
 		if (selected_ == SelectedButtons::Direction)

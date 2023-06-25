@@ -1,7 +1,7 @@
 ﻿#include "DebugMonitor.h"
 #include "Memory.h"
 #include "CPU.h"
-#include "APU/APU.h"
+#include "Audio/APU.h"
 #include "Address.h"
 
 namespace dmge

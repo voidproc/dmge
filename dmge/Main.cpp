@@ -5,7 +5,7 @@
 #include "CPU.h"
 #include "PPU.h"
 #include "LCD.h"
-#include "APU/APU.h"
+#include "Audio/APU.h"
 #include "Timer.h"
 #include "Joypad.h"
 #include "Interrupt.h"

@@ -119,18 +119,18 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="AppConfig.cpp" />
-    <ClCompile Include="APU\APU.cpp" />
-    <ClCompile Include="APU\APUStream.cpp" />
-    <ClCompile Include="APU\Channel.cpp" />
-    <ClCompile Include="APU\FrameSequencer.cpp" />
-    <ClCompile Include="APU\Frequency.cpp" />
-    <ClCompile Include="APU\FrequencySweep.cpp" />
-    <ClCompile Include="APU\LengthCounter.cpp" />
-    <ClCompile Include="APU\NoiseChannel.cpp" />
-    <ClCompile Include="APU\SquareChannel.cpp" />
-    <ClCompile Include="APU\SquareWave.cpp" />
-    <ClCompile Include="APU\VolumeEnvelope.cpp" />
-    <ClCompile Include="APU\WaveChannel.cpp" />
+    <ClCompile Include="Audio\APU.cpp" />
+    <ClCompile Include="Audio\APUStream.cpp" />
+    <ClCompile Include="Audio\Channel.cpp" />
+    <ClCompile Include="Audio\FrameSequencer.cpp" />
+    <ClCompile Include="Audio\Frequency.cpp" />
+    <ClCompile Include="Audio\FrequencySweep.cpp" />
+    <ClCompile Include="Audio\LengthCounter.cpp" />
+    <ClCompile Include="Audio\NoiseChannel.cpp" />
+    <ClCompile Include="Audio\SquareChannel.cpp" />
+    <ClCompile Include="Audio\SquareWave.cpp" />
+    <ClCompile Include="Audio\VolumeEnvelope.cpp" />
+    <ClCompile Include="Audio\WaveChannel.cpp" />
     <ClCompile Include="Cartridge.cpp" />
     <ClCompile Include="CPU.cpp" />
     <ClCompile Include="DebugMonitor.cpp" />
@@ -349,18 +349,18 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AppConfig.h" />
-    <ClInclude Include="APU\APU.h" />
-    <ClInclude Include="APU\APUStream.h" />
-    <ClInclude Include="APU\Channel.h" />
-    <ClInclude Include="APU\FrameSequencer.h" />
-    <ClInclude Include="APU\Frequency.h" />
-    <ClInclude Include="APU\FrequencySweep.h" />
-    <ClInclude Include="APU\LengthCounter.h" />
-    <ClInclude Include="APU\NoiseChannel.h" />
-    <ClInclude Include="APU\SquareChannel.h" />
-    <ClInclude Include="APU\SquareWave.h" />
-    <ClInclude Include="APU\VolumeEnvelope.h" />
-    <ClInclude Include="APU\WaveChannel.h" />
+    <ClInclude Include="Audio\APU.h" />
+    <ClInclude Include="Audio\APUStream.h" />
+    <ClInclude Include="Audio\Channel.h" />
+    <ClInclude Include="Audio\FrameSequencer.h" />
+    <ClInclude Include="Audio\Frequency.h" />
+    <ClInclude Include="Audio\FrequencySweep.h" />
+    <ClInclude Include="Audio\LengthCounter.h" />
+    <ClInclude Include="Audio\NoiseChannel.h" />
+    <ClInclude Include="Audio\SquareChannel.h" />
+    <ClInclude Include="Audio\SquareWave.h" />
+    <ClInclude Include="Audio\VolumeEnvelope.h" />
+    <ClInclude Include="Audio\WaveChannel.h" />
     <ClInclude Include="BitMask\InterruptFlag.h" />
     <ClInclude Include="BitMask\LCDC.h" />
     <ClInclude Include="BitMask\STAT.h" />

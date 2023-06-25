@@ -12,9 +12,5 @@ namespace dmge
 			DrakGray = 2,
 			Black = 3,
 		};
-
-		enum class Color : uint8
-		{
-		};
 	}
 }

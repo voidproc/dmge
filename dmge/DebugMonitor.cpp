@@ -212,7 +212,7 @@ namespace dmge
 			RectF{ apuArea.pos.movedBy(0.5, 0.5), gaugeSize }.drawFrame(1.0, 0.0, Color{ 220 });
 			FontAsset(U"debug")(U"{:5} / 44100"_fmt(buffer.remain)).drawAt(apuArea.center(), FontColor);
 
-			// JoyCon
+			// Joy-Con
 			//   "JOYCONL=L0 D0 U0 R0, JOYCONR=A0 X0 B0 Y0" => 40 chars
 			//   h : (1 * LineHeight)
 			//   w : (40 * FontSize.x)
@@ -239,7 +239,7 @@ namespace dmge
 			FontAsset(U"debug")(textL, textR).draw(10, joyconArea.x, joyconArea.y, FontColor);
 
 
-			// ProController
+			// Proコントローラー
 			//   "ProCon=L0 D0 U0 R0 A0 B0 P0 M0" => 30 chars
 			//   h : (1 * LineHeight)
 			//   w : (40 * FontSize.x)

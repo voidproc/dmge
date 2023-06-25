@@ -46,7 +46,7 @@ namespace dmge
 		InputGroup inputSelect = KeyBackspace;
 		InputGroup inputStart = KeyEnter;
 
-		// ジョイコンL,R（両手持ち）
+		// Joy-Con(L), Joy-Con(R) （両手持ち）
 
 		const auto joyConL = JoyConL(0);
 		const auto joyConR = JoyConR(0);
@@ -63,7 +63,7 @@ namespace dmge
 			inputStart = inputStart | joyConR.button1;
 		}
 
-		// プロコン
+		// Proコントローラー
 
 		if (const auto procon = ProController(0); procon.isConnected())
 		{
@@ -76,6 +76,8 @@ namespace dmge
 			inputSelect = inputSelect | procon.buttonMinus;
 			inputStart = inputStart | procon.buttonPlus;
 		}
+
+		// 入力を統合
 
 		if (selected_ == SelectedButtons::Direction)
 		{

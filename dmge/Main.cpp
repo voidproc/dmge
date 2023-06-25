@@ -317,13 +317,6 @@ private:
 					}
 				}
 
-				// ボタン入力の更新
-				// ※デバッグモニタのテキストボックス入力中は更新しない
-				if (not (showDebugMonitor_ && debugMonitor_.isVisibleTextbox()))
-				{
-					joypad_.update();
-				}
-
 				// PPUのレンダリング結果を画面表示
 				ppu_.draw(Point{ 0, 0 }, config_.scale);
 
@@ -341,6 +334,9 @@ private:
 
 					debugMonitor_.draw(Point{ 160 * config_.scale, 0 });
 				}
+
+				// デバッグモニタのテキストボックス入力中はJOYPADを更新しない
+				joypad_.setEnable(not (showDebugMonitor_ && debugMonitor_.isVisibleTextbox()));
 
 				if (config_.showFPS)
 				{

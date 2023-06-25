@@ -75,6 +75,14 @@ namespace dmge
 			selected_ = SelectedButtons::Action;
 		}
 
-		update();
+		if (enabled_)
+		{
+			update();
+		}
+	}
+
+	void Joypad::setEnable(bool enable)
+	{
+		enabled_ = enable;
 	}
 }

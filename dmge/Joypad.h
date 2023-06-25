@@ -24,8 +24,13 @@ namespace dmge
 		// 選択状態（方向orアクション）とIOレジスタ(JOYP:0xff00)を更新する
 		void update(uint8 value);
 
+		// ジョイパッド有効／無効を切り替える
+		// 無効の場合、update()が呼ばれてもデバイスからボタンの状態を取得しない
+		void setEnable(bool enable);
+
 	private:
 		Memory* mem_;
 		SelectedButtons selected_ = SelectedButtons::Direction;
+		bool enabled_ = true;
 	};
 }

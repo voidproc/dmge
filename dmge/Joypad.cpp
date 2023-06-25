@@ -9,6 +9,28 @@ namespace dmge
 	{
 	}
 
+	void Joypad::writeRegister(uint8 value)
+	{
+		if ((value & (1 << 4)) == 0)
+		{
+			selected_ = SelectedButtons::Direction;
+		}
+		else if ((value & (1 << 5)) == 0)
+		{
+			selected_ = SelectedButtons::Action;
+		}
+
+		if (enabled_)
+		{
+			update();
+		}
+	}
+
+	uint8 Joypad::readRegister() const
+	{
+		return joyp_;
+	}
+
 	void Joypad::update()
 	{
 		uint8 value = 0;
@@ -61,24 +83,7 @@ namespace dmge
 			value |= 0b11010000;
 		}
 
-		mem_->writeDirect(Address::JOYP, value);
-	}
-
-	void Joypad::update(uint8 value)
-	{
-		if ((value & (1 << 4)) == 0)
-		{
-			selected_ = SelectedButtons::Direction;
-		}
-		else if ((value & (1 << 5)) == 0)
-		{
-			selected_ = SelectedButtons::Action;
-		}
-
-		if (enabled_)
-		{
-			update();
-		}
+		joyp_ = value;
 	}
 
 	void Joypad::setEnable(bool enable)

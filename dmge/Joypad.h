@@ -17,12 +17,15 @@ namespace dmge
 	public:
 		Joypad(Memory* mem);
 
-		// 現在の選択状態（方向orアクション）に応じてIOレジスタ(JOYP:0xff00)を更新する
-		void update();
+		// IOレジスタへの書き込み
+		// 選択状態（方向orアクション）とIOレジスタを更新する
+		void writeRegister(uint8 value);
 
-		// IOレジスタ(JOYP:0xff00)にvalueが書き込まれる前に呼び出される
-		// 選択状態（方向orアクション）とIOレジスタ(JOYP:0xff00)を更新する
-		void update(uint8 value);
+		// IOレジスタからの読み込み
+		uint8 readRegister() const;
+
+		// 現在の選択状態（方向orアクション）に応じてIOレジスタを更新する
+		void update();
 
 		// ジョイパッド有効／無効を切り替える
 		// 無効の場合、update()が呼ばれてもデバイスからボタンの状態を取得しない
@@ -32,5 +35,6 @@ namespace dmge
 		Memory* mem_;
 		SelectedButtons selected_ = SelectedButtons::Direction;
 		bool enabled_ = true;
+		uint8 joyp_ = 0;
 	};
 }

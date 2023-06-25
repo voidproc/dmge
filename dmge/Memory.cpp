@@ -176,7 +176,7 @@ namespace dmge
 
 		else if (addr == Address::JOYP)
 		{
-			joypad_->update(value);
+			joypad_->writeRegister(value);
 			return;
 		}
 
@@ -396,6 +396,14 @@ namespace dmge
 
 		// I/O Registers
 		// 0xff00 - 0xffff
+
+		// Joypad
+		// 0xff00
+
+		else if (addr == Address::JOYP)
+		{
+			return joypad_->readRegister();
+		}
 
 		// Timer
 		// 0xff04 - 0xff07

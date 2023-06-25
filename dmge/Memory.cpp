@@ -213,8 +213,13 @@ namespace dmge
 				if (not isCGBMode())
 				{
 					// DMGでは長さ制御(NRx1)以外を無視する
+					// NRx1のDutyも無視される
 
-					if (addr == Address::NR11 || addr == Address::NR21 || addr == Address::NR31 || addr == Address::NR41)
+					if (addr == Address::NR11 || addr == Address::NR21 || addr == Address::NR41)
+					{
+						apu_->writeRegister(addr, value & 0x3f);
+					}
+					else if (addr == Address::NR31)
 					{
 						apu_->writeRegister(addr, value);
 					}

@@ -48,6 +48,9 @@ namespace dmge
 		// NR52の下位4bit
 		uint8 getChannelsEnabledState() const;
 
+		// NR52
+		void setMasterSwitch(uint8 NR52);
+
 		// 現在のストリームバッファの状態を取得（デバッグ用）
 		APUStreamBufferState getBufferState() const;
 		

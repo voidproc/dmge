@@ -69,5 +69,7 @@ namespace dmge
 		{
 			return ie_;
 		}
+
+		return 0;
 	}
 }

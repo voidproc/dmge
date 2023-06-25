@@ -163,48 +163,7 @@ namespace dmge
 
 		if (addr == Address::NR52)
 		{
-			masterSwitch_ = (value & 0x80) != 0;
-
-			// APUがoffになったとき、APUレジスタが全てクリアされる
-			// (except on the DMG, where length counters are unaffected by power and can still be written while off).
-			if ((value & 0x80) == 0)
-			{
-				for (uint16 apuReg = Address::NR10; apuReg <= Address::NR51; apuReg++)
-				{
-					if (not cgbMode_)
-					{
-						switch (apuReg)
-						{
-						case Address::NR11:
-							ch1_.setDuty(0);
-							mem_->writeDirect(apuReg, mem_->read(apuReg) & 0x3f);
-							break;
-
-						case Address::NR21:
-							ch2_.setDuty(0);
-							mem_->writeDirect(apuReg, mem_->read(apuReg) & 0x3f);
-							break;
-
-						case Address::NR31:
-						case Address::NR41:
-							break;
-
-						default:
-							mem_->write(apuReg, 0);
-						}
-					}
-				}
-			}
-			else
-			{
-				// When powered on:
-				// - the frame sequencer is reset so that the next step will be 0
-				// - the square duty units are reset to the first step of the waveform
-				// - the wave channel's sample buffer is reset to 0
-				frameSeq_.reset();
-				ch1_.resetDutyPosition();
-				ch3_.resetWaveRAMOffset(); // ?
-			}
+			setMasterSwitch(value);
 		}
 
 		// Sweep
@@ -429,6 +388,57 @@ namespace dmge
 			((uint8)ch2_.getEnable() << 1) |
 			((uint8)ch3_.getEnable() << 2) |
 			((uint8)ch4_.getEnable() << 3);
+	}
+
+	void APU::setMasterSwitch(uint8 NR52)
+	{
+		masterSwitch_ = (NR52 & 0x80) != 0;
+
+		// APUがoffになったとき、APUレジスタが全てクリアされる
+		// (except on the DMG, where length counters are unaffected by power and can still be written while off).
+		if ((NR52 & 0x80) == 0)
+		{
+			// APUがoffになると各チャンネルは無効になる
+			ch1_.setEnable(false);
+			ch2_.setEnable(false);
+			ch3_.setEnable(false);
+			ch4_.setEnable(false);
+
+			for (uint16 apuReg = Address::NR10; apuReg <= Address::NR51; apuReg++)
+			{
+				if (not cgbMode_)
+				{
+					switch (apuReg)
+					{
+					case Address::NR11:
+						ch1_.setDuty(0);
+						break;
+
+					case Address::NR21:
+						ch2_.setDuty(0);
+						break;
+
+					case Address::NR31:
+					case Address::NR41:
+						break;
+
+					default:
+						writeRegister(apuReg, 0);
+					}
+				}
+			}
+		}
+		else
+		{
+			// When powered on:
+			// - the frame sequencer is reset so that the next step will be 0
+			// - the square duty units are reset to the first step of the waveform
+			// - the wave channel's sample buffer is reset to 0
+			frameSeq_.reset();
+			ch1_.resetDutyPosition();
+			ch2_.resetDutyPosition();
+			ch3_.resetWaveRAMOffset(); // ?
+		}
 	}
 
 	APUStreamBufferState APU::getBufferState() const

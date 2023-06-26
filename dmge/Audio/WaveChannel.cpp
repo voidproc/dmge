@@ -93,7 +93,7 @@ namespace dmge
 		freq_ = FrequencyReplacedHigher(freq_, freqHigh);
 	}
 
-	int WaveChannel::getFrequency()
+	int WaveChannel::getFrequency() const
 	{
 		return freq_;
 	}

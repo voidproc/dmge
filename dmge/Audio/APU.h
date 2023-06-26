@@ -43,7 +43,7 @@ namespace dmge
 		void writeRegister(uint16 addr, uint8 value);
 
 		// IOレジスタからの読み込み
-		uint8 readRegister(uint16 addr);
+		uint8 readRegister(uint16 addr) const;
 
 		// NR52の下位4bit
 		uint8 getChannelsEnabledState() const;

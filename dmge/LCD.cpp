@@ -118,12 +118,12 @@ namespace dmge
 		return lyc_;
 	}
 
-	Colors::Gray LCD::bgp(int n)
+	Colors::Gray LCD::bgp(int n) const
 	{
 		return static_cast<Colors::Gray>((bgp_ >> (n * 2)) & 0b11);
 	}
 
-	Colors::Gray LCD::obp(int palette, int n)
+	Colors::Gray LCD::obp(int palette, int n) const
 	{
 		const uint8& paletteData = palette == 0 ? obp0_ : obp1_;
 		return static_cast<Colors::Gray>((paletteData >> (n * 2)) & 0b11);

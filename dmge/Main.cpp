@@ -463,7 +463,7 @@ private:
 	}
 
 	// ブレークポイントが有効かつブレークポイントに達したか
-	bool reachedBreakpoint_()
+	bool reachedBreakpoint_() const
 	{
 		if (not config_.enableBreakpoint) return false;
 

@@ -39,7 +39,7 @@ namespace dmge
 
 		void setFrequencyHigh(uint8 freqHigh);
 
-		int getFrequency();
+		int getFrequency() const;
 
 		// Wave volume
 

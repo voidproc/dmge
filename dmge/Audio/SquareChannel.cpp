@@ -113,7 +113,7 @@ namespace dmge
 		freq_ = FrequencyReplacedHigher(freq_, freqHigh);
 	}
 
-	int SquareChannel::getFrequency()
+	int SquareChannel::getFrequency() const
 	{
 		return freq_;
 	}

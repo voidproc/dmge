@@ -330,7 +330,7 @@ namespace dmge
 		}
 	}
 
-	uint8 APU::readRegister(uint16 addr)
+	uint8 APU::readRegister(uint16 addr) const
 	{
 		static constexpr std::array<uint8, 48> RegisterMasks = {
 			0x80,0x3F,0x00,0xFF,0xBF,

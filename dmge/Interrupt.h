@@ -20,11 +20,15 @@ namespace dmge
 
 		// IF & IE
 
-		void disableInterruptFlag(uint8 bit);
-
+		// 割り込み要求をする
+		// IFの指定したビット (BitMask::InterruptFlagBit) をセットする
 		void request(uint8 bit);
 
-		// 指定した割り込みが有効(IE)かつ要求(IF)されているか
+		// 割り込み要求をクリアする
+		// IFの指定したビット (BitMask::InterruptFlagBit) をリセットする
+		void clearRequest(uint8 bit);
+
+		// 指定したビット (BitMask::InterruptFlagBit) の割り込みが有効(IE)かつ要求(IF)されているか
 		bool requested(uint8 bit) const;
 
 		// 何かしらの有効かつ要求された割り込みがあるか

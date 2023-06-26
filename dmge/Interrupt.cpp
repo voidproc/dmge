@@ -27,14 +27,14 @@ namespace dmge
 		return ime_;
 	}
 
-	void Interrupt::disableInterruptFlag(uint8 bit)
-	{
-		if_ &= ~(1 << bit);
-	}
-
 	void Interrupt::request(uint8 bit)
 	{
 		if_ |= (1 << bit);
+	}
+
+	void Interrupt::clearRequest(uint8 bit)
+	{
+		if_ &= ~(1 << bit);
 	}
 
 	bool Interrupt::requested(uint8 bit) const

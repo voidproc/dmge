@@ -65,6 +65,11 @@ namespace dmge
 			MBC_ROMBank = 0x2000,
 			MBC_ROMBank_End = 0x3fff,
 
+			MBC_ROMBankLow = 0x2000,
+			MBC_ROMBankLow_End = 0x2fff,
+			MBC_ROMBankHigh = 0x3000,
+			MBC_ROMBankHigh_End = 0x3fff,
+
 			MBC_RAMBank = 0x4000,
 			MBC_RAMBank_End = 0x5fff,
 

@@ -43,7 +43,7 @@ namespace dmge
 		Array<uint8> rom_;
 
 		// External RAM (SRAM)
-		std::array<uint8, 0x8000> sram_;
+		std::array<uint8, 0x20000> sram_;
 
 		// カートリッジのヘッダ情報
 		CartridgeHeader cartridgeHeader_;
@@ -100,5 +100,16 @@ namespace dmge
 
 	private:
 		RTC rtc_;
+	};
+
+	class MBC5 : public MBC1
+	{
+	public:
+		using MBC1::MBC1;
+
+		void write(uint16 addr, uint8 value) override;
+
+		uint8 read(uint16 addr) const override;
+
 	};
 }

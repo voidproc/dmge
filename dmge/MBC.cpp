@@ -62,6 +62,22 @@ namespace dmge
 		return false;
 	}
 
+	bool IsMBC5(CartridgeType type)
+	{
+		switch (type)
+		{
+		case CartridgeType::MBC5:
+		case CartridgeType::MBC5_RAM:
+		case CartridgeType::MBC5_RAM_BATTERY:
+		case CartridgeType::MBC5_RUMBLE:
+		case CartridgeType::MBC5_RUMBLE_RAM:
+		case CartridgeType::MBC5_RUMBLE_RAM_BATTERY:
+			return true;
+		}
+
+		return false;
+	}
+
 	MBC::MBC(FilePath cartridgePath)
 	{
 		loadCartridge_(cartridgePath);
@@ -86,6 +102,10 @@ namespace dmge
 		else if (IsMBC3(header.type))
 		{
 			return std::make_unique<MBC3>(cartridgePath);
+		}
+		else if (IsMBC5(header.type))
+		{
+			return std::make_unique<MBC5>(cartridgePath);
 		}
 
 		return nullptr;
@@ -283,6 +303,11 @@ namespace dmge
 			// MBC1:
 			// 大容量RAMのとき、モード1の場合、セカンダリバンクで指定されたバンクに切り替わる
 
+			if (not ramEnabled_)
+			{
+				return 0xff;
+			}
+
 			const uint16 offset = addr - Address::SRAM;
 			return sram_[bankingMode_ == 0 ? offset : ramBank_ * 0x2000 + offset];
 		}
@@ -343,6 +368,12 @@ namespace dmge
 		else if (addr <= Address::SRAM_End)
 		{
 			// Built in RAM
+
+			if (not ramEnabled_)
+			{
+				return 0xff;
+			}
+
 			return sram_[(addr - Address::SRAM) & 0x1ff];
 		}
 
@@ -444,9 +475,88 @@ namespace dmge
 			}
 			else
 			{
+				if (not ramEnabled_)
+				{
+					return 0xff;
+				}
+
 				const uint16 offset = addr - Address::SRAM;
 				return sram_[ramBank_ * 0x2000 + offset];
 			}
+		}
+
+		return 0;
+	}
+
+	void MBC5::write(uint16 addr, uint8 value)
+	{
+		if (ADDRESS_IN_RANGE(addr, Address::MBC_RAMEnable))
+		{
+			// RAM and Timer Enable
+
+			bool enabled = (value & 0xf) == 0xa;
+			ramEnabled_ = enabled;
+		}
+		else if (ADDRESS_IN_RANGE(addr, Address::MBC_ROMBankLow))
+		{
+			// The 8 least significant bits of the ROM bank number
+
+			romBank_ &= 0x100;
+			romBank_ |= value;
+		}
+		else if (ADDRESS_IN_RANGE(addr, Address::MBC_ROMBankHigh))
+		{
+			// The 9th bit of the ROM bank number
+
+			romBank_ &= 0xff;
+			romBank_ |= (value & 1) << 8;
+		}
+		else if (ADDRESS_IN_RANGE(addr, Address::MBC_RAMBank))
+		{
+			// RAM Bank Number
+			if (value <= 0xf)
+			{
+				MBC1::write(addr, value);
+			}
+		}
+		else if (ADDRESS_IN_RANGE(addr, Address::SRAM))
+		{
+			// External RAM
+			// write to external RAM if it is enabled. If it is not,  >>> the write is ignored <<<
+
+			if (not ramEnabled_)
+			{
+				return;
+			}
+
+			const uint16 offset = addr - Address::SRAM;
+			sram_[ramBank_ * 0x2000 + offset] = value;
+		}
+	}
+
+	uint8 MBC5::read(uint16 addr) const
+	{
+		if (addr <= Address::ROMBank0_End)
+		{
+			// ROM Bank 0
+			return rom_[addr];
+		}
+		else if (addr <= Address::SwitchableROMBank_End)
+		{
+			// ROM Bank 0-
+			return MBC1::read(addr);
+		}
+		else if (addr <= Address::SRAM_End)
+		{
+			// External RAM
+
+			if (not ramEnabled_)
+			{
+				return 0xff;
+			}
+
+			const uint16 offset = addr - Address::SRAM;
+			return sram_[ramBank_ * 0x2000 + offset];
 		}
 
 		return 0;

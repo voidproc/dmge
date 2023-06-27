@@ -102,7 +102,7 @@ namespace dmge
 				{
 					// 割り込みを無効に
 					interrupt_->disableIME();
-					interrupt_->disableInterruptFlag(i);
+					interrupt_->clearRequest(i);
 
 					// 現在のPCをスタックにプッシュし、割り込みベクタにジャンプ
 					mem_->write(--sp, pc >> 8);

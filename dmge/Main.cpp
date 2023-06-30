@@ -129,6 +129,13 @@ public:
 		// SRAMをロード
 		mem_.loadSRAM();
 
+		// BootROM
+		bool enableBootROM = not config_.bootROMPath.isEmpty() && FileSystem::Exists(config_.bootROMPath);
+		if (enableBootROM)
+		{
+			mem_.enableBootROM(config_.bootROMPath);
+		}
+
 		// [DEBUG]
 		dmge::DebugPrint::Writeln(U"* Cartridge loaded:");
 		dmge::DebugPrint::Writeln(U"FileName={}"_fmt(FileSystem::FileName(*currentCartridgePath_)));
@@ -138,7 +145,7 @@ public:
 		ppu_.setCGBMode(mem_.isCGBMode());
 		apu_.setCGBMode(mem_.isCGBMode());
 		cpu_.setCGBMode(mem_.isCGBMode());
-		cpu_.reset();
+		cpu_.reset(enableBootROM);
 
 		mainLoop_();
 

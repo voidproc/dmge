@@ -37,6 +37,9 @@ namespace dmge
 		// LD B,B 実行時にブレークする
 		bool breakOnLDBB = false;
 
+		// 
+		String bootROMPath{};
+
 		// config.ini のパース結果を返す
 		static AppConfig LoadConfig();
 

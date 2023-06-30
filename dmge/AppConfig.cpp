@@ -33,7 +33,9 @@ namespace dmge
 
 		config.showDebugMonitor = ParseOr<int>(ini[U"ShowDebugMonitor"], true);
 
-		config.breakOnLDBB = ParseOr<int>(ini[U"BreakOnLDBB"], true);
+		config.breakOnLDBB = ParseOr<int>(ini[U"BreakOnLDBB"], false);
+
+		config.bootROMPath = ParseOr<String>(ini[U"BootROM"], U"");
 
 		return config;
 	}
@@ -73,5 +75,7 @@ namespace dmge
 		DebugPrint::Writeln(U"Scale={}"_fmt(scale));
 		DebugPrint::Writeln(U"ShowConsole={}"_fmt(showConsole));
 		DebugPrint::Writeln(U"ShowDebugMonitor={}"_fmt(showDebugMonitor));
+
+		DebugPrint::Writeln(U"BootROM={}"_fmt(bootROMPath));
 	}
 }

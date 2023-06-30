@@ -199,6 +199,17 @@ namespace dmge
 		cartridgeHeader_.dump();
 	}
 
+	void MBC::enableBootROM(FilePathView bootROMPath)
+	{
+		BinaryReader reader{ bootROMPath };
+		boot_.resize(reader.size());
+		reader.read(boot_.data(), reader.size());
+	}
+
+	void MBC::disableBootROM()
+	{
+		boot_.clear();
+	}
 
 	// ------------------------------------------------
 	// No MBC
@@ -210,6 +221,11 @@ namespace dmge
 
 	uint8 NoMBC::read(uint16 addr) const
 	{
+		if (addr < 0x100 && boot_)
+		{
+			return boot_[addr];
+		}
+
 		return rom_[addr];
 	}
 
@@ -281,8 +297,14 @@ namespace dmge
 
 	uint8 MBC1::read(uint16 addr) const
 	{
-		if (addr <= Address::ROMBank0_End)
+		if (addr < 0x100 && boot_)
 		{
+			// BootROM
+			return boot_[addr];
+		}
+		else if (addr <= Address::ROMBank0_End)
+		{
+
 			// ROM Bank 0
 
 			if (cartridgeHeader_.romSizeKB < 1024)
@@ -358,7 +380,12 @@ namespace dmge
 
 	uint8 MBC2::read(uint16 addr) const
 	{
-		if (addr <= Address::ROMBank0_End)
+		if (addr < 0x100 && boot_)
+		{
+			// BootROM
+			return boot_[addr];
+		}
+		else if (addr <= Address::ROMBank0_End)
 		{
 			// ROM Bank 0
 			return rom_[addr];
@@ -454,7 +481,12 @@ namespace dmge
 
 	uint8 MBC3::read(uint16 addr) const
 	{
-		if (addr <= Address::ROMBank0_End)
+		if (addr < 0x100 && boot_)
+		{
+			// BootROM
+			return boot_[addr];
+		}
+		else if (addr <= Address::ROMBank0_End)
 		{
 			// ROM Bank 0
 			return rom_[addr];
@@ -579,7 +611,12 @@ namespace dmge
 
 	uint8 MBC5::read(uint16 addr) const
 	{
-		if (addr <= Address::ROMBank0_End)
+		if (addr < 0x100 && boot_)
+		{
+			// BootROM
+			return boot_[addr];
+		}
+		else if (addr <= Address::ROMBank0_End)
 		{
 			// ROM Bank 0
 			return rom_[addr];

@@ -55,6 +55,10 @@ namespace dmge
 
 		void dump(uint16 addrBegin, uint16 addrEnd);
 
+		void enableBootROM(FilePathView bootROMPath);
+
+		void disableBootROM();
+
 		template <class F>
 		void setWriteHook(F f)
 		{

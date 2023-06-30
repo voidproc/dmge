@@ -35,6 +35,10 @@ namespace dmge
 		// [DEBUG]
 		void dumpCartridgeInfo();
 
+		void enableBootROM(FilePathView bootROMPath);
+
+		void disableBootROM();
+
 	private:
 		virtual void loadSRAM_(FilePathView saveFilePath);
 		virtual void saveSRAM_(FilePathView saveFilePath);
@@ -47,6 +51,9 @@ namespace dmge
 
 		// External RAM (SRAM)
 		std::array<uint8, 0x20000> sram_;
+
+		// BootROM
+		Array<uint8> boot_;
 
 		// カートリッジのヘッダ情報
 		CartridgeHeader cartridgeHeader_;

@@ -289,7 +289,10 @@ namespace dmge
 
 		else if (addr == Address::BANK)
 		{
-			//...
+			if (value & 1)
+			{
+				disableBootROM();
+			}
 		}
 
 		// HDMA
@@ -515,5 +518,15 @@ namespace dmge
 		}
 
 		DebugPrint::Writeln(dumped);
+	}
+
+	void Memory::enableBootROM(FilePathView bootROMPath)
+	{
+		mbc_->enableBootROM(bootROMPath);
+	}
+
+	void Memory::disableBootROM()
+	{
+		mbc_->disableBootROM();
 	}
 }

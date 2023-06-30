@@ -26,7 +26,7 @@ namespace dmge
 		void setCGBMode(bool value);
 
 		// レジスタを初期状態にする
-		void reset();
+		void reset(bool enableBootROM);
 
 		// CPU命令を１つフェッチ＆実行しPCを進める
 		void run();

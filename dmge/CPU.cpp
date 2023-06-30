@@ -32,14 +32,14 @@ namespace dmge
 			cgbMode_ = value;
 		}
 
-		void reset()
+		void reset(bool enableBootROM)
 		{
 			af(cgbMode_ ? 0x11b0 : 0x01b0); // GB/SGB:0x01b0, GBP:0xffb0, GBC:0x11b0
 			bc(cgbMode_ ? 0x0000 : 0x0013);
 			de(0x00d8);
 			hl(0x014d);
 			sp = 0xfffe;
-			pc = 0x0100;
+			pc = enableBootROM ? 0 : 0x100;
 		}
 
 		void run()
@@ -2254,7 +2254,7 @@ namespace dmge
 	CPU::CPU(Memory* mem, Interrupt* interrupt)
 		: mem_{ mem }, cpuDetail_{ std::make_unique<CPU_detail>(mem, interrupt) }
 	{
-		cpuDetail_->reset();
+		cpuDetail_->reset(false);
 	}
 
 	CPU::~CPU()
@@ -2266,9 +2266,9 @@ namespace dmge
 		cpuDetail_->setCGBMode(value);
 	}
 
-	void CPU::reset()
+	void CPU::reset(bool enableBootROM)
 	{
-		cpuDetail_->reset();
+		cpuDetail_->reset(enableBootROM);
 	}
 
 	void CPU::run()

@@ -40,9 +40,8 @@ C++ / OpenSiv3D でゲームボーイのエミュレータを作っています�
   - [x] ROM Only
   - [x] MBC1
   - [x] MBC2
-  - [ ] MBC3
-    - [x] MBC3 の RTC 以外の機能
-    - [ ] RTC: セーブ & ロード未実装
+  - [x] MBC3
+    - [x] RTC
   - [ ] MBC5
     - [x] MBC5 の Rumble 以外の機能
     - [ ] Rumble

@@ -64,4 +64,9 @@ namespace dmge
 		return FileSystem::Exists(path) && FileSystem::IsFile(path);
 
 	}
+
+	FilePath GetSaveFilePath(FilePathView cartridgePath)
+	{
+		return FileSystem::PathAppend(FileSystem::ParentPath(cartridgePath), FileSystem::BaseName(cartridgePath)) + U".sav";
+	}
 }

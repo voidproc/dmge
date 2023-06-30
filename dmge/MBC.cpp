@@ -123,31 +123,41 @@ namespace dmge
 		reader.read(rom_.data(), rom_.size());
 
 		// SRAMをファイルからロード
-		if (ramSizeBytes())
-		{
-			loadSRAM();
-		}
+		//if (ramSizeBytes())
+		//{
+		//	loadSRAM();
+		//}
 	}
 
 	void MBC::loadSRAM()
 	{
-		const auto savPath = FileSystem::PathAppend(FileSystem::ParentPath(cartridgePath_), FileSystem::BaseName(cartridgePath_)) + U".sav";
+		if (ramSizeBytes() == 0) return;
+
+		const auto savPath = GetSaveFilePath(cartridgePath_);
 		if (FileSystem::Exists(savPath))
 		{
-			BinaryReader savReader{ savPath };
-			savReader.read(sram_.data(), Min<size_t>(sram_.size(), savReader.size()));
+			loadSRAM_(savPath);
 		}
+	}
+
+	void MBC::loadSRAM_(FilePathView saveFilePath)
+	{
+		BinaryReader savReader{ saveFilePath };
+		savReader.read(sram_.data(), Min<size_t>(sram_.size(), savReader.size()));
 	}
 
 	void MBC::saveSRAM()
 	{
-		const auto savPath = FileSystem::PathAppend(FileSystem::ParentPath(cartridgePath_), FileSystem::BaseName(cartridgePath_)) + U".sav";
+		if (ramSizeBytes() == 0) return;
 
-		if (ramSizeBytes())
-		{
-			BinaryWriter writer{ savPath };
-			writer.write(sram_.data(), ramSizeBytes());
-		}
+		const auto savPath = GetSaveFilePath(cartridgePath_);
+		saveSRAM_(savPath);
+	}
+
+	void MBC::saveSRAM_(FilePathView saveFilePath)
+	{
+		BinaryWriter writer{ saveFilePath };
+		writer.write(sram_.data(), ramSizeBytes());
 	}
 
 	CGBFlag MBC::cgbFlag() const
@@ -448,11 +458,6 @@ namespace dmge
 		}
 	}
 
-	void MBC3::update(int cycles)
-	{
-		rtc_.update(cycles);
-	}
-
 	uint8 MBC3::read(uint16 addr) const
 	{
 		if (addr <= Address::ROMBank0_End)
@@ -487,6 +492,58 @@ namespace dmge
 
 		return 0;
 	}
+
+	void MBC3::update(int cycles)
+	{
+		rtc_.update(cycles);
+	}
+
+	void MBC3::loadSRAM_(FilePathView saveFilePath)
+	{
+		BinaryReader savReader{ saveFilePath };
+
+		// メインのセーブデータ: ramSizeBytes バイト読み込む
+		if (savReader.size() >= ramSizeBytes())
+		{
+			savReader.read(sram_.data(), ramSizeBytes());
+		}
+
+		// RTC
+		if (HasRTC(cartridgeHeader_.type) && savReader.size() >= ramSizeBytes() + sizeof(RTCSaveData))
+		{
+			RTCSaveData rtcSaveData;
+			savReader.read(rtcSaveData);
+
+			rtc_.loadSaveData(rtcSaveData);
+
+			// [DEBUG]dump
+			Console.writeln(U"RTC Load: s{:x} m{:x} h{:x} d{:x}"_fmt(rtcSaveData.seconds, rtcSaveData.minutes, rtcSaveData.hours, rtcSaveData.days));
+			rtc_.dump();
+		}
+	}
+
+	void MBC3::saveSRAM_(FilePathView saveFilePath)
+	{
+		BinaryWriter writer{ saveFilePath };
+
+		// メインのセーブデータ: ramSizeBytes バイト書き込む
+		writer.write(sram_.data(), ramSizeBytes());
+
+		// RTC
+		if (HasRTC(cartridgeHeader_.type))
+		{
+			const auto rtcSaveData = rtc_.getSaveData();
+			writer.write(rtcSaveData);
+
+			// [DEBUG]dump
+			Console.writeln(U"RTC Save: s{:x} m{:x} h{:x} d{:x}"_fmt(rtcSaveData.seconds, rtcSaveData.minutes, rtcSaveData.hours, rtcSaveData.days));
+			rtc_.dump();
+		}
+	}
+
+	// ------------------------------------------------
+	// MBC5
+	// ------------------------------------------------
 
 	void MBC5::write(uint16 addr, uint8 value)
 	{

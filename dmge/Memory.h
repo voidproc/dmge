@@ -27,6 +27,8 @@ namespace dmge
 
 		bool loadCartridge(FilePath cartridgePath);
 
+		void loadSRAM();
+
 		void saveSRAM();
 
 		void write(uint16 addr, uint8 value);

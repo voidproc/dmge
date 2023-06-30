@@ -66,4 +66,7 @@ namespace dmge
 	};
 
 	bool IsValidCartridgePath(StringView path);
+
+	FilePath GetSaveFilePath(FilePathView cartridgePath);
+
 }

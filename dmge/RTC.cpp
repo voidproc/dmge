@@ -130,6 +130,54 @@ namespace dmge
 		regInternal_.d &= MaskD;
 	}
 
+	RTCSaveData RTC::getSaveData()
+	{
+		RTCSaveData savedata;
+
+		savedata.seconds = regInternal_.s;
+		savedata.minutes = regInternal_.m;
+		savedata.hours = regInternal_.h;
+		savedata.days = (regInternal_.d & 0xff) | ((static_cast<uint64>(regInternal_.d) & 0xff00) << (8 * 3));
+
+		savedata.secondsLatched = regLatched_.s;
+		savedata.minutesLatched = regLatched_.m;
+		savedata.hoursLatched = regLatched_.h;
+		savedata.daysLatched = (regLatched_.d & 0xff) | ((regLatched_.d & 0xff00) << (8 * 3));
+
+		savedata.timestamp = Time::GetSecSinceEpoch();
+
+		return savedata;
+	}
+
+	void RTC::loadSaveData(const RTCSaveData& rtcSaveData)
+	{
+		const uint64 elapsedSec = Time::GetSecSinceEpoch() - rtcSaveData.timestamp;
+
+		const int s = rtcSaveData.seconds + elapsedSec;
+		regInternal_.s = static_cast<uint8>(s % 60);
+
+		const int m = rtcSaveData.minutes + (s / 60);
+		regInternal_.m = static_cast<uint8>(m % 60);
+
+		const int h = rtcSaveData.hours + (m / 60);
+		regInternal_.h = static_cast<uint8>(h % 24);
+
+		const uint16 d67 = (rtcSaveData.days >> (8 * 3)) & 0b11000000'00000000;
+		const uint16 d = ((rtcSaveData.days & 0xff) | ((rtcSaveData.days >> (8 * 3)) & 0x100)) + (h / 24);  //ここでキャリーを考慮すべきかわからない
+		regInternal_.d = d67 | (d & 0x1ff);
+
+		regLatched_.s = static_cast<uint8>(rtcSaveData.secondsLatched);
+		regLatched_.m = static_cast<uint8>(rtcSaveData.minutesLatched);
+		regLatched_.h = static_cast<uint8>(rtcSaveData.hoursLatched);
+		regLatched_.d = (rtcSaveData.daysLatched & 0xff) | ((rtcSaveData.daysLatched >> (8 * 3)) & 0xff00);
+	}
+
+	void RTC::dump()
+	{
+		Console.writeln(U"RTC Internal: s={:02x} m={:02x} h={:02x} d={:04x}"_fmt(regInternal_.s, regInternal_.m, regInternal_.h, regInternal_.d));
+		Console.writeln(U"RTC Latched : s={:02x} m={:02x} h={:02x} d={:04x}"_fmt(regLatched_.s, regLatched_.m, regLatched_.h, regLatched_.d));
+	}
+
 	void RTC::latch_()
 	{
 		regLatched_ = regInternal_;

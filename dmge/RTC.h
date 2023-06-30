@@ -19,6 +19,23 @@ namespace dmge
 		uint16 d = 0;
 	};
 
+#pragma pack(4)
+	struct RTCSaveData
+	{
+		uint32 seconds;
+		uint32 minutes;
+		uint32 hours;
+		uint64 days;
+
+		uint32 secondsLatched;
+		uint32 minutesLatched;
+		uint32 hoursLatched;
+		uint64 daysLatched;
+
+		uint64 timestamp;
+	};
+#pragma pack()
+
 	class RTC
 	{
 	public:
@@ -43,6 +60,13 @@ namespace dmge
 		uint8 readRegister() const;
 
 		void update(int cycles);
+
+		RTCSaveData getSaveData();
+
+		void loadSaveData(const RTCSaveData& rtcSaveData);
+
+		// [DEBUG]
+		void dump();
 
 	private:
 		bool enabled_ = false;

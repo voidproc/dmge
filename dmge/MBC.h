@@ -35,6 +35,9 @@ namespace dmge
 		// [DEBUG]
 		void dumpCartridgeInfo();
 
+	private:
+		virtual void loadSRAM_(FilePathView saveFilePath);
+		virtual void saveSRAM_(FilePathView saveFilePath);
 
 	protected:
 		String cartridgePath_;
@@ -100,6 +103,9 @@ namespace dmge
 
 	private:
 		RTC rtc_;
+
+		virtual void loadSRAM_(FilePathView saveFilePath) override;
+		virtual void saveSRAM_(FilePathView saveFilePath) override;
 	};
 
 	class MBC5 : public MBC1

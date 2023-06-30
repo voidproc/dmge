@@ -96,10 +96,6 @@ public:
 		return Dialog::OpenFile({ FileFilter{.name = U"GAMEBOY Cartridge", .patterns = {U"gb?"} } }, cartDir, U"ファイルを開く");
 	}
 
-	void setCartridgePath()
-	{
-	}
-
 	void setCartridgePath(const String& cartridgePath)
 	{
 		currentCartridgePath_ = cartridgePath;
@@ -122,7 +118,7 @@ public:
 		}
 
 		// カートリッジ読み込み
-		// 対応するMBCがカートリッジとSRAMをロードする
+		// 対応するMBCがカートリッジをロードする
 		// 対応するMBCがない場合は終了する
 		if (not mem_.loadCartridge(*currentCartridgePath_))
 		{
@@ -130,6 +126,10 @@ public:
 			return;
 		}
 
+		// SRAMをロード
+		mem_.loadSRAM();
+
+		// [DEBUG]
 		dmge::DebugPrint::Writeln(U"* Cartridge loaded:");
 		dmge::DebugPrint::Writeln(U"FileName={}"_fmt(FileSystem::FileName(*currentCartridgePath_)));
 		mem_.dumpCartridgeInfo();

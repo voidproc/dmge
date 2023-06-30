@@ -93,6 +93,11 @@ namespace dmge
 		return true;
 	}
 
+	void Memory::loadSRAM()
+	{
+		mbc_->loadSRAM();
+	}
+
 	void Memory::saveSRAM()
 	{
 		mbc_->saveSRAM();

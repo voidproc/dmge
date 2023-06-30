@@ -121,12 +121,6 @@ namespace dmge
 		BinaryReader reader{ cartridgePath };
 		rom_.resize(reader.size());
 		reader.read(rom_.data(), rom_.size());
-
-		// SRAMをファイルからロード
-		//if (ramSizeBytes())
-		//{
-		//	loadSRAM();
-		//}
 	}
 
 	void MBC::loadSRAM()
@@ -515,10 +509,6 @@ namespace dmge
 			savReader.read(rtcSaveData);
 
 			rtc_.loadSaveData(rtcSaveData);
-
-			// [DEBUG]dump
-			Console.writeln(U"RTC Load: s{:x} m{:x} h{:x} d{:x}"_fmt(rtcSaveData.seconds, rtcSaveData.minutes, rtcSaveData.hours, rtcSaveData.days));
-			rtc_.dump();
 		}
 	}
 
@@ -534,10 +524,6 @@ namespace dmge
 		{
 			const auto rtcSaveData = rtc_.getSaveData();
 			writer.write(rtcSaveData);
-
-			// [DEBUG]dump
-			Console.writeln(U"RTC Save: s{:x} m{:x} h{:x} d{:x}"_fmt(rtcSaveData.seconds, rtcSaveData.minutes, rtcSaveData.hours, rtcSaveData.days));
-			rtc_.dump();
 		}
 	}
 

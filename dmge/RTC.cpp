@@ -18,12 +18,6 @@ namespace dmge
 	void RTC::setEnable(bool enable)
 	{
 		enabled_ = enable;
-
-		//if (enable)
-		//{
-			//timeRTCEnabled_ = time(0);
-			//tm* t = localtime(&timeRTCEnabled_);
-		//}
 	}
 
 	bool RTC::enabled() const

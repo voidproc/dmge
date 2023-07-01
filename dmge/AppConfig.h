@@ -2,6 +2,14 @@
 
 namespace dmge
 {
+	struct GamepadButtonAssign
+	{
+		int buttonA = 0;
+		int buttonB = 1;
+		int buttonSelect = 2;
+		int buttonStart = 3;
+	};
+
 	struct AppConfig
 	{
 		// 読み込むカートリッジのパス
@@ -37,8 +45,11 @@ namespace dmge
 		// LD B,B 実行時にブレークする
 		bool breakOnLDBB = false;
 
-		// 
+		// Bootstrap ROMのパス
 		String bootROMPath{};
+
+		// ゲームパッドのボタン割り当て
+		GamepadButtonAssign gamepadButtonAssign;
 
 		// config.ini のパース結果を返す
 		static AppConfig LoadConfig();

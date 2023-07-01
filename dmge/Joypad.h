@@ -12,6 +12,8 @@ namespace dmge
 
 	class Memory;
 
+	struct GamepadButtonAssign;
+
 	class Joypad
 	{
 	public:
@@ -31,10 +33,22 @@ namespace dmge
 		// 無効の場合、update()が呼ばれてもデバイスからボタンの状態を取得しない
 		void setEnable(bool enable);
 
+		// ボタン割り当てを設定
+		void setButtonAssign(const GamepadButtonAssign& gamepadButtonAssign);
+
 	private:
 		Memory* mem_;
 		SelectedButtons selected_ = SelectedButtons::Direction;
 		bool enabled_ = true;
 		uint8 joyp_ = 0;
+
+		InputGroup inputRight_;
+		InputGroup inputLeft_;
+		InputGroup inputUp_;
+		InputGroup inputDown_;
+		InputGroup inputA_;
+		InputGroup inputB_;
+		InputGroup inputSelect_;
+		InputGroup inputStart_;
 	};
 }

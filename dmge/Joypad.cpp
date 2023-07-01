@@ -1,6 +1,7 @@
 ﻿#include "Joypad.h"
 #include "Memory.h"
 #include "Address.h"
+#include "AppConfig.h"
 
 namespace dmge
 {
@@ -35,64 +36,22 @@ namespace dmge
 	{
 		uint8 value = 0;
 
-		// キーボード
-
-		InputGroup inputRight = KeyRight;
-		InputGroup inputLeft = KeyLeft;
-		InputGroup inputUp = KeyUp;
-		InputGroup inputDown = KeyDown;
-		InputGroup inputA = KeyX;
-		InputGroup inputB = KeyZ;
-		InputGroup inputSelect = KeyBackspace;
-		InputGroup inputStart = KeyEnter;
-
-		// Joy-Con(L), Joy-Con(R) （両手持ち）
-
-		const auto joyConL = JoyConL(0);
-		const auto joyConR = JoyConR(0);
-
-		if (joyConL.isConnected() && joyConR.isConnected())
-		{
-			inputRight = inputRight | joyConL.button3;
-			inputLeft = inputLeft | joyConL.button0;
-			inputUp = inputUp | joyConL.button2;
-			inputDown = inputDown | joyConL.button1;
-			inputA = inputA | joyConR.button0;
-			inputB = inputB | joyConR.button2;
-			inputSelect = inputSelect | joyConR.button3;
-			inputStart = inputStart | joyConR.button1;
-		}
-
-		// Proコントローラー
-
-		if (const auto procon = ProController(0); procon.isConnected())
-		{
-			inputRight = inputRight | procon.povRight;
-			inputLeft = inputLeft | procon.povLeft;
-			inputUp = inputUp | procon.povUp;
-			inputDown = inputDown | procon.povDown;
-			inputA = inputA | procon.buttonA;
-			inputB = inputB | procon.buttonB;
-			inputSelect = inputSelect | procon.buttonMinus;
-			inputStart = inputStart | procon.buttonPlus;
-		}
-
 		// 入力を統合
 
 		if (selected_ == SelectedButtons::Direction)
 		{
-			value |= (inputRight.pressed() ? 0 : 1) << 0;
-			value |= (inputLeft.pressed() ? 0 : 1) << 1;
-			value |= (inputUp.pressed() ? 0 : 1) << 2;
-			value |= (inputDown.pressed() ? 0 : 1) << 3;
+			value |= (inputRight_.pressed() ? 0 : 1) << 0;
+			value |= (inputLeft_.pressed() ? 0 : 1) << 1;
+			value |= (inputUp_.pressed() ? 0 : 1) << 2;
+			value |= (inputDown_.pressed() ? 0 : 1) << 3;
 			value |= 0b11100000;
 		}
 		else
 		{
-			value |= (inputA.pressed() ? 0 : 1) << 0;
-			value |= (inputB.pressed() ? 0 : 1) << 1;
-			value |= (inputSelect.pressed() ? 0 : 1) << 2;
-			value |= (inputStart.pressed() ? 0 : 1) << 3;
+			value |= (inputA_.pressed() ? 0 : 1) << 0;
+			value |= (inputB_.pressed() ? 0 : 1) << 1;
+			value |= (inputSelect_.pressed() ? 0 : 1) << 2;
+			value |= (inputStart_.pressed() ? 0 : 1) << 3;
 			value |= 0b11010000;
 		}
 
@@ -102,5 +61,72 @@ namespace dmge
 	void Joypad::setEnable(bool enable)
 	{
 		enabled_ = enable;
+	}
+
+	void Joypad::setButtonAssign(const GamepadButtonAssign& gamepadButtonAssign)
+	{
+		// キーボード
+
+		inputRight_ = KeyRight;
+		inputLeft_ = KeyLeft;
+		inputUp_ = KeyUp;
+		inputDown_ = KeyDown;
+		inputA_ = KeyX;
+		inputB_ = KeyZ;
+		inputSelect_ = KeyBackspace;
+		inputStart_ = KeyEnter;
+
+		// Joy-Con(L), Joy-Con(R) （両手持ち）
+
+		const auto joyConL = JoyConL(0);
+		const auto joyConR = JoyConR(0);
+
+		if (joyConL.isConnected() && joyConR.isConnected())
+		{
+			inputRight_ = inputRight_ | joyConL.button3;
+			inputLeft_ = inputLeft_ | joyConL.button0;
+			inputUp_ = inputUp_ | joyConL.button2;
+			inputDown_ = inputDown_ | joyConL.button1;
+			inputA_ = inputA_ | joyConR.button0;
+			inputB_ = inputB_ | joyConR.button2;
+			inputSelect_ = inputSelect_ | joyConR.button3;
+			inputStart_ = inputStart_ | joyConR.button1;
+		}
+
+		// Proコントローラー
+
+		if (const auto procon = ProController(0); procon.isConnected())
+		{
+			inputRight_ = inputRight_ | procon.povRight;
+			inputLeft_ = inputLeft_ | procon.povLeft;
+			inputUp_ = inputUp_ | procon.povUp;
+			inputDown_ = inputDown_ | procon.povDown;
+			inputA_ = inputA_ | procon.buttonA;
+			inputB_ = inputB_ | procon.buttonB;
+			inputSelect_ = inputSelect_ | procon.buttonMinus;
+			inputStart_ = inputStart_ | procon.buttonPlus;
+		}
+
+		// 汎用ゲームパッド
+
+		if (const auto gamepad = Gamepad(0); gamepad.isConnected())
+		{
+			inputRight_ = inputRight_ | gamepad.povRight;
+			inputLeft_ = inputLeft_ | gamepad.povLeft;
+			inputUp_ = inputUp_ | gamepad.povUp;
+			inputDown_ = inputDown_ | gamepad.povDown;
+
+			if (gamepad.buttons.size() > gamepadButtonAssign.buttonA)
+				inputA_ = inputA_ | gamepad.buttons[gamepadButtonAssign.buttonA];
+
+			if (gamepad.buttons.size() > gamepadButtonAssign.buttonB)
+				inputB_ = inputB_ | gamepad.buttons[gamepadButtonAssign.buttonB];
+
+			if (gamepad.buttons.size() > gamepadButtonAssign.buttonSelect)
+				inputSelect_ = inputSelect_ | gamepad.buttons[gamepadButtonAssign.buttonSelect];
+
+			if (gamepad.buttons.size() > gamepadButtonAssign.buttonStart)
+				inputStart_ = inputStart_ | gamepad.buttons[gamepadButtonAssign.buttonStart];
+		}
 	}
 }

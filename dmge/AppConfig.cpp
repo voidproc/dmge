@@ -37,6 +37,11 @@ namespace dmge
 
 		config.bootROMPath = ParseOr<String>(ini[U"BootROM"], U"");
 
+		config.gamepadButtonAssign.buttonA = ParseOr<int>(ini[U"GamepadButtonA"], 0);
+		config.gamepadButtonAssign.buttonB = ParseOr<int>(ini[U"GamepadButtonB"], 1);
+		config.gamepadButtonAssign.buttonSelect = ParseOr<int>(ini[U"GamepadButtonSelect"], 2);
+		config.gamepadButtonAssign.buttonStart = ParseOr<int>(ini[U"GamepadButtonStart"], 3);
+
 		return config;
 	}
 

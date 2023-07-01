@@ -78,6 +78,8 @@ public:
 
 		mem_.init(&ppu_, &apu_, &timer_, &joypad_, &lcd_, &interrupt_);
 
+		joypad_.setButtonAssign(config_.gamepadButtonAssign);
+
 		// メモリ書き込み時フックを設定
 		if (config_.enableBreakpoint && not config_.breakpointsMemWrite.empty())
 		{

@@ -120,6 +120,8 @@ namespace dmge
 
 		void dump()
 		{
+			if (powerSavingMode_) return;
+
 			const auto& inst = getInstruction_(pc);
 
 			const uint8 ly = mem_->read(Address::LY);
@@ -1038,10 +1040,9 @@ namespace dmge
 			}
 			else
 			{
-				const uint8 intEnable = mem->read(Address::IE);
-				const uint8 intFlag = mem->read(Address::IF);
-				if ((intEnable & intFlag) != 0)
+				if (interrupt_->requested())
 				{
+					// TODO: halt bug
 					;
 				}
 				else

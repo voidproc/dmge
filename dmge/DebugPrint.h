@@ -7,16 +7,14 @@ namespace dmge
 	public:
 		static void EnableConsole();
 
+		static void EnableFileOutput(FilePathView logfilePath);
+
+		static void Writeln(const String& text);
+
 		template <class ...Args>
 		static void Writeln(const Args& ... args)
 		{
-			if (enableConsole)
-			{
-				Console.writeln(args...);
-			}
+			Writeln(Format(args...));
 		}
-
-	private:
-		inline static bool enableConsole = false;
 	};
 }

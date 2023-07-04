@@ -549,6 +549,7 @@ void Main()
 
 	if (config.showConsole)
 	{
+		//dmge::DebugPrint::EnableFileOutput(U"log/log.txt");
 		dmge::DebugPrint::EnableConsole();
 	}
 

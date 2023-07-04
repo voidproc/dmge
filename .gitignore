@@ -404,3 +404,4 @@ MigrationBackup/
 **/App/config.ini
 **/App/cartridges/
 **/App/boot/
+**/App/log/

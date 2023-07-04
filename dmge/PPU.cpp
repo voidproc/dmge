@@ -9,6 +9,12 @@ namespace dmge
 {
 	constexpr Size LCDSize{ 160, 144 };
 
+	constexpr int Mode2Dots = 80;
+	constexpr int Mode3DotsShort = 172;
+	constexpr int Mode3DotsLong = 289;
+	constexpr int LineDots = 456;
+	constexpr int FrameDots = 70224;
+
 	// OAMバッファ
 	struct BufferedOAM
 	{
@@ -72,7 +78,7 @@ namespace dmge
 		canvas_{ LCDSize.x + 8, LCDSize.y },
 		texture_{ canvas_.size() }
 	{
-		dot_ = 70224 - 52 + 4;
+		dot_ = FrameDots - 52 + 4;
 		canvas_.fill(Palette::White);
 		oamBuffer_.reserve(10);
 	}
@@ -89,7 +95,7 @@ namespace dmge
 	void PPU::run()
 	{
 		// 1ドット進めてLYを更新
-		dot_ = (dot_ + 1) % 70224;
+		dot_ = (dot_ + 1) % FrameDots;
 		updateLY_();
 
 		// PPU Modeを更新
@@ -101,7 +107,7 @@ namespace dmge
 		// 現在の行に存在するOAMを探す
 		// OAMScanモードへの移行直後に行うと意図した結果にならない気がするので、モード終盤まで待つ
 
-		if (mode_ == PPUMode::OAMScan && (dot_ % 456) == 79)
+		if (mode_ == PPUMode::OAMScan && (dot_ % LineDots) == Mode2Dots - 1)
 		{
 			oamBuffer_.clear();
 			scanOAM_();
@@ -182,17 +188,17 @@ namespace dmge
 
 	bool PPU::modeChangedToOAMScan() const
 	{
-		return (dot_ < LCDSize.y * 456) && ((dot_ % 456) == 0);
+		return (dot_ < LCDSize.y * LineDots) && ((dot_ % LineDots) == 0);
 	}
 
 	bool PPU::modeChangedToHBlank() const
 	{
-		return (dot_ < LCDSize.y * 456) && ((dot_ % 456) == 370);
+		return (dot_ < LCDSize.y * LineDots) && ((dot_ % LineDots) == Mode2Dots + Mode3DotsShort + 1);
 	}
 
 	bool PPU::modeChangedToVBlank() const
 	{
-		return dot_ == LCDSize.y * 456;
+		return dot_ == LCDSize.y * LineDots;
 	}
 
 	int PPU::dot() const
@@ -212,10 +218,10 @@ namespace dmge
 			dot_ = 0;
 		}
 
-		uint8 ly = static_cast<uint8>(dot_ / 456);
+		uint8 ly = static_cast<uint8>(dot_ / LineDots);
 
 		// "scanline 153 quirk"
-		if (ly == 153 && (dot_ % 456) >= 4)
+		if (ly == 153 && (dot_ % LineDots) >= 4)
 		{
 			ly = 0;
 		}
@@ -227,22 +233,30 @@ namespace dmge
 	{
 		// Set PPU Mode
 
-		if (dot_ >= 456 * 144)
+		if (dot_ >= LineDots * LCDSize.y)
 		{
 			mode_ = PPUMode::VBlank;
 		}
 		else
 		{
-			if (const int x = dot_ % 456; x < 80)
+			if (const int x = dot_ % LineDots; x < Mode2Dots)
 			{
+				// Mode2 の期間 : 80 dots
+
 				mode_ = PPUMode::OAMScan;
 			}
-			else if (x < 369)
+			else if (x < Mode2Dots + Mode3DotsShort)
 			{
+				// Mode3 の期間 : 172 dots
+				// ※スプライトの数に応じて可変（172～289）で実装すべきかもしれないが、とりあえず固定で実装
+				// ※ライン上にスプライトがないケースがほとんどであると仮定して 172 を使用
+
 				mode_ = PPUMode::Drawing;
 			}
 			else
 			{
+				// Mode1 の期間 : 456 - 80 - 172 = 204 dots
+
 				mode_ = PPUMode::HBlank;
 			}
 		}

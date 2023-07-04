@@ -302,7 +302,7 @@ namespace dmge
 			oam.yFlip = (flags >> 6) & 1;
 			oam.xFlip = (flags >> 5) & 1;
 			oam.palette = (flags >> 4) & 1;
-			oam.bank = (flags >> 3) & 1;
+			oam.bank = cgbMode_ ? ((flags >> 3) & 1) : 0;
 			oam.obp = flags & 0b111;
 
 			// 8x16サイズのスプライトの場合、上半分のタイルIDはLSB=0、下半分はLSB=1となる

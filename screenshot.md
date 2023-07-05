@@ -42,3 +42,12 @@ https://tangramgames.dk/tobutobugirl/
 
 ![Pokemon Silver](screenshot/pokemons.png)
 
+## MBC5
+
+- 2friendly
+
+## デバッグ表示
+
+![DebugMonitor](screenshot/debugmonitor.png)
+
+

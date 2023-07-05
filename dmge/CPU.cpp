@@ -13,7 +13,7 @@ namespace dmge
 		uint8 cyclesOnSkip;
 		StringView mnemonic;
 		StringView operands;
-		void (CPU_detail::* inst)(Memory*, const Instruction*);
+		void (CPU_detail::* inst)(const Instruction&);
 	};
 
 
@@ -66,7 +66,7 @@ namespace dmge
 
 			if (instruction.inst != nullptr)
 			{
-				(this->*(instruction.inst))(mem_, &instruction);
+				(this->*(instruction.inst))(instruction);
 			}
 
 			pc = pcNext_;
@@ -281,11 +281,11 @@ namespace dmge
 		// Loads
 		// (LD, LDI, LDD, LDH, PUSH, POP)
 
-		void ld_r_n_(Memory* mem, const Instruction* inst)
+		void ld_r_n_(const Instruction& inst)
 		{
-			const uint8 n = mem->read(pc + 1);
+			const uint8 n = mem_->read(pc + 1);
 
-			switch (inst->opcode)
+			switch (inst.opcode)
 			{
 			case 0x06: b = n; return;
 			case 0x0e: c = n; return;
@@ -297,9 +297,9 @@ namespace dmge
 			}
 		}
 
-		void ld_r_r_(Memory* mem, const Instruction* inst)
+		void ld_r_r_(const Instruction& inst)
 		{
-			switch (inst->opcode)
+			switch (inst.opcode)
 			{
 				// A
 				//case 0x7f: return;
@@ -318,7 +318,7 @@ namespace dmge
 			case 0x43: b = e; return;
 			case 0x44: b = h; return;
 			case 0x45: b = l; return;
-			case 0x46: b = mem->read(hl()); return;
+			case 0x46: b = mem_->read(hl()); return;
 
 				// C
 			case 0x48: c = b; return;
@@ -327,7 +327,7 @@ namespace dmge
 			case 0x4b: c = e; return;
 			case 0x4c: c = h; return;
 			case 0x4d: c = l; return;
-			case 0x4e: c = mem->read(hl()); return;
+			case 0x4e: c = mem_->read(hl()); return;
 
 				// D
 			case 0x50: d = b; return;
@@ -336,7 +336,7 @@ namespace dmge
 			case 0x53: d = e; return;
 			case 0x54: d = h; return;
 			case 0x55: d = l; return;
-			case 0x56: d = mem->read(hl()); return;
+			case 0x56: d = mem_->read(hl()); return;
 
 				// E
 			case 0x58: e = b; return;
@@ -345,7 +345,7 @@ namespace dmge
 			case 0x5b: e = e; return;
 			case 0x5c: e = h; return;
 			case 0x5d: e = l; return;
-			case 0x5e: e = mem->read(hl()); return;
+			case 0x5e: e = mem_->read(hl()); return;
 
 				//H
 			case 0x60: h = b; return;
@@ -354,7 +354,7 @@ namespace dmge
 			case 0x63: h = e; return;
 			case 0x64: h = h; return;
 			case 0x65: h = l; return;
-			case 0x66: h = mem->read(hl()); return;
+			case 0x66: h = mem_->read(hl()); return;
 
 				// L
 			case 0x68: l = b; return;
@@ -363,26 +363,26 @@ namespace dmge
 			case 0x6b: l = e; return;
 			case 0x6c: l = h; return;
 			case 0x6d: l = l; return;
-			case 0x6e: l = mem->read(hl()); return;
+			case 0x6e: l = mem_->read(hl()); return;
 
 				// (HL)
-			case 0x70: mem->write(hl(), b); return;
-			case 0x71: mem->write(hl(), c); return;
-			case 0x72: mem->write(hl(), d); return;
-			case 0x73: mem->write(hl(), e); return;
-			case 0x74: mem->write(hl(), h); return;
-			case 0x75: mem->write(hl(), l); return;
-			case 0x36: mem->write(hl(), mem->read(pc + 1)); return;
+			case 0x70: mem_->write(hl(), b); return;
+			case 0x71: mem_->write(hl(), c); return;
+			case 0x72: mem_->write(hl(), d); return;
+			case 0x73: mem_->write(hl(), e); return;
+			case 0x74: mem_->write(hl(), h); return;
+			case 0x75: mem_->write(hl(), l); return;
+			case 0x36: mem_->write(hl(), mem_->read(pc + 1)); return;
 
 			default: return;
 			}
 		}
 
-		void ld_a_n_(Memory* mem, const Instruction* inst)
+		void ld_a_n_(const Instruction& inst)
 		{
 			uint8 n = 0;
 
-			switch (inst->opcode)
+			switch (inst.opcode)
 			{
 			case 0x7f: return;
 			case 0x78: n = b; break;
@@ -391,20 +391,20 @@ namespace dmge
 			case 0x7b: n = e; break;
 			case 0x7c: n = h; break;
 			case 0x7d: n = l; break;
-			case 0x0a: n = mem->read(bc()); break;
-			case 0x1a: n = mem->read(de()); break;
-			case 0x7e: n = mem->read(hl()); break;
-			case 0xfa: n = mem->read(mem->read16(pc + 1)); break;
-			case 0x3e: n = mem->read(pc + 1); break;
+			case 0x0a: n = mem_->read(bc()); break;
+			case 0x1a: n = mem_->read(de()); break;
+			case 0x7e: n = mem_->read(hl()); break;
+			case 0xfa: n = mem_->read(mem_->read16(pc + 1)); break;
+			case 0x3e: n = mem_->read(pc + 1); break;
 			default: return;
 			}
 
 			a = n;
 		}
 
-		void ld_n_a_(Memory* mem, const Instruction* inst)
+		void ld_n_a_(const Instruction& inst)
 		{
-			switch (inst->opcode)
+			switch (inst.opcode)
 			{
 			case 0x7f: a = a; return;
 			case 0x47: b = a; return;
@@ -413,76 +413,76 @@ namespace dmge
 			case 0x5f: e = a; return;
 			case 0x67: h = a; return;
 			case 0x6f: l = a; return;
-			case 0x02: mem->write(bc(), a); return;
-			case 0x12: mem->write(de(), a); return;
-			case 0x77: mem->write(hl(), a); return;
-			case 0xea: mem->write(mem->read16(pc + 1), a); return;
+			case 0x02: mem_->write(bc(), a); return;
+			case 0x12: mem_->write(de(), a); return;
+			case 0x77: mem_->write(hl(), a); return;
+			case 0xea: mem_->write(mem_->read16(pc + 1), a); return;
 			default: return;
 			}
 		}
 
-		void ld_a_c_(Memory* mem, const Instruction*)
+		void ld_a_c_(const Instruction&)
 		{
 			// opcode: 0xf2
-			a = mem->read(0xff00 + c);
+			a = mem_->read(0xff00 + c);
 		}
 
-		void ld_c_a_(Memory* mem, const Instruction*)
+		void ld_c_a_(const Instruction&)
 		{
 			// opcode: 0xe2
-			mem->write(0xff00 + c, a);
+			mem_->write(0xff00 + c, a);
 		}
 
-		void ldd_a_hl_(Memory* mem, const Instruction* inst)
+		void ldd_a_hl_(const Instruction& inst)
 		{
 			// opcode: 0x3a
-			a = mem->read(hl());
-			dec16_(mem, inst);
+			a = mem_->read(hl());
+			dec16_(inst);
 		}
 
-		void ldd_hl_a_(Memory* mem, const Instruction* inst)
+		void ldd_hl_a_(const Instruction& inst)
 		{
 			// opcode: 0x32
-			mem->write(hl(), a);
-			dec16_(mem, inst);
+			mem_->write(hl(), a);
+			dec16_(inst);
 		}
 
-		void ldi_a_hl_(Memory* mem, const Instruction* inst)
+		void ldi_a_hl_(const Instruction& inst)
 		{
 			// opcode: 0x2a
-			a = mem->read(hl());
-			inc16_(mem, inst);
+			a = mem_->read(hl());
+			inc16_(inst);
 		}
 
-		void ldi_hl_a_(Memory* mem, const Instruction* inst)
+		void ldi_hl_a_(const Instruction& inst)
 		{
 			// opcode: 0x22
-			mem->write(hl(), a);
-			inc16_(mem, inst);
+			mem_->write(hl(), a);
+			inc16_(inst);
 		}
 
-		void ldh_(Memory* mem, const Instruction* inst)
+		void ldh_(const Instruction& inst)
 		{
-			const uint8 n = mem->read(pc + 1);
+			const uint8 n = mem_->read(pc + 1);
 
-			switch (inst->opcode)
+			switch (inst.opcode)
 			{
 			case 0xe0:
-				mem->write(0xff00 + n, a);
+				mem_->write(0xff00 + n, a);
 				return;
 			case 0xf0:
-				a = mem->read(0xff00 + n);
+				a = mem_->read(0xff00 + n);
 				return;
 			default:
 				return;
 			}
 		}
 
-		void ld16_(Memory* mem, const Instruction* inst)
+		void ld16_(const Instruction& inst)
 		{
-			const uint16 n = mem->read16(pc + 1);
+			const uint16 n = mem_->read16(pc + 1);
 
-			switch (inst->opcode)
+			switch (inst.opcode)
 			{
 			case 0x01: bc(n); return;
 			case 0x11: de(n); return;
@@ -492,17 +492,17 @@ namespace dmge
 			}
 		}
 
-		void ld16_sp_hl_(Memory*, const Instruction*)
+		void ld16_sp_hl_(const Instruction&)
 		{
 			// opcode: 0xf9
 			sp = hl();
 		}
 
-		void ldhl_sp_n_(Memory* mem, const Instruction*)
+		void ldhl_sp_n_(const Instruction&)
 		{
 			// opcode: 0xf8
 
-			const int8 n = mem->read(pc + 1);
+			const int8 n = mem_->read(pc + 1);
 
 			hl(sp + n);  //※符号付演算
 
@@ -512,60 +512,60 @@ namespace dmge
 			f_c((sp & 0xff) + (n & 0xff) > 0xff);
 		}
 
-		void ld16_n_sp_(Memory* mem, const Instruction*)
+		void ld16_n_sp_(const Instruction&)
 		{
 			// opcode: 0x08
-			const uint16 addr = mem->read16(pc + 1);
-			mem->write(addr, sp & 0xff);
-			mem->write(addr + 1, (sp >> 8) & 0xff);
+			const uint16 addr = mem_->read16(pc + 1);
+			mem_->write(addr, sp & 0xff);
+			mem_->write(addr + 1, (sp >> 8) & 0xff);
 		}
 
-		void push_(Memory* mem, const Instruction* inst)
+		void push_(const Instruction& inst)
 		{
-			switch (inst->opcode)
+			switch (inst.opcode)
 			{
 			case 0xf5:
-				mem->write(--sp, a);
-				mem->write(--sp, f);
+				mem_->write(--sp, a);
+				mem_->write(--sp, f);
 				return;
 
 			case 0xc5:
-				mem->write(--sp, b);
-				mem->write(--sp, c);
+				mem_->write(--sp, b);
+				mem_->write(--sp, c);
 				return;
 
 			case 0xd5:
-				mem->write(--sp, d);
-				mem->write(--sp, e);
+				mem_->write(--sp, d);
+				mem_->write(--sp, e);
 				return;
 
 			case 0xe5:
-				mem->write(--sp, h);
-				mem->write(--sp, l);
+				mem_->write(--sp, h);
+				mem_->write(--sp, l);
 				return;
 
 			default: return;
 			}
 		}
 
-		void pop_(Memory* mem, const Instruction* inst)
+		void pop_(const Instruction& inst)
 		{
-			switch (inst->opcode)
+			switch (inst.opcode)
 			{
 			case 0xf1:
-				af(mem->read16(sp++) & 0xfff0);
+				af(mem_->read16(sp++) & 0xfff0);
 				break;
 
 			case 0xc1:
-				bc(mem->read16(sp++));
+				bc(mem_->read16(sp++));
 				break;
 
 			case 0xd1:
-				de(mem->read16(sp++));
+				de(mem_->read16(sp++));
 				break;
 
 			case 0xe1:
-				hl(mem->read16(sp++));
+				hl(mem_->read16(sp++));
 				break;
 			}
 
@@ -575,11 +575,11 @@ namespace dmge
 		// Arithmetic
 		// (ADD, ADC, SUB, SBC, AND, OR, XOR, CP, INC, DEC)
 
-		void add_a_(Memory* mem, const Instruction* inst)
+		void add_a_(const Instruction& inst)
 		{
 			uint8 n;
 
-			switch (inst->opcode)
+			switch (inst.opcode)
 			{
 			case 0x87: n = a; break;
 			case 0x80: n = b; break;
@@ -588,8 +588,8 @@ namespace dmge
 			case 0x83: n = e; break;
 			case 0x84: n = h; break;
 			case 0x85: n = l; break;
-			case 0x86: n = mem->read(hl()); break;
-			case 0xc6: n = mem->read(pc + 1); break;
+			case 0x86: n = mem_->read(hl()); break;
+			case 0xc6: n = mem_->read(pc + 1); break;
 			default: return;
 			}
 
@@ -600,11 +600,11 @@ namespace dmge
 			f_z(a == 0);
 		}
 
-		void adc_a_(Memory* mem, const Instruction* inst)
+		void adc_a_(const Instruction& inst)
 		{
 			uint8 n;
 
-			switch (inst->opcode)
+			switch (inst.opcode)
 			{
 			case 0x8f: n = a; break;
 			case 0x88: n = b; break;
@@ -613,8 +613,8 @@ namespace dmge
 			case 0x8b: n = e; break;
 			case 0x8c: n = h; break;
 			case 0x8d: n = l; break;
-			case 0x8e: n = mem->read(hl()); break;
-			case 0xce: n = mem->read(pc + 1); break;
+			case 0x8e: n = mem_->read(hl()); break;
+			case 0xce: n = mem_->read(pc + 1); break;
 			default: return;
 			}
 
@@ -627,11 +627,11 @@ namespace dmge
 			f_z(a == 0);
 		}
 
-		void sub_a_(Memory* mem, const Instruction* inst)
+		void sub_a_(const Instruction& inst)
 		{
 			uint8 n;
 
-			switch (inst->opcode)
+			switch (inst.opcode)
 			{
 			case 0x97: n = a; break;
 			case 0x90: n = b; break;
@@ -640,8 +640,8 @@ namespace dmge
 			case 0x93: n = e; break;
 			case 0x94: n = h; break;
 			case 0x95: n = l; break;
-			case 0x96: n = mem->read(hl()); break;
-			case 0xd6: n = mem->read(pc + 1); break;
+			case 0x96: n = mem_->read(hl()); break;
+			case 0xd6: n = mem_->read(pc + 1); break;
 			default: return;
 			}
 
@@ -652,11 +652,11 @@ namespace dmge
 			f_z(a == 0);
 		}
 
-		void sbc_a_(Memory* mem, const Instruction* inst)
+		void sbc_a_(const Instruction& inst)
 		{
 			uint8 n;
 
-			switch (inst->opcode)
+			switch (inst.opcode)
 			{
 			case 0x9f: n = a; break;
 			case 0x98: n = b; break;
@@ -665,8 +665,8 @@ namespace dmge
 			case 0x9b: n = e; break;
 			case 0x9c: n = h; break;
 			case 0x9d: n = l; break;
-			case 0x9e: n = mem->read(hl()); break;
-			case 0xde: n = mem->read(pc + 1); break;
+			case 0x9e: n = mem_->read(hl()); break;
+			case 0xde: n = mem_->read(pc + 1); break;
 			default: return;
 			}
 
@@ -679,11 +679,11 @@ namespace dmge
 			f_z(a == 0);
 		}
 
-		void and_(Memory* mem, const Instruction* inst)
+		void and_(const Instruction& inst)
 		{
 			uint8 n = 0;
 
-			switch (inst->opcode)
+			switch (inst.opcode)
 			{
 			case 0xa7: n = a; break;
 			case 0xa0: n = b; break;
@@ -692,8 +692,8 @@ namespace dmge
 			case 0xa3: n = e; break;
 			case 0xa4: n = h; break;
 			case 0xa5: n = l; break;
-			case 0xa6: n = mem->read(hl()); break;
-			case 0xe6: n = mem->read(pc + 1); break;
+			case 0xa6: n = mem_->read(hl()); break;
+			case 0xe6: n = mem_->read(pc + 1); break;
 			default: return;
 			}
 
@@ -705,11 +705,11 @@ namespace dmge
 			f_c(false);
 		}
 
-		void or_(Memory* mem, const Instruction* inst)
+		void or_(const Instruction& inst)
 		{
 			uint8 n = 0;
 
-			switch (inst->opcode)
+			switch (inst.opcode)
 			{
 			case 0xb7: n = a; break;
 			case 0xb0: n = b; break;
@@ -718,8 +718,8 @@ namespace dmge
 			case 0xb3: n = e; break;
 			case 0xb4: n = h; break;
 			case 0xb5: n = l; break;
-			case 0xb6: n = mem->read(hl()); break;
-			case 0xf6: n = mem->read(pc + 1); break;
+			case 0xb6: n = mem_->read(hl()); break;
+			case 0xf6: n = mem_->read(pc + 1); break;
 			default: return;
 			}
 
@@ -731,11 +731,11 @@ namespace dmge
 			f_c(false);
 		}
 
-		void xor_(Memory* mem, const Instruction* inst)
+		void xor_(const Instruction& inst)
 		{
 			uint8 n = 0;
 
-			switch (inst->opcode)
+			switch (inst.opcode)
 			{
 			case 0xaf: n = a; break;
 			case 0xa8: n = b; break;
@@ -744,8 +744,8 @@ namespace dmge
 			case 0xab: n = e; break;
 			case 0xac: n = h; break;
 			case 0xad: n = l; break;
-			case 0xae: n = mem->read(hl()); break;
-			case 0xee: n = mem->read(pc + 1); break;
+			case 0xae: n = mem_->read(hl()); break;
+			case 0xee: n = mem_->read(pc + 1); break;
 			default: return;
 			}
 
@@ -757,11 +757,11 @@ namespace dmge
 			f_c(false);
 		}
 
-		void cp_(Memory* mem, const Instruction* inst)
+		void cp_(const Instruction& inst)
 		{
 			uint8 n = 0;
 
-			switch (inst->opcode)
+			switch (inst.opcode)
 			{
 			case 0xbf: n = a; break;
 			case 0xb8: n = b; break;
@@ -770,8 +770,8 @@ namespace dmge
 			case 0xbb: n = e; break;
 			case 0xbc: n = h; break;
 			case 0xbd: n = l; break;
-			case 0xbe: n = mem->read(hl()); break;
-			case 0xfe: n = mem->read(pc + 1); break;
+			case 0xbe: n = mem_->read(hl()); break;
+			case 0xfe: n = mem_->read(pc + 1); break;
 			default: return;
 			}
 
@@ -781,11 +781,11 @@ namespace dmge
 			f_c(a < n);
 		}
 
-		void inc_(Memory*, const Instruction* inst)
+		void inc_(const Instruction& inst)
 		{
 			uint8* p;
 
-			switch (inst->opcode)
+			switch (inst.opcode)
 			{
 			case 0x3c: p = &a; break;
 			case 0x04: p = &b; break;
@@ -806,25 +806,25 @@ namespace dmge
 			f_z(result == 0);
 		}
 
-		void inc_hl_(Memory* mem, const Instruction*)
+		void inc_hl_(const Instruction&)
 		{
 			// opcode: 0x34
-			uint8 value = mem->read(hl());
+			uint8 value = mem_->read(hl());
 
 			f_n(false);
 			f_h((value & 0xf) == 0xf);
 
 			const uint8 result = value + 1;
 
-			mem->write(hl(), result);
+			mem_->write(hl(), result);
 			f_z(result == 0);
 		}
 
-		void dec_(Memory*, const Instruction* inst)
+		void dec_(const Instruction& inst)
 		{
 			uint8* p;
 
-			switch (inst->opcode)
+			switch (inst.opcode)
 			{
 			case 0x3d: p = &a; break;
 			case 0x05: p = &b; break;
@@ -846,25 +846,25 @@ namespace dmge
 			f_z(result == 0);
 		}
 
-		void dec_hl_(Memory* mem, const Instruction*)
+		void dec_hl_(const Instruction&)
 		{
 			// opcode: 0x35
-			uint8 value = mem->read(hl());
+			uint8 value = mem_->read(hl());
 
 			f_n(true);
 			f_h((value & 0xf) == 0);
 
 			const uint8 result = value - 1;
 
-			mem->write(hl(), result);
+			mem_->write(hl(), result);
 			f_z(result == 0);
 		}
 
-		void add_hl_(Memory*, const Instruction* inst)
+		void add_hl_(const Instruction& inst)
 		{
 			uint16 n;
 
-			switch (inst->opcode)
+			switch (inst.opcode)
 			{
 			case 0x09: n = bc(); break;
 			case 0x19: n = de(); break;
@@ -879,19 +879,19 @@ namespace dmge
 			hl(hl() + n);
 		}
 
-		void add_sp_(Memory* mem, const Instruction*)
+		void add_sp_(const Instruction&)
 		{
 			// opcode: 0xe8
-			const int8 n = mem->read(pc + 1);
+			const int8 n = mem_->read(pc + 1);
 			f = 0;
 			f_h((sp & 0xf) + (n & 0xf) > 0xf);
 			f_c((sp & 0xff) + (n & 0xff) > 0xff);
 			sp += n;
 		}
 
-		void inc16_(Memory*, const Instruction* inst)
+		void inc16_(const Instruction& inst)
 		{
-			switch (inst->opcode)
+			switch (inst.opcode)
 			{
 			case 0x03: bc(bc() + 1); return;
 			case 0x13: de(de() + 1); return;
@@ -904,9 +904,9 @@ namespace dmge
 			}
 		}
 
-		void dec16_(Memory*, const Instruction* inst)
+		void dec16_(const Instruction& inst)
 		{
-			switch (inst->opcode)
+			switch (inst.opcode)
 			{
 			case 0x0b: bc(bc() - 1); return;
 			case 0x1b: de(de() - 1); return;
@@ -923,11 +923,11 @@ namespace dmge
 		// Misc
 		// (SWAP, DAA, CPL, CCF, SCF, NOP, HALT, STOP, DI, EI)
 
-		void swap_(Memory*, const Instruction* inst)
+		void swap_(const Instruction& inst)
 		{
 			uint8* p;
 
-			switch (inst->opcode)
+			switch (inst.opcode)
 			{
 			case 0x37: p = &a; break;
 			case 0x30: p = &b; break;
@@ -947,20 +947,20 @@ namespace dmge
 			f_z(result == 0);
 		}
 
-		void swap_hl_(Memory* mem, const Instruction*)
+		void swap_hl_(const Instruction&)
 		{
 			// opcode: 0x36
-			uint8 value = mem->read(hl());
+			uint8 value = mem_->read(hl());
 
 			const uint8 result = (value >> 4) | (value << 4);
 
-			mem->write(hl(), result);
+			mem_->write(hl(), result);
 
 			f = 0;
 			f_z(result == 0);
 		}
 
-		void daa_(Memory*, const Instruction*)
+		void daa_(const Instruction&)
 		{
 			// opcode: 0x27
 			int16 result = a;
@@ -998,7 +998,7 @@ namespace dmge
 			f_h(false);
 		}
 
-		void cpl_(Memory*, const Instruction*)
+		void cpl_(const Instruction&)
 		{
 			// opcode: 0x2f
 			a ^= 0xff;
@@ -1006,7 +1006,7 @@ namespace dmge
 			f_h(true);
 		}
 
-		void ccf_(Memory*, const Instruction*)
+		void ccf_(const Instruction&)
 		{
 			// opcode: 0x3f
 			f_c(!f_c());
@@ -1014,7 +1014,7 @@ namespace dmge
 			f_h(false);
 		}
 
-		void scf_(Memory*, const Instruction*)
+		void scf_(const Instruction&)
 		{
 			// opcode: 0x37
 			f_c(true);
@@ -1022,12 +1022,12 @@ namespace dmge
 			f_h(false);
 		}
 
-		void nop_(Memory*, const Instruction*)
+		void nop_(const Instruction&)
 		{
 			// opcode: 0x00
 		}
 
-		void halt_(Memory* mem, const Instruction*)
+		void halt_(const Instruction&)
 		{
 			// opcode: 0x76
 
@@ -1052,19 +1052,19 @@ namespace dmge
 			}
 		}
 
-		void stop_(Memory*, const Instruction*)
+		void stop_(const Instruction&)
 		{
 			// opcode: 0x10
 			//...
 		}
 
-		void di_(Memory*, const Instruction*)
+		void di_(const Instruction&)
 		{
 			// opcode: 0xf3
 			interrupt_->disableIME();
 		}
 
-		void ei_(Memory*, const Instruction*)
+		void ei_(const Instruction&)
 		{
 			// opcode: 0xfb
 			interrupt_->reserveEnablingIME();
@@ -1073,7 +1073,7 @@ namespace dmge
 		// Rotates & Shifts
 		// (RLCA, RLA, RRCA, RRA, RLC, RL, RRA, RR)
 
-		void rlca_(Memory*, const Instruction*)
+		void rlca_(const Instruction&)
 		{
 			// opcode: 0x07
 			const uint8 bit7 = a >> 7;
@@ -1082,7 +1082,7 @@ namespace dmge
 			a = (a << 1) | bit7;
 		}
 
-		void rla_(Memory*, const Instruction*)
+		void rla_(const Instruction&)
 		{
 			// opcode: 0x17
 			const uint8 bit7 = a >> 7;
@@ -1092,7 +1092,7 @@ namespace dmge
 			a = (a << 1) | carry;
 		}
 
-		void rrca_(Memory*, const Instruction*)
+		void rrca_(const Instruction&)
 		{
 			// opcode: 0x0f
 			const uint8 bit0 = a & 1;
@@ -1101,7 +1101,7 @@ namespace dmge
 			a = (a >> 1) | (bit0 << 7);
 		}
 
-		void rra_(Memory*, const Instruction*)
+		void rra_(const Instruction&)
 		{
 			// opcode: 0x1f
 			const uint8 bit0 = a & 1;
@@ -1111,11 +1111,11 @@ namespace dmge
 			a = (a >> 1) | (carry << 7);
 		}
 
-		void rlc_(Memory*, const Instruction* inst)
+		void rlc_(const Instruction& inst)
 		{
 			uint8* p;
 
-			switch (inst->opcode)
+			switch (inst.opcode)
 			{
 			case 0x07: p = &a; break;
 			case 0x00: p = &b; break;
@@ -1137,10 +1137,10 @@ namespace dmge
 			*p = result;
 		}
 
-		void rlc_hl_(Memory* mem, const Instruction*)
+		void rlc_hl_(const Instruction&)
 		{
 			// opcode: 0x06
-			uint8 value = mem->read(hl());
+			uint8 value = mem_->read(hl());
 
 			const uint8 bit7 = value >> 7;
 			f = 0;
@@ -1149,14 +1149,14 @@ namespace dmge
 
 			const uint8 result = (value << 1) | bit7;
 
-			mem->write(hl(), result);
+			mem_->write(hl(), result);
 		}
 
-		void rl_(Memory*, const Instruction* inst)
+		void rl_(const Instruction& inst)
 		{
 			uint8* p;
 
-			switch (inst->opcode)
+			switch (inst.opcode)
 			{
 			case 0x17: p = &a; break;
 			case 0x10: p = &b; break;
@@ -1180,10 +1180,10 @@ namespace dmge
 			f_z(result == 0);
 		}
 
-		void rl_hl_(Memory* mem, const Instruction*)
+		void rl_hl_(const Instruction&)
 		{
 			// opcode: 0x16
-			uint8 value = mem->read(hl());
+			uint8 value = mem_->read(hl());
 
 			const uint8 bit7 = value >> 7;
 			const uint8 carry = (uint8)f_c();
@@ -1192,16 +1192,16 @@ namespace dmge
 
 			const uint8 result = (value << 1) | carry;
 
-			mem->write(hl(), result);
+			mem_->write(hl(), result);
 
 			f_z(result == 0);
 		}
 
-		void rrc_(Memory*, const Instruction* inst)
+		void rrc_(const Instruction& inst)
 		{
 			uint8* p;
 
-			switch (inst->opcode)
+			switch (inst.opcode)
 			{
 			case 0x0f: p = &a; break;
 			case 0x08: p = &b; break;
@@ -1224,10 +1224,10 @@ namespace dmge
 			f_z(*p == 0);
 		}
 
-		void rrc_hl_(Memory* mem, const Instruction*)
+		void rrc_hl_(const Instruction&)
 		{
 			// opcode: 0x0e
-			uint8 value = mem->read(hl());
+			uint8 value = mem_->read(hl());
 
 			const uint8 bit0 = value & 1;
 			f = 0;
@@ -1235,16 +1235,16 @@ namespace dmge
 
 			const uint8 result = (value >> 1) | (bit0 << 7);
 
-			mem->write(hl(), result);
+			mem_->write(hl(), result);
 
 			f_z(result == 0);
 		}
 
-		void rr_(Memory*, const Instruction* inst)
+		void rr_(const Instruction& inst)
 		{
 			uint8* p;
 
-			switch (inst->opcode)
+			switch (inst.opcode)
 			{
 			case 0x1f: p = &a; break;
 			case 0x18: p = &b; break;
@@ -1268,10 +1268,10 @@ namespace dmge
 			f_z(result == 0);
 		}
 
-		void rr_hl_(Memory* mem, const Instruction*)
+		void rr_hl_(const Instruction&)
 		{
 			// opcode: 0x1e
-			uint8 value = mem->read(hl());
+			uint8 value = mem_->read(hl());
 
 			const uint8 bit0 = value & 1;
 			const uint8 carry = (uint8)f_c();
@@ -1280,16 +1280,16 @@ namespace dmge
 
 			const uint8 result = (value >> 1) | (carry << 7);
 
-			mem->write(hl(), result);
+			mem_->write(hl(), result);
 
 			f_z(result == 0);
 		}
 
-		void sla_(Memory*, const Instruction* inst)
+		void sla_(const Instruction& inst)
 		{
 			uint8* p;
 
-			switch (inst->opcode)
+			switch (inst.opcode)
 			{
 			case 0x27: p = &a; break;
 			case 0x20: p = &b; break;
@@ -1311,26 +1311,26 @@ namespace dmge
 			f_z(result == 0);
 		}
 
-		void sla_hl_(Memory* mem, const Instruction*)
+		void sla_hl_(const Instruction&)
 		{
 			// opcode: 0x26
-			uint8 value = mem->read(hl());
+			uint8 value = mem_->read(hl());
 
 			f = 0;
 			f_c(value & (1 << 7));
 
 			const uint8 result = value << 1;
 
-			mem->write(hl(), result);
+			mem_->write(hl(), result);
 
 			f_z(result == 0);
 		}
 
-		void sra_(Memory*, const Instruction* inst)
+		void sra_(const Instruction& inst)
 		{
 			uint8* p;
 
-			switch (inst->opcode)
+			switch (inst.opcode)
 			{
 			case 0x2f: p = &a; break;
 			case 0x28: p = &b; break;
@@ -1352,26 +1352,26 @@ namespace dmge
 			f_z(result == 0);
 		}
 
-		void sra_hl_(Memory* mem, const Instruction*)
+		void sra_hl_(const Instruction&)
 		{
 			// opcode: 0x2e
-			uint8 value = mem->read(hl());
+			uint8 value = mem_->read(hl());
 
 			f = 0;
 			f_c(value & 1);
 
 			const uint8 result = (value >> 1) | (value & (1 << 7));
 
-			mem->write(hl(), result);
+			mem_->write(hl(), result);
 
 			f_z(result == 0);
 		}
 
-		void srl_(Memory*, const Instruction* inst)
+		void srl_(const Instruction& inst)
 		{
 			uint8* p;
 
-			switch (inst->opcode)
+			switch (inst.opcode)
 			{
 			case 0x3f: p = &a; break;
 			case 0x38: p = &b; break;
@@ -1393,17 +1393,17 @@ namespace dmge
 			f_z(result == 0);
 		}
 
-		void srl_hl_(Memory* mem, const Instruction*)
+		void srl_hl_(const Instruction&)
 		{
 			// opcode: 0x3e
-			uint8 value = mem->read(hl());
+			uint8 value = mem_->read(hl());
 
 			f = 0;
 			f_c(value & 1);
 
 			const uint8 result = value >> 1;
 
-			mem->write(hl(), result);
+			mem_->write(hl(), result);
 
 			f_z(result == 0);
 		}
@@ -1411,13 +1411,13 @@ namespace dmge
 		// Bit
 		// (BIT, SET)
 
-		void bit_(Memory*, const Instruction* inst)
+		void bit_(const Instruction& inst)
 		{
-			const uint8 bit = (inst->opcode - 0x40) / 8;
+			const uint8 bit = (inst.opcode - 0x40) / 8;
 
 			uint8* p;
 
-			uint8 opl = inst->opcode & 0xf;
+			uint8 opl = inst.opcode & 0xf;
 			if (opl > 7) opl -= 8;
 
 			switch (opl)
@@ -1437,24 +1437,24 @@ namespace dmge
 			f_h(true);
 		}
 
-		void bit_hl_(Memory* mem, const Instruction* inst)
+		void bit_hl_(const Instruction& inst)
 		{
-			const uint8 bit = (inst->opcode - 0x40) / 8;
+			const uint8 bit = (inst.opcode - 0x40) / 8;
 
-			uint8 value = mem->read(hl());
+			uint8 value = mem_->read(hl());
 
 			f_z((value & (1 << bit)) == 0);
 			f_n(false);
 			f_h(true);
 		}
 
-		void set_(Memory*, const Instruction* inst)
+		void set_(const Instruction& inst)
 		{
-			const uint8 bit = (inst->opcode - 0xc0) / 8;
+			const uint8 bit = (inst.opcode - 0xc0) / 8;
 
 			uint8* p;
 
-			uint8 opl = inst->opcode & 0xf;
+			uint8 opl = inst.opcode & 0xf;
 			if (opl > 7) opl -= 8;
 
 			switch (opl)
@@ -1474,24 +1474,24 @@ namespace dmge
 			*p = result;
 		}
 
-		void set_hl_(Memory* mem, const Instruction* inst)
+		void set_hl_(const Instruction& inst)
 		{
-			const uint8 bit = (inst->opcode - 0xc0) / 8;
+			const uint8 bit = (inst.opcode - 0xc0) / 8;
 
-			uint8 value = mem->read(hl());
+			uint8 value = mem_->read(hl());
 
 			const uint8 result = value | (1 << bit);
 
-			mem->write(hl(), result);
+			mem_->write(hl(), result);
 		}
 
-		void res_(Memory*, const Instruction* inst)
+		void res_(const Instruction& inst)
 		{
-			const uint8 bit = (inst->opcode - 0x80) / 8;
+			const uint8 bit = (inst.opcode - 0x80) / 8;
 
 			uint8* p;
 
-			uint8 opl = inst->opcode & 0xf;
+			uint8 opl = inst.opcode & 0xf;
 			if (opl > 7) opl -= 8;
 
 			switch (opl)
@@ -1511,26 +1511,26 @@ namespace dmge
 			*p = result;
 		}
 
-		void res_hl_(Memory* mem, const Instruction* inst)
+		void res_hl_(const Instruction& inst)
 		{
-			const uint8 bit = (inst->opcode - 0x80) / 8;
+			const uint8 bit = (inst.opcode - 0x80) / 8;
 
-			uint8 value = mem->read(hl());
+			uint8 value = mem_->read(hl());
 
 			const uint8 result = value & ~(1 << bit);
 
-			mem->write(hl(), result);
+			mem_->write(hl(), result);
 		}
 
 		// Jumps
 		// (JP, JR)
 
-		void jp_(Memory* mem, const Instruction* inst)
+		void jp_(const Instruction& inst)
 		{
-			const uint16 dstAddr = mem->read16(pc + 1);
+			const uint16 dstAddr = mem_->read16(pc + 1);
 			bool toJump = false;
 
-			switch (inst->opcode)
+			switch (inst.opcode)
 			{
 			case 0xc3:
 				toJump = true;
@@ -1555,21 +1555,21 @@ namespace dmge
 				return;
 			}
 
-			consumedCycles_ = inst->cyclesOnSkip;
+			consumedCycles_ = inst.cyclesOnSkip;
 		}
 
-		void jp_hl_(Memory*, const Instruction*)
+		void jp_hl_(const Instruction&)
 		{
 			// opcode: 0xe9
 			pcNext_ = hl();
 		}
 
-		void jr_(Memory* mem, const Instruction* inst)
+		void jr_(const Instruction& inst)
 		{
-			const int8 n = mem->read(pc + 1);
+			const int8 n = mem_->read(pc + 1);
 			bool toJump = false;
 
-			switch (inst->opcode)
+			switch (inst.opcode)
 			{
 			case 0x18:
 				toJump = true;
@@ -1594,17 +1594,17 @@ namespace dmge
 				return;
 			}
 
-			consumedCycles_ = inst->cyclesOnSkip;
+			consumedCycles_ = inst.cyclesOnSkip;
 		}
 
 		// Calls
 		// (CALL)
 
-		void call_(Memory* mem, const Instruction* inst)
+		void call_(const Instruction& inst)
 		{
 			bool toCall = false;
 
-			switch (inst->opcode)
+			switch (inst.opcode)
 			{
 			case 0xcd:
 				toCall = true;
@@ -1625,24 +1625,24 @@ namespace dmge
 
 			if (toCall)
 			{
-				const uint16 addr = mem->read16(pc + 1);
-				mem->write(--sp, (pc + 3) >> 8);
-				mem->write(--sp, (pc + 3) & 0xff);
+				const uint16 addr = mem_->read16(pc + 1);
+				mem_->write(--sp, (pc + 3) >> 8);
+				mem_->write(--sp, (pc + 3) & 0xff);
 				pcNext_ = addr;
 				return;
 			}
 
-			consumedCycles_ = inst->cyclesOnSkip;
+			consumedCycles_ = inst.cyclesOnSkip;
 		}
 
 		// Restarts
 		// (RST)
 
-		void rst_(Memory* mem, const Instruction* inst)
+		void rst_(const Instruction& inst)
 		{
 			uint16 addr;
 
-			switch (inst->opcode)
+			switch (inst.opcode)
 			{
 			case 0xc7: addr = 0x00; break;
 			case 0xcf: addr = 0x08; break;
@@ -1655,8 +1655,8 @@ namespace dmge
 			default: return;
 			}
 
-			mem->write(--sp, (pc + 1) >> 8);
-			mem->write(--sp, (pc + 1) & 0xff);
+			mem_->write(--sp, (pc + 1) >> 8);
+			mem_->write(--sp, (pc + 1) & 0xff);
 			pcNext_ = addr;
 		}
 
@@ -1664,11 +1664,11 @@ namespace dmge
 		// Returns
 		// (RET, RETI)
 
-		void ret_(Memory* mem, const Instruction* inst)
+		void ret_(const Instruction& inst)
 		{
 			bool toRet = false;
 
-			switch (inst->opcode)
+			switch (inst.opcode)
 			{
 			case 0xc9:
 				toRet = true;
@@ -1689,29 +1689,29 @@ namespace dmge
 
 			if (toRet)
 			{
-				pcNext_ = mem->read16(sp);
+				pcNext_ = mem_->read16(sp);
 				sp += 2;
 				return;
 			}
 
-			consumedCycles_ = inst->cyclesOnSkip;
+			consumedCycles_ = inst.cyclesOnSkip;
 		}
 
-		void reti_(Memory* mem, const Instruction*)
+		void reti_(const Instruction&)
 		{
 			// opcode: 0xd9
-			pcNext_ = mem->read16(sp);
+			pcNext_ = mem_->read16(sp);
 			sp += 2;
 			interrupt_->reserveEnablingIME(); //?
 		}
 
 		// Other
 
-		void cbprefix_(Memory*, const Instruction*)
+		void cbprefix_(const Instruction&)
 		{
 		}
 
-		void illegal_(Memory*, const Instruction*)
+		void illegal_(const Instruction&)
 		{
 		}
 

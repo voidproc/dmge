@@ -2297,7 +2297,7 @@ namespace dmge
 		return cpuDetail_->consumedCycles_;
 	}
 
-	RegisterValues CPU::getRegisterValues() const
+	CPUState CPU::getCurrentCPUState() const
 	{
 		return {
 			cpuDetail_->af(),
@@ -2306,6 +2306,8 @@ namespace dmge
 			cpuDetail_->hl(),
 			cpuDetail_->sp,
 			cpuDetail_->pc,
+			cpuDetail_->powerSavingMode_,
+			cpuDetail_->cgbMode_,
 		};
 	}
 }

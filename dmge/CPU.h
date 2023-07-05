@@ -6,7 +6,7 @@ namespace dmge
 	class Interrupt;
 	class CPU_detail;
 
-	struct RegisterValues
+	struct CPUState
 	{
 		uint16 af;
 		uint16 bc;
@@ -14,6 +14,8 @@ namespace dmge
 		uint16 hl;
 		uint16 sp;
 		uint16 pc;
+		bool halt;
+		bool cgbMode;
 	};
 
 	class CPU
@@ -43,8 +45,8 @@ namespace dmge
 		// run()により実行された命令が消費したクロック数
 		int consumedCycles() const;
 
-		// 現在のレジスタの値を取得（デバッグ用）
-		RegisterValues getRegisterValues() const;
+		// 現在のCPUの状態を取得（デバッグ用）
+		CPUState getCurrentCPUState() const;
 
 	private:
 		Memory* mem_;

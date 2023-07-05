@@ -3,52 +3,119 @@
 #include "CPU.h"
 #include "Audio/APU.h"
 #include "Address.h"
+#include "Interrupt.h"
 
 namespace dmge
 {
-	constexpr Color FontColor{ 220 };
+	constexpr Color TextColor{ 210 };
+	constexpr Color SectionColor = Palette::Khaki;
 	constexpr Color BgColor{ 32 };
 	constexpr Size FontSize{ 5, 10 };
 	constexpr int LineHeight = FontSize.y + 1;
 
-	void DrawMemoryAddressValue(uint16 addr, StringView name, uint8 value, double x, double y)
+
+	namespace
 	{
-		if (addr != 0)
+		String Uint8ToHexAndBin(const uint8 num)
 		{
-			FontAsset(U"debug")(U"{:04X} {:4}={:02X}"_fmt(addr, name, value)).draw(10, x, y, FontColor);
+			return U"{:02X} ({:08b})"_fmt(num, num);
 		}
 	}
 
-	void DrawMemoryDump(Memory* mem, uint16 addr, double x, double y)
-	{
-		for (uint16 row = 0; row < 4u; row++)
-		{
-			FontAsset(U"debug")(U"{:04X}: {:02X} {:02X} {:02X} {:02X} {:02X} {:02X} {:02X} {:02X} | {:02X} {:02X} {:02X} {:02X} {:02X} {:02X} {:02X} {:02X}"_fmt(
-				addr + 0x10 * row,
-				mem->read(addr + row * 16 + 0),
-				mem->read(addr + row * 16 + 1),
-				mem->read(addr + row * 16 + 2),
-				mem->read(addr + row * 16 + 3),
-				mem->read(addr + row * 16 + 4),
-				mem->read(addr + row * 16 + 5),
-				mem->read(addr + row * 16 + 6),
-				mem->read(addr + row * 16 + 7),
-				mem->read(addr + row * 16 + 8),
-				mem->read(addr + row * 16 + 9),
-				mem->read(addr + row * 16 + 10),
-				mem->read(addr + row * 16 + 11),
-				mem->read(addr + row * 16 + 12),
-				mem->read(addr + row * 16 + 13),
-				mem->read(addr + row * 16 + 14),
-				mem->read(addr + row * 16 + 15)))
-				.draw(10, x, y + 11 * row, FontColor);
-		}
-	}
 
-	DebugMonitor::DebugMonitor(Memory* mem, CPU* cpu, APU* apu)
-		: mem_{ mem }, cpu_{ cpu }, apu_{ apu }
+	class DrawDebugItem
+	{
+	public:
+		DrawDebugItem(const Vec2& initPos)
+			: pos_{ initPos }
+		{
+		}
+
+		void drawSection(StringView sectionName)
+		{
+			FontAsset(U"debug")(U"[{}]"_fmt(sectionName)).draw(FontSize.y, pos_, SectionColor);
+
+			pos_.y += LineHeight;
+		}
+
+		void drawLabelAndValue(StringView label, StringView value)
+		{
+			FontAsset(U"debug")(U"{} = {}"_fmt(label, value)).draw(FontSize.y, pos_, TextColor);
+
+			pos_.y += LineHeight;
+		}
+
+		void drawText(StringView text)
+		{
+			FontAsset(U"debug")(text).draw(FontSize.y, pos_, TextColor);
+
+			pos_.y += LineHeight;
+		}
+
+		void drawEmptyLine(int nLine = 1)
+		{
+			pos_.y += LineHeight * nLine;
+		}
+
+		void drawMemoryDump(Memory* mem, uint16 addr)
+		{
+			for (uint16 row = 0; row < 4u; row++)
+			{
+				FontAsset(U"debug")(U"{:02X} {:02X} {:02X} {:02X} {:02X} {:02X} {:02X} {:02X} | {:02X} {:02X} {:02X} {:02X} {:02X} {:02X} {:02X} {:02X}"_fmt(
+					mem->read(addr + row * 16 + 0),
+					mem->read(addr + row * 16 + 1),
+					mem->read(addr + row * 16 + 2),
+					mem->read(addr + row * 16 + 3),
+					mem->read(addr + row * 16 + 4),
+					mem->read(addr + row * 16 + 5),
+					mem->read(addr + row * 16 + 6),
+					mem->read(addr + row * 16 + 7),
+					mem->read(addr + row * 16 + 8),
+					mem->read(addr + row * 16 + 9),
+					mem->read(addr + row * 16 + 10),
+					mem->read(addr + row * 16 + 11),
+					mem->read(addr + row * 16 + 12),
+					mem->read(addr + row * 16 + 13),
+					mem->read(addr + row * 16 + 14),
+					mem->read(addr + row * 16 + 15)))
+					.draw(10, pos_, TextColor);
+
+				pos_.y += LineHeight;
+			}
+		}
+
+		void drawChannelsAmplitude(APU* apu)
+		{
+			const auto ampList = apu->getAmplitude();
+
+			for (const auto [index, amp] : Indexed(ampList))
+			{
+				const double amp01 = amp / 15.0;
+
+				const SizeF rectSize{ 6.0, FontSize.y - 2 };
+				const double xPadding = 2.0;
+				const Vec2 bottomLeft{ pos_.x + index * (rectSize.x + xPadding), pos_.y + FontSize.y };
+				const RectF rect{ Arg::bottomLeft = bottomLeft, rectSize };
+				rect.draw(ColorF{ 1.0, 0.05 + 0.3 * amp01 });
+				rect.scaledAt(bottomLeft, 1.0, amp01).draw(ColorF{ 1.0, 1 - 0.5 * amp01 });
+			}
+
+			pos_.y += LineHeight;
+		}
+
+	private:
+		Vec2 pos_{};
+	};
+
+
+	DebugMonitor::DebugMonitor(Memory* mem, CPU* cpu, APU* apu, Interrupt* interrupt)
+		: mem_{ mem }, cpu_{ cpu }, apu_{ apu }, interrupt_{ interrupt }
 	{
 		textStateDumpAddress_.text = U"0000";
+	}
+
+	DebugMonitor::~DebugMonitor()
+	{
 	}
 
 	void DebugMonitor::update()
@@ -80,182 +147,101 @@ namespace dmge
 	void DebugMonitor::draw(const Point& pos)
 	{
 		{
-			const ScopedViewport2D viewport{ pos.x, pos.y, Scene::Width() / 2, Scene::Height() };
+			const ScopedViewport2D viewport{ pos.x, pos.y, size.x, Scene::Height() };
 
 			Scene::Rect().draw(BgColor);
 
-			// Group 1 : LCD, Various
-			//   13 Lines
-			//   h : (13 * LineHeight)
-			//   w : "XXXX YYYY=ZZ" (12 * FontSize.x)
-
-			const Array<std::pair<uint16, StringView>> group1 = {
-				{ Address::LCDC, U"LCDC" },
-				{ Address::STAT, U"STAT" },
-				{ Address::SCY, U"SCY" },
-				{ Address::SCX, U"SCX" },
-				{ Address::LY, U"LY" },
-				{ Address::LYC, U"LYC" },
-				{ Address::DMA, U"DMA" },
-				{ Address::BGP, U"BGP" },
-				{ Address::OBP0, U"OBP0" },
-				{ Address::OBP1, U"OBP1" },
-				{ Address::WY, U"WY" },
-				{ Address::WX, U"WX" },
-				{ Address::SVBK, U"SVBK" },
-				{ Address::VBK, U"VBK" },
-				{ Address::KEY1, U"KEY1" },
-				{ Address::JOYP, U"JOYP" },
-				{ Address::SB, U"SB" },
-				{ Address::SC, U"SC" },
-				//{ Address::DIV, U"DIV" },
-				{ Address::TIMA, U"TIMA" },
-				{ Address::TMA, U"TMA" },
-				{ Address::TAC, U"TAC" },
-				{ Address::IF, U"IF" },
-				{ Address::IE, U"IE" },
-			};
-
-			const Rect group1Area{ 2, 1, 12 * FontSize.x, group1.size() * LineHeight };
-
-			for (const auto [index, item] : Indexed(group1))
 			{
-				const auto& addr = item.first;
-				const auto& name = item.second;
-				DrawMemoryAddressValue(addr, name, mem_->read(addr), group1Area.x, group1Area.y + index * LineHeight);
+				DrawDebugItem d{ Vec2{ 4, 2 } };
+
+				// Timer
+
+				d.drawSection(U"Timer");
+				d.drawLabelAndValue(U"FF04 DIV ", Uint8ToHexAndBin(mem_->read(Address::DIV)));
+				d.drawLabelAndValue(U"FF05 TIMA", Uint8ToHexAndBin(mem_->read(Address::TIMA)));
+				d.drawLabelAndValue(U"FF06 TMA ", Uint8ToHexAndBin(mem_->read(Address::TMA)));
+				d.drawLabelAndValue(U"FF07 TAC ", Uint8ToHexAndBin(mem_->read(Address::TAC)));
+				d.drawEmptyLine();
+
+				// Interrupt
+
+				d.drawSection(U"Interrupt");
+				d.drawLabelAndValue(U"IME      ", U"{:d}"_fmt(interrupt_->ime()));
+				d.drawLabelAndValue(U"FF0F IF  ", Uint8ToHexAndBin(mem_->read(Address::IF)));
+				d.drawLabelAndValue(U"FFFF IE  ", Uint8ToHexAndBin(mem_->read(Address::IE)));
+				d.drawEmptyLine();
+
+				// Rendering
+
+				d.drawSection(U"Rendering");
+				d.drawLabelAndValue(U"FF40 LCDC", Uint8ToHexAndBin(mem_->read(Address::LCDC)));
+				d.drawLabelAndValue(U"FF41 STAT", Uint8ToHexAndBin(mem_->read(Address::STAT)));
+				d.drawLabelAndValue(U"FF42 SCY ", Uint8ToHexAndBin(mem_->read(Address::SCY)));
+				d.drawLabelAndValue(U"FF43 SCX ", Uint8ToHexAndBin(mem_->read(Address::SCX)));
+				d.drawLabelAndValue(U"FF44 LY  ", Uint8ToHexAndBin(mem_->read(Address::LY)));
+				d.drawLabelAndValue(U"FF45 LYC ", Uint8ToHexAndBin(mem_->read(Address::LYC)));
+				d.drawLabelAndValue(U"FF47 BGP ", Uint8ToHexAndBin(mem_->read(Address::BGP)));
+				d.drawLabelAndValue(U"FF48 OBP0", Uint8ToHexAndBin(mem_->read(Address::OBP0)));
+				d.drawLabelAndValue(U"FF49 OBP1", Uint8ToHexAndBin(mem_->read(Address::OBP1)));
+				d.drawLabelAndValue(U"FF4A WY  ", Uint8ToHexAndBin(mem_->read(Address::WY)));
+				d.drawLabelAndValue(U"FF4B WX  ", Uint8ToHexAndBin(mem_->read(Address::WX)));
+				d.drawEmptyLine();
+
+				// Memory dump
+
+				d.drawSection(U"Memory ({:04X})"_fmt(dumpAddress_));
+				d.drawMemoryDump(mem_, dumpAddress_);
+				d.drawEmptyLine();
 			}
 
-			// Group 2 : Audio
-			//  11 Lines
-			//  h : (11 * LineHeight)
-			//  w : "XXXX YYYY=ZZ" (12 * FontSize.x)
-
-			const Array<std::pair<uint16, StringView>> group2 = {
-				{ Address::NR10, U"ENT1" },
-				{ Address::NR11, U"LEN1" },
-				{ Address::NR12, U"ENV1" },
-				{ Address::NR13, U"FRQ1" },
-				{ Address::NR14, U"KIK1" },
-				{ Address::NR21, U"LEN2" },
-				{ Address::NR22, U"ENV2" },
-				{ Address::NR23, U"FRQ2" },
-				{ Address::NR24, U"KIK2" },
-				{ Address::NR30, U"ON_3" },
-				{ Address::NR31, U"LEN3" },
-				{ Address::NR32, U"ENV3" },
-				{ Address::NR33, U"FRQ3" },
-				{ Address::NR34, U"KIK3" },
-				{ Address::NR41, U"LEN4" },
-				{ Address::NR42, U"ENV4" },
-				{ Address::NR43, U"FRQ4" },
-				{ Address::NR44, U"KIK4" },
-				{ Address::NR50, U"VOL" },
-				{ Address::NR51, U"L/R" },
-				{ Address::NR52, U"ON" },
-			};
-
-			const Rect group2Area{ group1Area.tr().x + 2 * FontSize.x, group1Area.y, 12 * FontSize.x, group2.size() * LineHeight };
-
-			for (const auto [index, item] : Indexed(group2))
 			{
-				const auto& addr = item.first;
-				const auto& name = item.second;
-				DrawMemoryAddressValue(addr, name, mem_->read(addr), group2Area.x, group2Area.y + index * LineHeight);
+				DrawDebugItem d{ Vec2{ 4 + 5 * 30, 2 } };
+
+				// CPU
+
+				const auto cpuState = cpu_->getCurrentCPUState();
+
+				d.drawSection(U"CPU");
+				d.drawLabelAndValue(U"AF  ", U"{:04X}"_fmt(cpuState.af));
+				d.drawLabelAndValue(U"BC  ", U"{:04X}"_fmt(cpuState.bc));
+				d.drawLabelAndValue(U"DE  ", U"{:04X}"_fmt(cpuState.de));
+				d.drawLabelAndValue(U"HL  ", U"{:04X}"_fmt(cpuState.hl));
+				d.drawLabelAndValue(U"SP  ", U"{:04X}"_fmt(cpuState.sp));
+				d.drawLabelAndValue(U"PC  ", U"{:04X}"_fmt(cpuState.pc));
+				d.drawLabelAndValue(U"Halt", U"{:d}"_fmt(cpuState.halt));
+				d.drawEmptyLine();
+
+				// Cartridge
+
+				d.drawSection(U"Cartridge");
+				d.drawLabelAndValue(U"ROM Bank", U"{:X}"_fmt(mem_->romBank()));
+				d.drawLabelAndValue(U"RAM Bank", U"{:X}"_fmt(mem_->ramBank()));
+				d.drawEmptyLine();
+
+				// Sound
+
+				const auto buffer = apu_->getBufferState();
+
+				d.drawSection(U"Sound");
+				d.drawLabelAndValue(U"FF26 NR52", Uint8ToHexAndBin(mem_->read(Address::NR52)));
+				d.drawText(U"Stream buffer: {:5d} / {:5d}"_fmt(buffer.remain, buffer.max));
+				d.drawChannelsAmplitude(apu_);
+				d.drawEmptyLine();
+
+				// Joypad
+
+				const auto gamepad = Gamepad(0);
+				const auto joyconL = JoyConL(0);
+				const auto joyconR = JoyConR(0);
+				const auto procon = ProController(0);
+
+				d.drawSection(U"Joypad");
+				d.drawLabelAndValue(U"FF00 JOYP", Uint8ToHexAndBin(mem_->read(Address::JOYP)));
+				d.drawText(U"Gamepad: {}"_fmt(gamepad.isConnected() ? U"connected" : U"not found"));
+				d.drawText(U"JoyCon : {}"_fmt(joyconL.isConnected() && joyconR.isConnected() ? U"connected" : U"not found"));
+				d.drawText(U"ProCon : {}"_fmt(procon.isConnected() ? U"connected" : U"not found"));
+				d.drawEmptyLine();
 			}
-
-			// CPU Registers, MBC State
-			//   9 Lines
-			//   h : (9 * LineHeight)
-			//   w : "XX=YYYY", "XXX=YY" (7 * FontSize.x)
-
-			const Rect group3Area{ group2Area.tr().x + 2 * FontSize.x, group1Area.y, 7 * FontSize.x, 9 * LineHeight };
-
-			const auto registerValues = cpu_->getRegisterValues();
-
-			FontAsset(U"debug")(U"AF={:04X}"_fmt(registerValues.af)).draw(10, group3Area.x, group3Area.y + 0 * LineHeight, FontColor);
-			FontAsset(U"debug")(U"BC={:04X}"_fmt(registerValues.bc)).draw(10, group3Area.x, group3Area.y + 1 * LineHeight, FontColor);
-			FontAsset(U"debug")(U"DE={:04X}"_fmt(registerValues.de)).draw(10, group3Area.x, group3Area.y + 2 * LineHeight, FontColor);
-			FontAsset(U"debug")(U"HL={:04X}"_fmt(registerValues.hl)).draw(10, group3Area.x, group3Area.y + 3 * LineHeight, FontColor);
-			FontAsset(U"debug")(U"SP={:04X}"_fmt(registerValues.sp)).draw(10, group3Area.x, group3Area.y + 4 * LineHeight, FontColor);
-			FontAsset(U"debug")(U"PC={:04X}"_fmt(registerValues.pc)).draw(10, group3Area.x, group3Area.y + 5 * LineHeight, FontColor);
-
-			FontAsset(U"debug")(U"ROM={:02X}"_fmt(mem_->romBank())).draw(10, group3Area.x, group3Area.y + 7 * LineHeight, FontColor);
-			FontAsset(U"debug")(U"RAM={:02X}"_fmt(mem_->ramBank())).draw(10, group3Area.x, group3Area.y + 8 * LineHeight, FontColor);
-
-			// Memory dump
-			//   "0000: 00 00 00 00 00 00 00 00 | 00 00 00 00 00 00 00 00" => 55 chars
-			//   h : (4 * LineHeight)
-			//   w : (55 * FontSize.x)
-
-			const Rect memDumpArea{ group1Area.x, group1Area.bl().y + LineHeight, 55 * FontSize.x, 4 * LineHeight };
-
-			DrawMemoryDump(mem_, dumpAddress_, memDumpArea.x, memDumpArea.y);
-
-			// APU
-			//   APU Stream Buffer Gauge
-
-			const Size gaugeSize{ 240, 12 };
-
-			const Rect apuArea{ group1Area.x, memDumpArea.bl().y + LineHeight, gaugeSize };
-
-			const auto buffer = apu_->getBufferState();
-
-			if (buffer.remain > 0)
-			{
-				RectF{ apuArea.pos, SizeF{ 1.0 * gaugeSize.x * buffer.remain / buffer.max, gaugeSize.y } }.draw(Color{ 128 });
-			}
-			else
-			{
-				RectF{ apuArea.pos, gaugeSize }.draw(Palette::Red);
-			}
-
-			RectF{ apuArea.pos.movedBy(0.5, 0.5), gaugeSize }.drawFrame(1.0, 0.0, Color{ 220 });
-			FontAsset(U"debug")(U"{:5} / 44100"_fmt(buffer.remain)).drawAt(apuArea.center(), FontColor);
-
-			// Joy-Con
-			//   "JOYCONL=L0 D0 U0 R0, JOYCONR=A0 X0 B0 Y0" => 40 chars
-			//   h : (1 * LineHeight)
-			//   w : (40 * FontSize.x)
-
-			const Rect joyconArea{ apuArea.x, apuArea.bl().y + LineHeight, 40 * FontSize.x, 1 * LineHeight };
-
-			const auto joyconL = JoyConL(0);
-			const auto joyconR = JoyConR(0);
-			String textL = U"JoyConL=(none), ";
-			String textR = U"JoyConR=(none)";
-
-			if (joyconL.isConnected())
-			{
-				textL = U"JoyConL=L{:d} D{:d} U{:d} R{:d}, "_fmt(
-					joyconL.button0.pressed(), joyconL.button1.pressed(), joyconL.button2.pressed(), joyconL.button3.pressed());
-			}
-
-			if (joyconR.isConnected())
-			{
-				textR = U"JoyConR=L{:d} D{:d} U{:d} R{:d}"_fmt(
-					joyconR.button0.pressed(), joyconR.button1.pressed(), joyconR.button2.pressed(), joyconR.button3.pressed());
-			}
-
-			FontAsset(U"debug")(textL, textR).draw(10, joyconArea.x, joyconArea.y, FontColor);
-
-
-			// Proコントローラー
-			//   "ProCon=L0 D0 U0 R0 A0 B0 P0 M0" => 30 chars
-			//   h : (1 * LineHeight)
-			//   w : (40 * FontSize.x)
-
-			const Rect proconArea{ joyconArea.x, joyconArea.bl().y + LineHeight, 30 * FontSize.x, 1 * LineHeight };
-
-			const auto procon = ProController(0);
-			String textProcon = U"ProCon=(none)";
-
-			if (procon.isConnected())
-			{
-				textProcon = U"ProCon=L{:d} D{:d} U{:d} R{:d} A{:d} B{:d} P{:d} M{:d}"_fmt(
-					procon.povLeft.pressed(), procon.povDown.pressed(), procon.povUp.pressed(), procon.povRight.pressed(), procon.buttonA.pressed(), procon.buttonB.pressed(), procon.buttonPlus.pressed(), procon.buttonMinus.pressed());
-			}
-
-			FontAsset(U"debug")(textProcon).draw(10, proconArea.x, proconArea.y, FontColor);
 		}
 
 		if (showDumpAddressTextbox_)

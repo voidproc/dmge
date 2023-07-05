@@ -53,6 +53,9 @@ namespace dmge
 
 		// 現在のストリームバッファの状態を取得（デバッグ用）
 		APUStreamBufferState getBufferState() const;
+
+		// 各チャンネルの amplitude を取得
+		std::array<int, 4> getAmplitude() const;
 		
 	private:
 		Memory* mem_;

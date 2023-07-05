@@ -26,10 +26,13 @@ void LoadAssets()
 
 void SetWindowSize(int scale, bool showDebugMonitor)
 {
-	const int width = 160 * scale + (showDebugMonitor ? 5 * 58 : 0);
-	const int height = Max(144 * scale, showDebugMonitor ? 10 * 32 : 144 * scale);
+	const int width = 160 * scale;
+	const int height = 144 * scale;
 
-	const auto SceneSize = Size{ width, height };
+	const int widthWithDebugMonitor = width + dmge::DebugMonitor::size.x;
+	const int heightWithDebugMonitor = Max(height, dmge::DebugMonitor::size.y);
+
+	const auto SceneSize = showDebugMonitor ? Size{ widthWithDebugMonitor, heightWithDebugMonitor } : Size{ width, height };
 	Scene::Resize(SceneSize);
 	Window::Resize(SceneSize);
 }
@@ -509,7 +512,7 @@ private:
 
 	dmge::Joypad joypad_{ &mem_ };
 
-	dmge::DebugMonitor debugMonitor_{ &mem_, & cpu_, & apu_ };
+	dmge::DebugMonitor debugMonitor_{ &mem_, &cpu_, &apu_, &interrupt_ };
 
 	// モード（通常 or トレース）
 	DmgeAppMode mode_ = DmgeAppMode::Default;

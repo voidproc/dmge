@@ -445,4 +445,17 @@ namespace dmge
 	{
 		return APUStreamBufferState{ apuStream_->bufferRemain(), apuStream_->bufferMaxSize() };
 	}
+
+	std::array<int, 4> APU::getAmplitude() const
+	{
+		if (not masterSwitch_)
+			return { 0, 0, 0, 0 };
+
+		return {
+			ch1_.amplitude() * ch1_.getEnable(),
+			ch2_.amplitude() * ch2_.getEnable(),
+			ch3_.amplitude() * ch3_.getEnable(),
+			ch4_.amplitude() * ch4_.getEnable(),
+		};
+	}
 }

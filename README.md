@@ -11,6 +11,8 @@ C++ / OpenSiv3D でゲームボーイのエミュレータを作っています�
   - [目次](#目次)
   - [概要](#概要)
   - [開発環境](#開発環境)
+  - [ダウンロード](#ダウンロード)
+  - [使用方法](#使用方法)
   - [実装状況](#実装状況)
   - [テスト ROM 実行結果](#テスト-rom-実行結果)
   - [スクリーンショット](#スクリーンショット)
@@ -28,6 +30,53 @@ C++ / OpenSiv3D でゲームボーイのエミュレータを作っています�
 - Windows 11
 - Visual Studio 2022
 - [OpenSiv3D](https://github.com/Siv3D/OpenSiv3D) v0.6.10
+
+
+## ダウンロード
+
+- 準備中
+
+
+## 使用方法
+
+`dmge.exe` を起動してください。
+
+以下のキーボードショートカットが使用可能です。
+
+- ボタン操作
+  - 4方向ボタン : <kbd>&uarr;</kbd> <kbd>&darr;</kbd> <kbd>&larr;</kbd> <kbd>&rarr;</kbd>
+  - A ボタン : <kbd>X</kbd>
+  - B ボタン : <kbd>Z</kbd>
+  - Start ボタン : <kbd>Enter</kbd>
+  - Select ボタン : <kbd>BackSpace</kbd>
+- ファイル
+  - カートリッジを開くダイアログ表示 : <kbd>Ctrl + O</kbd>
+  - リセット : <kbd>Ctrl + R</kbd>
+- レンダリング
+  - パレット切替（DMG モード） : <kbd>L</kbd>
+- サウンド
+  - サウンド有効／無効切替 : <kbd>1</kbd>
+- デバッグ
+  - デバッグモニタ表示切替 : <kbd>F10</kbd>
+  - デバッグモニタのメモリダンプ対象アドレス設定 : <kbd>M</kbd>
+  - ステップ実行を開始 : <kbd>P</kbd>
+  - ステップ実行 : <kbd>F7</kbd>
+  - ステップ実行を終了 : <kbd>F5</kbd>
+
+また、`config.ini` を編集して以下の設定を行うことができます（`config.example.ini` を参考にしてください）。
+
+- `CartridgePath` : 読み込むカートリッジファイルのパス
+- `Breakpoint` : ブレークポイント（コンマ区切りで複数指定可能）
+- `BreakpointMemW` : メモリ書き込み時ブレークポイント（コンマ区切りで複数指定可能）
+- `BreakOnLDBB` : LD B,B 実行時にブレークするかどうか
+- `EnableBreakpoint` : 上記ブレークポイントの有効／無効の切替
+- `ShowFPS` : 画面上部にFPSを表示するかどうか
+- `Scale` : 画面の表示倍率
+- `ShowConsole` : コンソールを表示するかどうか
+- `ShowDebugMonitor` : デバッグモニタを表示するかどうか
+- `DumpAddress` : ブレーク時のメモリダンプ先アドレス（コンマ区切りで複数指定可能）
+- `BootROM` : Bootstrap ROM のパス
+- `GamepadButton****` : ゲームパッドのボタン割り当て
 
 
 ## 実装状況

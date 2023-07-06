@@ -430,8 +430,7 @@ namespace dmge
 		}
 
 		// APU
-		// 0xff10 - 0xff26,
-		// 0xff30 - 0xff3f
+		// 0xff10 - 0xff3f
 
 		else if (addr >= Address::NR10 && addr < Address::NR10 + 48)
 		{

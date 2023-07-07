@@ -8,7 +8,7 @@ namespace dmge
 	class Memory;
 	class Interrupt;
 	class LCD;
-	struct BufferedOAM;
+	struct OAM;
 
 	class PPU
 	{
@@ -90,7 +90,7 @@ namespace dmge
 
 		// OAMバッファ
 		// スキャンラインのはじめのあたり（OAMScanモード時）に構築される
-		Array<BufferedOAM> oamBuffer_;
+		Array<OAM> oamBuffer_;
 
 		// CGB Mode
 		bool cgbMode_ = false;

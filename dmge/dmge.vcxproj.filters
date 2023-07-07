@@ -975,5 +975,11 @@
     <ClInclude Include="Audio\WaveChannel.h">
       <Filter>Header Files\Audio</Filter>
     </ClInclude>
+    <ClInclude Include="OAM.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TileMapAttribute.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

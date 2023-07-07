@@ -4,6 +4,8 @@
 #include "Interrupt.h"
 #include "TileData.h"
 #include "BitMask/InterruptFlag.h"
+#include "OAM.h"
+#include "TileMapAttribute.h"
 
 namespace dmge
 {
@@ -14,58 +16,6 @@ namespace dmge
 	constexpr int Mode3DotsLong = 289;
 	constexpr int LineDots = 456;
 	constexpr int FrameDots = 70224;
-
-	// OAMバッファ
-	struct BufferedOAM
-	{
-		// OAMTable内のアドレス
-		uint16 address;
-
-		// OAMのY座標
-		// 実際の描画位置は-16される
-		uint8 y;
-
-		// OAMのX座標
-		// 実際の描画位置は-8される
-		uint8 x;
-
-		// タイルID
-		// 0x8000からの符号なしオフセット
-		uint8 tile;
-
-		// BG and Window over OBJ
-		uint8 priority;
-
-		// 垂直反転
-		bool yFlip;
-
-		// 水平反転
-		bool xFlip;
-
-		// (DMG) パレット（0=OBP0, 1=OBP1）
-		uint8 palette;
-
-		// (CGB) Tile VRAM-Bank
-		uint8 bank;
-
-		// (CGB) Palette number
-		uint8 obp;
-	};
-
-	// (CGB) 背景マップ属性
-	union TileMapAttribute
-	{
-		struct
-		{
-			uint8 palette : 3;
-			uint8 bank : 1;
-			uint8 unused1 : 1;
-			bool xFlip : 1;
-			bool yFlip : 1;
-			uint8 priority : 1;
-		} attr;
-		uint8 value;
-	};
 
 	PPU::PPU(Memory* mem, LCD* lcd, Interrupt* interrupt)
 		:
@@ -294,7 +244,7 @@ namespace dmge
 			// 1ライン10個まで
 			if (oamBuffer_.size() >= 10) break;
 
-			BufferedOAM oam{};
+			OAM oam{};
 			oam.y = mem_->read(addr);
 
 			// Y座標が描画範囲にあるか？
@@ -392,36 +342,26 @@ namespace dmge
 			fetcherX_ = 0;
 		}
 
-		// ピクセルフェッチャーのいるX座標
-		const uint8 x = fetcherX_;
-
-
 		// タイルマップの中の、描画対象のタイルのアドレスを得る
 		uint16 tileAddr;
 
 		if (drawingWindow_)
 		{
 			const uint16 tileMapAddrBase = lcd_->windowTileMapAddress();
-			const uint16 addrOffsetX = x / 8;
+			const uint16 addrOffsetX = fetcherX_ / 8;
 			const uint16 addrOffsetY = 32 * (windowLine_ / 8);
 			tileAddr = tileMapAddrBase + ((addrOffsetX + addrOffsetY) & 0x3ff);
 		}
 		else
 		{
 			const uint16 tileMapAddrBase = lcd_->bgTileMapAddress();
-			const uint16 addrOffsetX = ((x / 8) + (scx / 8)) & 0x1f;
+			const uint16 addrOffsetX = ((fetcherX_ / 8) + (scx / 8)) & 0x1f;
 			const uint16 addrOffsetY = 32 * (((ly + scy) & 0xff) / 8);
 			tileAddr = tileMapAddrBase + ((addrOffsetX + addrOffsetY) & 0x3ff);
 		}
 
 		// (CGB) 背景マップ属性を取得（VRAM Bank1）
-
-		TileMapAttribute tileMapAttr{};
-
-		if (cgbMode_)
-		{
-			tileMapAttr.value = mem_->readVRAMBank(tileAddr, 1);
-		}
+		const TileMapAttribute tileMapAttr{ cgbMode_ ? mem_->readVRAMBank(tileAddr, 1) : 0u };
 
 		// タイルデータのアドレスを得る
 		const uint8 tileId = mem_->readVRAMBank(tileAddr, 0);

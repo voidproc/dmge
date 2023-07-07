@@ -77,6 +77,7 @@
       <AdditionalIncludeDirectories>lib/</AdditionalIncludeDirectories>
       <BuildStlModules>false</BuildStlModules>
       <SupportJustMyCode>false</SupportJustMyCode>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>

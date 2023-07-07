@@ -33,9 +33,6 @@ namespace dmge
 		// 0x8000からの符号なしオフセット
 		uint8 tile;
 
-
-		// Flags
-
 		// BG and Window over OBJ
 		uint8 priority;
 

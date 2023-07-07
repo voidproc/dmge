@@ -234,15 +234,17 @@ namespace dmge
 			}
 
 			apu_->writeRegister(addr, value);
+			return;
 		}
 		else if (addr == Address::NR52)
 		{
 			apu_->writeRegister(addr, value);
-			value &= 0x80;
+			return;
 		}
 		else if (addr >= Address::WaveRAM && addr <= Address::WaveRAM + 15)
 		{
 			apu_->writeRegister(addr, value);
+			return;
 		}
 
 		// LCDC, STAT, Scroll, LY, LYC
@@ -251,6 +253,7 @@ namespace dmge
 		else if (addr >= Address::LCDC && addr <= Address::LYC)
 		{
 			lcd_->writeRegister(addr, value);
+			return;
 		}
 
 		// DMA
@@ -269,6 +272,7 @@ namespace dmge
 			(addr >= Address::WY && addr <= Address::WX))
 		{
 			lcd_->writeRegister(addr, value);
+			return;
 		}
 
 		// (CGB) KEY1
@@ -321,6 +325,7 @@ namespace dmge
 		else if (addr >= Address::BCPS && addr <= Address::OPRI)
 		{
 			lcd_->writeRegister(addr, value);
+			return;
 		}
 
 		// WRAM Bank (SVBK)

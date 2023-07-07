@@ -158,7 +158,7 @@ public:
 		mem_.saveSRAM();
 	}
 
-	StringView currentCartridgePath() const
+	String currentCartridgePath() const
 	{
 		return currentCartridgePath_.value_or(U"");
 	}
@@ -330,7 +330,7 @@ private:
 				}
 
 				// PPUのレンダリング結果を画面表示
-				ppu_.draw(Point{ 0, 0 }, config_.scale);
+				ppu_.draw(Vec2{ 0, 0 }, config_.scale);
 
 				// APU
 				if (enableAPU && mode_ != DmgeAppMode::Trace)

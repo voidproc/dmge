@@ -25,7 +25,7 @@ namespace dmge
 		void run();
 
 		// PPUによるレンダリング結果をシーンに描画する
-		void draw(const Point& pos, int scale);
+		void draw(const Vec2& pos, int scale);
 
 		// PPUのモード
 		// LYと、このフレームの描画ドット数により変化する

@@ -64,7 +64,7 @@ namespace dmge
 
 		if (mode_ == PPUMode::Drawing)
 		{
-			if (fetcherX_ < LCDSize.x && canvasX_ < LCDSize.x)
+			if (canvasX_ < LCDSize.x)
 			{
 				scanline_();
 			}
@@ -82,8 +82,12 @@ namespace dmge
 
 			fetcherX_ = 0;
 			canvasX_ = 0;
-			if (drawingWindow_) windowLine_++;
-			drawingWindow_ = false;
+
+			if (drawingWindow_)
+			{
+				windowLine_++;
+				drawingWindow_ = false;
+			}
 		}
 
 		if (modeChangedToVBlank())
@@ -116,7 +120,7 @@ namespace dmge
 		prevStatInt_ = statInt;
 	}
 
-	void PPU::draw(const Point& pos, int scale)
+	void PPU::draw(const Vec2& pos, int scale)
 	{
 		if (not lcd_->isEnabled()) return;
 
@@ -223,7 +227,7 @@ namespace dmge
 		const uint8 ly = lcd_->ly();
 		const uint8 lyc = lcd_->lyc();
 
-		if ((ly != prevLY_) || lyc != prevLYC_)
+		if ((ly != prevLY_) || (lyc != prevLYC_))
 		{
 			const uint8 stat = lcd_->stat();
 			mem_->write(Address::STAT, 0x80 | (stat & ~4) | (ly == lyc ? 4 : 0));
@@ -236,7 +240,7 @@ namespace dmge
 	void PPU::scanOAM_()
 	{
 		const uint8 ly = lcd_->ly();
-		const int spriteSize = lcd_->isEnabledTallSprite() ? 16 : 8;
+		const uint8 spriteSize = lcd_->spriteSize();
 
 		// OAMメモリを走査して、描画対象のOAMをバッファに格納していく
 		for (uint16 addr = 0xfe00; addr <= 0xfe9f; addr += 4)
@@ -369,7 +373,7 @@ namespace dmge
 
 		// タイルデータを参照
 		const uint16 tileData = mem_->read16VRAMBank(tileDataAddr, tileMapAttr.attr.bank);
-		const uint8 color = TileData::GetColor(tileData, x % 8, tileMapAttr.attr.xFlip);
+		const uint8 color = TileData::GetColor(tileData, fetcherX_ % 8, tileMapAttr.attr.xFlip);
 
 		// 実際の描画色
 		Color dispColor;
@@ -385,15 +389,13 @@ namespace dmge
 			int oamPriorityVal = 999;
 			int oamIndex = 0;
 
-			const auto filteredOAMs = oamBuffer_.filter([&](const auto& o) { return o.x <= canvasX_ + 8 && o.x + 8 > canvasX_ + 8; });
-
-			for (const auto& oam : filteredOAMs)
+			for (const auto& oam : oamBuffer_)
 			{
+				// 描画中のドットがスプライトに重なっているか？
+				if (not (oam.x <= canvasX_ + 8 && oam.x + 8 > canvasX_ + 8)) continue;
+
 				// 0xff6c(OPRI)を反映
 				if (cgbMode_ && oamPriorityVal != 999 && ((opri && oamPriorityVal < oam.x) || (not opri && oamPriorityVal < oamIndex))) continue;
-
-				// 描画中のドットがスプライトに重なっているか？
-				//if (not (oam.x <= canvasX_ + 8 && oam.x + 8 > canvasX_ + 8)) continue;
 
 				// スプライトの、左から oamX 個目のドットを描画する
 				const int oamX = canvasX_ + 8 - oam.x;

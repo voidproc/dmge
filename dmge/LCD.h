@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Colors.h"
+#include "Address.h"
 
 namespace dmge
 {
@@ -31,7 +32,7 @@ namespace dmge
 		uint16 bgTileMapAddress() const;
 
 		// LCDC.2 - OBJ size
-		bool isEnabledTallSprite() const;
+		uint8 spriteSize() const;
 
 		// LCDC.1 - OBJ enable
 		bool isEnabledSprite() const;
@@ -127,6 +128,12 @@ namespace dmge
 		uint8 wy_ = 0;
 		uint8 wx_ = 0;
 		uint8 opri_ = 0;
+
+		// LCDC state
+		uint8 spriteSize_ = 8;
+		uint16 windowTileMapAddress_ = Address::TileMap0;
+		uint16 bgTileMapAddress_ = Address::TileMap0;
+		uint16 tileDataAddress_ = Address::TileData0;
 
 		// (CGB) BG/OBJ Palette Index
 

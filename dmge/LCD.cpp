@@ -1,5 +1,4 @@
 ﻿#include "LCD.h"
-#include "Address.h"
 #include "BitMask/LCDC.h"
 #include "BitMask/STAT.h"
 
@@ -30,7 +29,7 @@ namespace dmge
 
 	uint16 LCD::windowTileMapAddress() const
 	{
-		return (lcdc_ & BitMask::LCDC::WindowTileMapArea) > 0 ? Address::TileMap1 : Address::TileMap0;
+		return windowTileMapAddress_;
 	}
 
 	bool LCD::isEnabledWindow() const
@@ -40,17 +39,17 @@ namespace dmge
 
 	uint16 LCD::tileDataAddress() const
 	{
-		return (lcdc_ & BitMask::LCDC::BGAndWindowTileDataArea) > 0 ? Address::TileData0 : Address::TileData2;
+		return tileDataAddress_;
 	}
 
 	uint16 LCD::bgTileMapAddress() const
 	{
-		return (lcdc_ & BitMask::LCDC::BGTileMapArea) > 0 ? Address::TileMap1 : Address::TileMap0;
+		return bgTileMapAddress_;
 	}
 
-	bool LCD::isEnabledTallSprite() const
+	uint8 LCD::spriteSize() const
 	{
-		return (lcdc_ & BitMask::LCDC::OBJSize) > 0;
+		return spriteSize_;
 	}
 
 	bool LCD::isEnabledSprite() const
@@ -179,6 +178,11 @@ namespace dmge
 		if (addr == Address::LCDC)
 		{
 			lcdc_ = value;
+
+			spriteSize_ = (value & BitMask::LCDC::OBJSize) > 0 ? 16 : 8;
+			windowTileMapAddress_ = (value & BitMask::LCDC::WindowTileMapArea) > 0 ? Address::TileMap1 : Address::TileMap0;
+			bgTileMapAddress_ = (value & BitMask::LCDC::BGTileMapArea) > 0 ? Address::TileMap1 : Address::TileMap0;
+			tileDataAddress_ = (value & BitMask::LCDC::BGAndWindowTileDataArea) > 0 ? Address::TileData0 : Address::TileData2;
 		}
 		else if (addr == Address::STAT)
 		{

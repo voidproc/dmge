@@ -9,6 +9,7 @@ namespace dmge
 	class Interrupt;
 	class LCD;
 	struct OAM;
+	union TileMapAttribute;
 
 	class PPU
 	{
@@ -40,6 +41,9 @@ namespace dmge
 		// PPUのモードが VBlank に変化した
 		bool modeChangedToVBlank() const;
 
+		// STAT 割り込みソースが前回から変化したかを記録して返す
+		bool checkChangedSTATSources_();
+
 		// このフレームの描画ドット数
 		int dot() const;
 
@@ -65,7 +69,7 @@ namespace dmge
 		PPUMode mode_ = PPUMode::OAMScan;
 
 		// 前回STATによる割り込み要求をしたか（してたら今回は要求しない）
-		bool prevStatInt_ = false;
+		bool prevRequireSTATInt_ = false;
 
 		// レンダリング結果
 		Image canvas_;
@@ -103,7 +107,8 @@ namespace dmge
 		void updateMode_();
 		void updateSTAT_();
 		void scanOAM_();
-		void scanline_();
+		void renderDot_();
+		Color fetchOAMDot_(const Color& initialDotColor, uint8 bgColor, const TileMapAttribute& bgTileMapAttr) const;
 
 	};
 }

@@ -66,7 +66,7 @@ namespace dmge
 		{
 			if (canvasX_ < LCDSize.x)
 			{
-				scanline_();
+				renderDot_();
 			}
 		}
 
@@ -77,7 +77,7 @@ namespace dmge
 			// 右端の残りのドットを描画
 			while (canvasX_ < LCDSize.x)
 			{
-				scanline_();
+				renderDot_();
 			}
 
 			fetcherX_ = 0;
@@ -106,19 +106,11 @@ namespace dmge
 
 		// STAT割り込み要求
 
-		bool statInt = false;
-		statInt |= (lcd_->isEnabledLYCInterrupt() && lcd_->lycFlag());
-		statInt |= (lcd_->isEnabledOAMScanInterrupt() && modeChangedToOAMScan());
-		statInt |= (lcd_->isEnabledHBlankInterrupt() && modeChangedToHBlank());
-		statInt |= (lcd_->isEnabledVBlankInterrupt() && modeChangedToVBlank());
-
-		if (statInt && !prevStatInt_)
+		if (checkChangedSTATSources_())
 		{
 			interrupt_->request(BitMask::InterruptFlagBit::STAT);
 		}
-
-		prevStatInt_ = statInt;
-	}
+}
 
 	void PPU::draw(const Vec2& pos, int scale)
 	{
@@ -150,6 +142,21 @@ namespace dmge
 	bool PPU::modeChangedToVBlank() const
 	{
 		return dot_ == LCDSize.y * LineDots;
+	}
+
+	bool PPU::checkChangedSTATSources_()
+	{
+		bool requireSTATInt = false;
+		requireSTATInt |= (lcd_->isEnabledLYCInterrupt() && lcd_->lycFlag());
+		requireSTATInt |= (lcd_->isEnabledOAMScanInterrupt() && modeChangedToOAMScan());
+		requireSTATInt |= (lcd_->isEnabledHBlankInterrupt() && modeChangedToHBlank());
+		requireSTATInt |= (lcd_->isEnabledVBlankInterrupt() && modeChangedToVBlank());
+
+		const bool changed = requireSTATInt && !prevRequireSTATInt_;
+
+		prevRequireSTATInt_ = requireSTATInt;
+
+		return changed;
 	}
 
 	int PPU::dot() const
@@ -298,7 +305,7 @@ namespace dmge
 		}
 	}
 
-	void PPU::scanline_()
+	void PPU::renderDot_()
 	{
 		// DMG: BGとWindow無効
 		// CGB: BGとWindowの優先度無効
@@ -318,10 +325,6 @@ namespace dmge
 		const uint8 ly = lcd_->ly();
 		const uint8 scy = lcd_->scy();
 		const uint8 scx = lcd_->scx();
-		const uint8 wy = lcd_->wy();
-		const uint8 wx = lcd_->wx();
-		const bool enabledWindow = lcd_->isEnabledWindow();
-		const uint8 opri = lcd_->opri() & 1;
 
 		// ※スクロール処理
 		// BG描画中（ウィンドウ描画中でないとき）、SCXの端数分を読み飛ばす
@@ -332,7 +335,7 @@ namespace dmge
 		}
 
 		// このフレームでウィンドウに到達したかどうかを toDrawWindow_ に記録する
-		if (ly == wy)
+		if (ly == lcd_->wy())
 		{
 			toDrawWindow_ = true;
 		}
@@ -340,10 +343,13 @@ namespace dmge
 		// このスキャンラインでウィンドウのフェッチが開始したら
 		// ピクセルフェッチャーのX座標をリセットする
 		// ※スプライトの描画には、リセットされない canvasX_ を使用
-		if (not drawingWindow_ && enabledWindow && toDrawWindow_ && (fetcherX_ >= wx - 7))
+		if (not drawingWindow_ && toDrawWindow_ && (fetcherX_ >= lcd_->wx() - 7))
 		{
-			drawingWindow_ = true;
-			fetcherX_ = 0;
+			if (lcd_->isEnabledWindow())
+			{
+				drawingWindow_ = true;
+				fetcherX_ = 0;
+			}
 		}
 
 		// タイルマップの中の、描画対象のタイルのアドレスを得る
@@ -376,88 +382,81 @@ namespace dmge
 		const uint8 color = TileData::GetColor(tileData, fetcherX_ % 8, tileMapAttr.attr.xFlip);
 
 		// 実際の描画色
-		Color dispColor;
+		Color dotColor;
 		if (not cgbMode_)
-			dispColor = displayColorPalette_[(int)lcd_->bgp(color)];
+			dotColor = displayColorPalette_[(int)lcd_->bgp(color)];
 		else
-			dispColor = lcd_->bgPaletteColor(tileMapAttr.attr.palette, color);
+			dotColor = lcd_->bgPaletteColor(tileMapAttr.attr.palette, color);
 
 
 		// スプライトをフェッチ
 		if (lcd_->isEnabledSprite())
 		{
-			int oamPriorityVal = 999;
-			int oamIndex = 0;
-
-			for (const auto& oam : oamBuffer_)
-			{
-				// 描画中のドットがスプライトに重なっているか？
-				if (not (oam.x <= canvasX_ + 8 && oam.x + 8 > canvasX_ + 8)) continue;
-
-				// 0xff6c(OPRI)を反映
-				if (cgbMode_ && oamPriorityVal != 999 && ((opri && oamPriorityVal < oam.x) || (not opri && oamPriorityVal < oamIndex))) continue;
-
-				// スプライトの、左から oamX 個目のドットを描画する
-				const int oamX = canvasX_ + 8 - oam.x;
-
-				// タイルデータのアドレスを得る
-				const uint16 oamTileDataAddr = TileData::GetAddress(0x8000, oam.tile, (ly + 16 - oam.y) % 8, oam.yFlip);
-
-				// タイルデータを参照
-				const uint16 oamTileData = mem_->read16VRAMBank(oamTileDataAddr, oam.bank);
-				const uint8 oamColor = TileData::GetColor(oamTileData, oamX % 8, oam.xFlip);
-
-				// BGとのマージ
-				if (not cgbMode_)
-				{
-					if (oamColor != 0 && not (oam.priority == 1 && color != 0))
-					{
-						dispColor = displayColorPalette_[(int)lcd_->obp(oam.palette, oamColor)];
-					}
-				}
-				else
-				{
-					// Refer: https://gbdev.io/pandocs/Tile_Maps.html#bg-to-obj-priority-in-cgb-mode
-
-					bool drawObj = false;
-
-					if (oamColor != 0)
-					{
-
-						// LCDC.0 :
-						// ... When Bit 0 is cleared, ... the sprites will be always displayed on top of background and window
-						// independently of the priority flags in OAM and BG Map attributes.
-						if (not lcdc0)
-						{
-							drawObj = true;
-						}
-						else
-						{
-							if (oam.priority == 0 && tileMapAttr.attr.priority == 0)
-							{
-								drawObj = true;
-							}
-							else
-							{
-								if (color == 0) drawObj = true;
-							}
-						}
-					}
-
-					if (drawObj)
-					{
-						dispColor = lcd_->objPaletteColor(oam.obp, oamColor);
-						oamPriorityVal = opri ? oam.x : oamIndex;
-					}
-				}
-
-				oamIndex++;
-			}
+			dotColor = fetchOAMDot_(dotColor, color, tileMapAttr);
 		}
 
-		canvas_[ly][canvasX_] = dispColor;
+		canvas_[ly][canvasX_] = dotColor;
 
 		fetcherX_++;
 		canvasX_++;
+	}
+
+	Color PPU::fetchOAMDot_(const Color& initialDotColor, uint8 bgColor, const TileMapAttribute& bgTileMapAttr) const
+	{
+		const bool opri = lcd_->opri() & 1;
+		int oamPriorityVal = 999;
+		int oamIndex = 0;
+
+		// 描画結果
+		Color fetched = initialDotColor;
+
+		for (const auto& oam : oamBuffer_)
+		{
+			// 描画中のドットがスプライトに重なっているか？
+			if (not (oam.x <= canvasX_ + 8 && oam.x + 8 > canvasX_ + 8)) continue;
+
+			// 0xff6c(OPRI)を反映
+			if (cgbMode_ && oamPriorityVal != 999 && ((opri && oamPriorityVal < oam.x) || (not opri && oamPriorityVal < oamIndex))) continue;
+
+			// タイルデータのアドレスを得る
+			const uint16 tileDataAddr = TileData::GetAddress(0x8000, oam.tile, (lcd_->ly() + 16 - oam.y) % 8, oam.yFlip);
+
+			// タイルデータを参照
+			const uint16 tileData = mem_->read16VRAMBank(tileDataAddr, oam.bank);
+
+			// スプライトの、左から oamX 個目のドットを描画する
+			const int oamX = canvasX_ + 8 - oam.x;
+			const uint8 oamColor = TileData::GetColor(tileData, oamX % 8, oam.xFlip);
+
+			// BGとのマージ
+			if (not cgbMode_)
+			{
+				if (oamColor != 0 && not (oam.priority == 1 && bgColor != 0))
+				{
+					fetched = displayColorPalette_[(int)lcd_->obp(oam.palette, oamColor)];
+				}
+			}
+			else
+			{
+				// - https://gbdev.io/pandocs/LCDC.html#lcdc0--bg-and-window-enablepriority
+				// - https://gbdev.io/pandocs/Tile_Maps.html#bg-to-obj-priority-in-cgb-mode
+
+				const bool drawObj =
+					((oamColor != 0) &&
+						((not lcd_->isEnabledBgAndWindow()) ||
+							(oam.priority == 0 && bgTileMapAttr.attr.priority == 0) ||
+							(bgColor == 0)));
+
+				if (drawObj)
+				{
+					fetched = lcd_->objPaletteColor(oam.obp, oamColor);
+					oamPriorityVal = opri ? oam.x : oamIndex;
+				}
+			}
+
+			oamIndex++;
+		}
+
+		return fetched;
 	}
 }

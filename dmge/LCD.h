@@ -101,10 +101,10 @@ namespace dmge
 		uint8 opri() const;
 
 		// (CGB) 実際の描画色
-		Color bgPaletteColor(uint8 palette, uint8 color) const;
+		const ColorF& bgPaletteColor(uint8 palette, uint8 color) const;
 
 		// (CGB) 実際の描画色
-		Color objPaletteColor(uint8 palette, uint8 color) const;
+		const ColorF& objPaletteColor(uint8 palette, uint8 color) const;
 
 		// IOレジスタへの書き込み
 		void writeRegister(uint16 addr, uint8 value);

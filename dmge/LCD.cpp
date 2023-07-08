@@ -163,12 +163,12 @@ namespace dmge
 		return opri_;
 	}
 
-	Color LCD::bgPaletteColor(uint8 palette, uint8 color) const
+	const ColorF& LCD::bgPaletteColor(uint8 palette, uint8 color) const
 	{
 		return displayBGColorPalette_[palette][color];
 	}
 
-	Color LCD::objPaletteColor(uint8 palette, uint8 color) const
+	const ColorF& LCD::objPaletteColor(uint8 palette, uint8 color) const
 	{
 		return displayOBJColorPalette_[palette][color];
 	}

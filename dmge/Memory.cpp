@@ -520,7 +520,7 @@ namespace dmge
 
 			return interrupt_->readRegister(addr);
 		}
-		else if (addr < Address::WaveRAM_End)
+		else if (addr <= Address::WaveRAM_End)
 		{
 			// APU
 			// 0xff10 - 0xff3f

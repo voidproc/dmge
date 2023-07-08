@@ -115,103 +115,111 @@ namespace dmge
 			}
 		}
 
-		// MBC
-		// 0x0000 - 0x7fff
-
 		if (addr <= Address::SwitchableROMBank_End)
 		{
+			// MBC
+			// 0x0000 - 0x7fff
+
 			mbc_->write(addr, value);
-			return;
 		}
-
-		// VRAM
-		// 0x8000 - 0x9fff
-
 		else if (addr <= Address::VRAM_End)
 		{
+			// VRAM
+			// 0x8000 - 0x9fff
+
 			vram_[vramBank_][addr - Address::VRAM] = value;
-			return;
 		}
-
-		// SRAM
-		// 0xa000 - 0xbfff
-
 		else if (addr <= Address::SRAM_End)
 		{
+			// SRAM
+			// 0xa000 - 0xbfff
+
 			mbc_->write(addr, value);
-			return;
 		}
-
-		// WRAM
-		// 0xc000 - 0xdfff
-
 		else if (addr <= Address::WRAM0_End)
 		{
+			// WRAM bank 0
+			// 0xc000 - 0xcfff
+
 			wram_[0][addr - Address::WRAM0] = value;
-			return;
 		}
 		else if (addr <= Address::WRAM1_End)
 		{
+			// WRAM switchable
+			// 0xd000 - 0xdfff
+
 			wram_[wramBank_][addr - Address::WRAM1] = value;
-			return;
 		}
-
-		// Echo of WRAM
-		// 0xe000 - 0xfdff
-
 		else if (addr <= Address::EchoRAM_End)
 		{
+			// Echo of WRAM
+			// 0xe000 - 0xfdff
+
 			write(addr - 0x2000, value);
-			return;
 		}
-
-		// OAM Table
-		// 0xfe00 - 0xfe9f
-		// ...
-
-		// Not usable
-		// 0xfea0 - 0xfeff
-		// ...
-
-		// I/O Registers
-		// 0xff00 - 0xffff
-
-		// Joypad
-		// 0xff00
-
-		else if (addr == Address::JOYP)
+		else if (addr <= Address::OAMTable_End)
 		{
+			// OAM Table
+			// 0xfe00 - 0xfe9f
+			// ...
+
+			goto Fallback_WriteToMemory;
+		}
+		else if (addr <= 0xfeff)
+		{
+			// Not usable
+			// 0xfea0 - 0xfeff
+
+			goto Fallback_WriteToMemory;
+		}
+		else if (addr <= Address::JOYP)
+		{
+			// Joypad
+			// 0xff00
+
 			joypad_->writeRegister(value);
-			return;
 		}
-
-		// Serial
-		// 0xff01 - 0xff02
-		// ...
-
-		// Timer
-		// 0xff04 - 0xff07
-
-		else if (addr >= Address::DIV && addr <= Address::TAC)
+		else if (addr <= Address::SC)
 		{
+			// Serial
+			// 0xff01 - 0xff02
+			// ...
+
+			goto Fallback_WriteToMemory;
+		}
+		else if (addr <= 0xff03)
+		{
+			// ?
+			// 0xff03
+
+			goto Fallback_WriteToMemory;
+		}
+		else if (addr <= Address::TAC)
+		{
+			// Timer
+			// 0xff04 - 0xff07
+
 			timer_->writeRegister(addr, value);
-			return;
 		}
-
-		// Interrupt Flag (IF), Interrupt enable (IE)
-		// 0xff0f, 0xffff
-
-		else if (addr == Address::IF || addr == Address::IE)
+		else if (addr <= 0xff0e)
 		{
+			// ?
+			// 0xff08 - 0xff0e
+
+			goto Fallback_WriteToMemory;
+		}
+		else if (addr <= Address::IF)
+		{
+			// Interrupt Flag (IF)
+			// 0xff0f
+
 			interrupt_->writeRegister(addr, value);
 		}
-
-		// APU
-		// 0xff10 - 0xff26,
-		// 0xff30 - 0xff3f
-
-		else if (addr >= Address::NR10 && addr <= Address::NR51)
+		else if (addr <= Address::NR51)
 		{
+			// APU
+			// 0xff10 - 0xff25
+
 			// Ignore if APU is off
 			if ((apu_->readRegister(Address::NR52) & 0x80) == 0)
 			{
@@ -234,76 +242,84 @@ namespace dmge
 			}
 
 			apu_->writeRegister(addr, value);
-			return;
 		}
-		else if (addr == Address::NR52)
+		else if (addr <= Address::WaveRAM_End)
 		{
-			apu_->writeRegister(addr, value);
-			return;
-		}
-		else if (addr >= Address::WaveRAM && addr <= Address::WaveRAM + 15)
-		{
-			apu_->writeRegister(addr, value);
-			return;
-		}
+			// APU master switch ~ wave RAM
+			// 0xff26 - 0xff3f
 
-		// LCDC, STAT, Scroll, LY, LYC
-		// 0xff40 - 0xff45
-
-		else if (addr >= Address::LCDC && addr <= Address::LYC)
+			apu_->writeRegister(addr, value);
+		}
+		else if (addr <= Address::LYC)
 		{
+			// LCDC, STAT, Scroll, LY, LYC
+			// 0xff40 - 0xff45
+
 			lcd_->writeRegister(addr, value);
-			return;
 		}
-
-		// DMA
-		// 0xff46
-
-		else if (addr == Address::DMA)
+		else if (addr <= Address::DMA)
 		{
+			// DMA
+			// 0xff46
+
 			dma_.start(value);
+			goto Fallback_WriteToMemory;
 		}
-
-		// Palette, Window
-		// 0xff47 - 0xff4b
-
-		else if (
-			(addr >= Address::BGP && addr <= Address::OBP1) ||
-			(addr >= Address::WY && addr <= Address::WX))
+		else if (addr <= Address::WX)
 		{
+			// Palette (BGP, OBP0/1), Window (WY, WX)
+			// 0xff47 - 0xff4b
+
 			lcd_->writeRegister(addr, value);
-			return;
 		}
-
-		// (CGB) KEY1
-		// 0xff4d
-		// ...
-
-		// VBK (VRAM Bank)
-		// 0xff4f
-
-		else if (addr == Address::VBK)
+		else if (addr <= 0xff4c)
 		{
+			// ?
+			// 0xff4c
+
+			goto Fallback_WriteToMemory;
+		}
+		else if (addr <= Address::KEY1)
+		{
+			// (CGB) KEY1
+			// 0xff4d
+			// ...
+
+			goto Fallback_WriteToMemory;
+		}
+		else if (addr <= 0xff4e)
+		{
+			// ?
+			// 0xff4e
+
+			goto Fallback_WriteToMemory;
+		}
+		else if (addr <= Address::VBK)
+		{
+			// VBK (VRAM Bank)
+			// 0xff4f
+
 			vramBank_ = value & 1;
 			value |= 0xfe;
+			goto Fallback_WriteToMemory;
 		}
-
-		// Boot ROM Enable
-		// 0xff50
-
-		else if (addr == Address::BANK)
+		else if (addr <= Address::BANK)
 		{
+			// Boot ROM Enable
+			// 0xff50
+
 			if (value & 1)
 			{
 				disableBootROM();
 			}
+
+			goto Fallback_WriteToMemory;
 		}
-
-		// HDMA
-		// 0xff51 - 0xff55
-
-		else if (addr == Address::HDMA5)
+		else if (addr <= Address::HDMA5)
 		{
+			// HDMA
+			// 0xff51 - 0xff55
+
 			// 仮実装
 			const uint16 srcAddr = (read(Address::HDMA1) << 8) | (read(Address::HDMA2) & 0xf0);
 			const uint16 dstAddr = (((read(Address::HDMA3) << 8) | read(Address::HDMA4)) & 0x1ff0) + 0x8000;
@@ -315,32 +331,90 @@ namespace dmge
 
 			// FIXME: 転送モード（bit7）を考慮していないので、転送が終わったことにしている
 			value = 0xff;
+
+			goto Fallback_WriteToMemory;
 		}
-
-		// RP (Infrared communications port)
-		// ...
-
-		// (CGB) Palette, OBJ priority mode
-		// 0xff68 - 0xff6c
-		else if (addr >= Address::BCPS && addr <= Address::OPRI)
+		else if (addr <= Address::RP)
 		{
+			// RP (Infrared communications port)
+			// 0xff56
+			// ...
+
+			goto Fallback_WriteToMemory;
+		}
+		else if (addr <= 0xff67)
+		{
+			// ?
+			// 0xff57 - 0xff67
+
+			goto Fallback_WriteToMemory;
+		}
+		else if (addr <= Address::OPRI)
+		{
+			// (CGB) Palette, OBJ priority mode
+			// 0xff68 - 0xff6c
+
 			lcd_->writeRegister(addr, value);
-			return;
 		}
-
-		// WRAM Bank (SVBK)
-		// 0xff70
-
-		else if (addr == Address::SVBK)
+		else if (addr <= 0xff6f)
 		{
+			// ?
+			// 0xff6d - 0xff6f
+
+			goto Fallback_WriteToMemory;
+		}
+		else if (addr <= Address::SVBK)
+		{
+			// WRAM Bank (SVBK)
+			// 0xff70
+
 			if ((value & 0b111) == 0) value |= 1;
 			wramBank_ = value & 0b111;
 			value |= 0xf8;
+
+			goto Fallback_WriteToMemory;
+		}
+		else if (addr <= 0xff75)
+		{
+			// ?
+			// 0xff71 - 0xff75
+
+			goto Fallback_WriteToMemory;
+		}
+		else if (addr <= Address::PCM34)
+		{
+			// PCM12, PCM34
+			// 0xff76 - 0xff77
+			// ...
+
+			goto Fallback_WriteToMemory;
+		}
+		else if (addr <= 0xff7f)
+		{
+			// ?
+			// 0xff78 - 0xff7f
+
+			goto Fallback_WriteToMemory;
+		}
+		else if (addr <= Address::HRAM_End)
+		{
+			// HRAM
+			// 0xff80 - 0xfffe
+			//...
+
+			goto Fallback_WriteToMemory;
+		}
+		else if (addr <= Address::IE)
+		{
+			// Interrupt enable (IE)
+			// 0xffff
+
+			interrupt_->writeRegister(addr, value);
 		}
 
-		// PCM
-		// ...
+		return;
 
+	Fallback_WriteToMemory:
 		mem_[addr] = value;
 	}
 
@@ -351,120 +425,215 @@ namespace dmge
 
 	uint8 Memory::read(uint16 addr) const
 	{
-		// ROM
-		// 0x0000 - 0x7fff
-
 		if (addr <= Address::SwitchableROMBank_End)
 		{
+			// MBC
+			// 0x0000 - 0x7fff
+
 			return mbc_->read(addr);
 		}
-
-		// VRAM
-		// 0x8000 - 0x9fff
-
 		else if (addr <= Address::VRAM_End)
 		{
+			// VRAM
+			// 0x8000 - 0x9fff
+
 			return vram_[vramBank_][addr - Address::VRAM];
 		}
-
-		// SRAM
-		// 0xa000 - 0xbfff
-
 		else if (addr <= Address::SRAM_End)
 		{
+			// SRAM
+			// 0xa000 - 0xbfff
+
 			return mbc_->read(addr);
 		}
-
-		// WRAM
-		// 0xc000 - 0xdfff
-
 		else if (addr <= Address::WRAM0_End)
 		{
+			// WRAM bank 0
+			// 0xc000 - 0xcfff
+
 			return wram_[0][addr - Address::WRAM0];
 		}
 		else if (addr <= Address::WRAM1_End)
 		{
+			// WRAM switchable
+			// 0xd000 - 0xdfff
+
 			return wram_[wramBank_][addr - Address::WRAM1];
 		}
-
-		// Echo of WRAM
-		// 0xe000 - 0xfdff
-
 		else if (addr <= Address::EchoRAM_End)
 		{
+			// Echo of WRAM
+			// 0xe000 - 0xfdff
+
 			return read(addr - 0x2000);
 		}
-
-		// OAM Table
-		// 0xfe00 - 0xfe9f
-		// DMA転送中に読むと $FF となる？
-
-		else if (addr >= Address::OAMTable && addr <= Address::OAMTable_End)
+		else if (addr <= Address::OAMTable_End)
 		{
+			// OAM Table
+			// 0xfe00 - 0xfe9f
+
+			// DMA転送中に読むと $FF となる？
 			if (dma_.running())
 			{
 				return 0xff;
 			}
 		}
-
-		// I/O Registers
-		// 0xff00 - 0xffff
-
-		// Joypad
-		// 0xff00
-
+		else if (addr <= 0xfeff)
+		{
+			// Not usable
+			// 0xfea0 - 0xfeff
+		}
 		else if (addr == Address::JOYP)
 		{
+			// Joypad
+			// 0xff00
+
 			return joypad_->readRegister();
 		}
-
-		// Timer
-		// 0xff04 - 0xff07
-
-		else if (addr >= Address::DIV && addr <= Address::TAC)
+		else if (addr <= Address::SC)
 		{
+			// Serial
+			// 0xff01 - 0xff02
+			// ...
+		}
+		else if (addr <= 0xff03)
+		{
+			// ?
+			// 0xff03
+		}
+		else if (addr <= Address::TAC)
+		{
+			// Timer
+			// 0xff04 - 0xff07
+
 			return timer_->readRegister(addr);
 		}
-
-		// Interrupt flag (IF), Interrupt enable (IE)
-		// 0xff0f, 0xffff
-
-		else if (addr == Address::IF || addr == Address::IE)
+		else if (addr <= 0xff0e)
 		{
+			// ?
+			// 0xff08 - 0xff0e
+		}
+		else if (addr == Address::IF)
+		{
+			// Interrupt flag (IF)
+			// 0xff0f
+
 			return interrupt_->readRegister(addr);
 		}
-
-		// APU
-		// 0xff10 - 0xff3f
-
-		else if (addr >= Address::NR10 && addr < Address::NR10 + 48)
+		else if (addr < Address::WaveRAM_End)
 		{
+			// APU
+			// 0xff10 - 0xff3f
+
 			return apu_->readRegister(addr);
 		}
-
-		// LCDC, STAT, Scroll, LY, LYC
-		// 0xff40 - 0xff45
-
-		else if (addr >= Address::LCDC && addr <= Address::LYC)
+		else if (addr <= Address::LYC)
 		{
+			// LCDC, STAT, Scroll, LY, LYC
+			// 0xff40 - 0xff45
+
 			return lcd_->readRegister(addr);
 		}
-
-		// Palette, Window
-		// 0xff47 - 0xff4b
-
-		else if (
-			(addr >= Address::BGP && addr <= Address::OBP1) ||
-			(addr >= Address::WY && addr <= Address::WX))
+		else if (addr <= Address::DMA)
 		{
+			// DMA
+			// 0xff46
+			//...
+		}
+		else if (addr <= Address::WX)
+		{
+			// Palette, Window
+			// 0xff47 - 0xff4b
+
 			return lcd_->readRegister(addr);
 		}
-
-		// (CGB) Palette, OBJ priority mode
-		// 0xff68 - 0xff6c
-		else if (addr >= Address::BCPS && addr <= Address::OPRI)
+		else if (addr <= 0xff4c)
 		{
+			// ?
+			// 0xff4c
+		}
+		else if (addr <= Address::KEY1)
+		{
+			// (CGB) KEY1
+			// 0xff4d
+			// ...
+		}
+		else if (addr <= 0xff4e)
+		{
+			// ?
+			// 0xff4e
+		}
+		else if (addr <= Address::VBK)
+		{
+			// VBK (VRAM Bank)
+			// 0xff4f
+		}
+		else if (addr <= Address::BANK)
+		{
+			// Boot ROM Enable
+			// 0xff50
+		}
+		else if (addr <= Address::HDMA5)
+		{
+			// HDMA
+			// 0xff51 - 0xff55
+		}
+		else if (addr <= Address::RP)
+		{
+			// RP (Infrared communications port)
+			// 0xff56
+			// ...
+		}
+		else if (addr <= 0xff67)
+		{
+			// ?
+			// 0xff57 - 0xff67
+		}
+		else if (addr <= Address::OPRI)
+		{
+			// (CGB) Palette, OBJ priority mode
+			// 0xff68 - 0xff6c
+
 			return lcd_->readRegister(addr);
+		}
+		else if (addr <= 0xff6f)
+		{
+			// ?
+			// 0xff6d - 0xff6f
+		}
+		else if (addr <= Address::SVBK)
+		{
+			// WRAM Bank (SVBK)
+			// 0xff70
+		}
+		else if (addr <= 0xff75)
+		{
+			// ?
+			// 0xff71 - 0xff75
+		}
+		else if (addr <= Address::PCM34)
+		{
+			// PCM12, PCM34
+			// 0xff76 - 0xff77
+			// ...
+		}
+		else if (addr <= 0xff7f)
+		{
+			// ?
+			// 0xff78 - 0xff7f
+		}
+		else if (addr <= Address::HRAM_End)
+		{
+			// HRAM
+			// 0xff80 - 0xfffe
+			//...
+		}
+		else if (addr == Address::IE)
+		{
+			// Interrupt enable (IE)
+			// 0xffff
+
+			return interrupt_->readRegister(addr);
 		}
 
 		return mem_[addr];

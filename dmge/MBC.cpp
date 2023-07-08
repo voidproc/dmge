@@ -235,14 +235,14 @@ namespace dmge
 
 	void MBC1::write(uint16 addr, uint8 value)
 	{
-		if (ADDRESS_IN_RANGE(addr, Address::MBC_RAMEnable))
+		if (addr <= Address::MBC_RAMEnable_End)
 		{
 			// Enable RAM
 			// enables external RAM if the lower 4 bits of the written value are 0xA
 
 			ramEnabled_ = (value & 0xf) == 0xa;
 		}
-		else if (ADDRESS_IN_RANGE(addr, Address::MBC_ROMBank))
+		else if (addr <= Address::MBC_ROMBank_End)
 		{
 			// ROM Bank
 			// set the ROM Bank Number
@@ -265,14 +265,14 @@ namespace dmge
 
 			romBank_ = value;
 		}
-		else if (ADDRESS_IN_RANGE(addr, Address::MBC_RAMBank))
+		else if (addr <= Address::MBC_RAMBank_End)
 		{
 			// RAM Bank
 			// set the 2 bits of the RAM bank number to the lowest 2 bits of the written value
 
 			ramBank_ = value & 0b11;
 		}
-		else if (ADDRESS_IN_RANGE(addr, Address::MBC_BankingMode))
+		else if (addr <= Address::MBC_BankingMode_End)
 		{
 			// MBC1:
 			// Mode Select
@@ -280,7 +280,7 @@ namespace dmge
 
 			bankingMode_ = value & 1;
 		}
-		else if (ADDRESS_IN_RANGE(addr, Address::SRAM))
+		else if (addr <= Address::SRAM_End)
 		{
 			// External RAM
 			// write to external RAM if it is enabled. If it is not,  >>> the write is ignored <<<
@@ -304,7 +304,6 @@ namespace dmge
 		}
 		else if (addr <= Address::ROMBank0_End)
 		{
-
 			// ROM Bank 0
 
 			if (cartridgeHeader_.romSizeKB < 1024)
@@ -347,7 +346,7 @@ namespace dmge
 
 	void MBC2::write(uint16 addr, uint8 value)
 	{
-		if (addr >= 0x0000 && addr <= 0x3fff)
+		if (addr <= Address::MBC_ROMBank_End)
 		{
 			if ((addr & 0x0100) == 0)
 			{
@@ -365,7 +364,10 @@ namespace dmge
 				romBank_ = value;
 			}
 		}
-		else if (ADDRESS_IN_RANGE(addr, Address::SRAM))
+		else if (addr <= 0x7fff)
+		{
+		}
+		else if (addr <= Address::SRAM_End)
 		{
 			// External RAM
 			// write to external RAM if it is enabled. If it is not,  >>> the write is ignored <<<
@@ -417,7 +419,7 @@ namespace dmge
 
 	void MBC3::write(uint16 addr, uint8 value)
 	{
-		if (ADDRESS_IN_RANGE(addr, Address::MBC_RAMEnable))
+		if (addr <= Address::MBC_RAMEnable_End)
 		{
 			// RAM and Timer Enable
 
@@ -425,7 +427,7 @@ namespace dmge
 			ramEnabled_ = enabled;
 			rtc_.setEnable(enabled);
 		}
-		else if (ADDRESS_IN_RANGE(addr, Address::MBC_ROMBank))
+		else if (addr <= Address::MBC_ROMBank_End)
 		{
 			// ROM Bank
 			// set the ROM Bank Number
@@ -439,7 +441,7 @@ namespace dmge
 
 			romBank_ = value;
 		}
-		else if (ADDRESS_IN_RANGE(addr, Address::MBC_RAMBank))
+		else if (addr <= Address::MBC_RAMBank_End)
 		{
 			// RAM Bank Number / RTC Register Select
 			if (value <= 3)
@@ -454,11 +456,11 @@ namespace dmge
 				rtc_.select(value);
 			}
 		}
-		else if (ADDRESS_IN_RANGE(addr, Address::MBC_LatchClock))
+		else if (addr <= Address::MBC_LatchClock_End)
 		{
 			rtc_.writeLatchClock(value);
 		}
-		else if (ADDRESS_IN_RANGE(addr, Address::SRAM))
+		else if (addr <= Address::SRAM_End)
 		{
 			if (rtc_.selected())
 			{
@@ -565,28 +567,28 @@ namespace dmge
 
 	void MBC5::write(uint16 addr, uint8 value)
 	{
-		if (ADDRESS_IN_RANGE(addr, Address::MBC_RAMEnable))
+		if (addr <= Address::MBC_RAMEnable_End)
 		{
 			// RAM and Timer Enable
 
 			bool enabled = (value & 0xf) == 0xa;
 			ramEnabled_ = enabled;
 		}
-		else if (ADDRESS_IN_RANGE(addr, Address::MBC_ROMBankLow))
+		else if (addr <= Address::MBC_ROMBankLow_End)
 		{
 			// The 8 least significant bits of the ROM bank number
 
 			romBank_ &= 0x100;
 			romBank_ |= value;
 		}
-		else if (ADDRESS_IN_RANGE(addr, Address::MBC_ROMBankHigh))
+		else if (addr <= Address::MBC_ROMBankHigh_End)
 		{
 			// The 9th bit of the ROM bank number
 
 			romBank_ &= 0xff;
 			romBank_ |= (value & 1) << 8;
 		}
-		else if (ADDRESS_IN_RANGE(addr, Address::MBC_RAMBank))
+		else if (addr <= Address::MBC_RAMBank_End)
 		{
 			// RAM Bank Number
 			if (value <= 0xf)
@@ -594,7 +596,10 @@ namespace dmge
 				MBC1::write(addr, value);
 			}
 		}
-		else if (ADDRESS_IN_RANGE(addr, Address::SRAM))
+		else if (addr <= 0x7fff)
+		{
+		}
+		else if (addr <= Address::SRAM_End)
 		{
 			// External RAM
 			// write to external RAM if it is enabled. If it is not,  >>> the write is ignored <<<

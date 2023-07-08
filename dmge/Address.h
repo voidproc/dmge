@@ -19,6 +19,10 @@ namespace dmge
 			INT58_Serial = 0x0058,
 			INT60_Joypad = 0x0060,
 
+			// Boot ROM
+
+			BootROM_End = 0x00ff,
+
 			// Cartridge Header
 
 			EntryPoint = 0x0100,
@@ -168,6 +172,7 @@ namespace dmge
 			NR51 = 0xff25,
 			NR52 = 0xff26,
 			WaveRAM = 0xff30,
+			WaveRAM_End = 0xff3f,
 			LCDC = 0xff40,
 			STAT = 0xff41,
 			SCY = 0xff42,

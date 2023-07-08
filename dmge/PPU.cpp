@@ -110,7 +110,7 @@ namespace dmge
 		{
 			interrupt_->request(BitMask::InterruptFlagBit::STAT);
 		}
-}
+	}
 
 	void PPU::draw(const Vec2& pos, int scale)
 	{
@@ -307,21 +307,6 @@ namespace dmge
 
 	void PPU::renderDot_()
 	{
-		// DMG: BGとWindow無効
-		// CGB: BGとWindowの優先度無効
-		const bool lcdc0 = lcd_->isEnabledBgAndWindow();
-
-		// (DMG) BGとWindowが無効なので、ピクセルを1つ進めて終了
-		if (not cgbMode_ && not lcdc0)
-		{
-			canvas_[lcd_->ly()][canvasX_] = displayColorPalette_[0];
-
-			fetcherX_++;
-			canvasX_++;
-			return;
-		}
-
-		// 現在の状態
 		const uint8 ly = lcd_->ly();
 		const uint8 scy = lcd_->scy();
 		const uint8 scx = lcd_->scx();
@@ -384,10 +369,14 @@ namespace dmge
 		// 実際の描画色
 		Color dotColor;
 		if (not cgbMode_)
-			dotColor = displayColorPalette_[(int)lcd_->bgp(color)];
+		{
+			// LCDC.0 == 0 の場合はBGを描画しない
+			dotColor = displayColorPalette_[lcd_->isEnabledBgAndWindow() ? (size_t)lcd_->bgp(color) : 0u];
+		}
 		else
+		{
 			dotColor = lcd_->bgPaletteColor(tileMapAttr.attr.palette, color);
-
+		}
 
 		// スプライトをフェッチ
 		if (lcd_->isEnabledSprite())

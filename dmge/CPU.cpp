@@ -62,7 +62,8 @@ namespace dmge
 			const auto& instruction = getInstruction_(pc);
 
 			pcNext_ = pc + instruction.bytes;
-			consumedCycles_ = instruction.cycles;
+			consumedCycles_ = instruction.cycles + consumedCyclesForInterrupt_;
+			consumedCyclesForInterrupt_ = 0;
 
 			if (instruction.inst != nullptr)
 			{
@@ -108,6 +109,9 @@ namespace dmge
 					mem_->write(--sp, pc >> 8);
 					mem_->write(--sp, pc & 0xff);
 					pc = intAddr[i];
+
+					// 割り込み関係で 5 M-cycle 消費する(?)
+					consumedCyclesForInterrupt_ = 5 * 4;
 
 					// 低電力モードから抜ける
 					powerSavingMode_ = false;
@@ -268,6 +272,7 @@ namespace dmge
 
 		// 実際に消費したサイクル数
 		int consumedCycles_ = 0;
+		int consumedCyclesForInterrupt_ = 0;
 
 		// HALT
 		bool powerSavingMode_ = false;

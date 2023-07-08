@@ -23,7 +23,8 @@ namespace dmge
 		lcd_{ lcd },
 		interrupt_{ interrupt },
 		canvas_{ LCDSize.x + 8, LCDSize.y },
-		texture_{ canvas_.size() }
+		texture_{ canvas_.size() },
+		renderTexture_{ LCDSize }
 	{
 		dot_ = FrameDots - 52 + 4;
 		canvas_.fill(Palette::White);
@@ -92,6 +93,8 @@ namespace dmge
 
 		if (modeChangedToVBlank())
 		{
+			flushRenderingResult();
+
 			toDrawWindow_ = false;
 			drawingWindow_ = false;
 			windowLine_ = 0;
@@ -112,6 +115,14 @@ namespace dmge
 		}
 	}
 
+	void PPU::flushRenderingResult()
+	{
+		const ScopedRenderStates2D renderState{ SamplerState::ClampNearest };
+		const ScopedRenderTarget2D renderTarget{ renderTexture_ };
+		texture_.fill(canvas_);
+		texture_.draw();
+	}
+
 	void PPU::draw(const Vec2& pos, int scale)
 	{
 		if (not lcd_->isEnabled()) return;
@@ -120,8 +131,7 @@ namespace dmge
 
 		const Transformer2D transformer{ Mat3x2::Scale(scale).translated(pos) };
 
-		texture_.fill(canvas_);
-		texture_.draw();
+		renderTexture_.draw();
 	}
 
 	PPUMode PPU::mode() const

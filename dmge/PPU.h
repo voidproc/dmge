@@ -25,6 +25,9 @@ namespace dmge
 		// 状態更新の結果により割り込み要求を行う
 		void run();
 
+		// レンダリング結果をRenderTextureに記録
+		void flushRenderingResult();
+
 		// PPUによるレンダリング結果をシーンに描画する
 		void draw(const Vec2& pos, int scale);
 
@@ -74,6 +77,7 @@ namespace dmge
 		// レンダリング結果
 		Image canvas_;
 		DynamicTexture texture_;
+		RenderTexture renderTexture_;
 
 		// ピクセルフェッチャーのいるX座標
 		// ウィンドウフェッチが開始すると0にリセットされる

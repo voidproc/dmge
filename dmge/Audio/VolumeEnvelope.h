@@ -23,5 +23,6 @@ namespace dmge
 		int period_ = 0;
 		int currentVolume_ = 0;
 		int periodTimer_ = 0;
+		bool finished_ = true;
 	};
 }

@@ -62,13 +62,14 @@ namespace dmge
 			const auto& instruction = getInstruction_(pc);
 
 			pcNext_ = pc + instruction.bytes;
-			consumedCycles_ = instruction.cycles + consumedCyclesForInterrupt_;
-			consumedCyclesForInterrupt_ = 0;
 
 			if (instruction.inst != nullptr)
 			{
 				(this->*(instruction.inst))(instruction);
 			}
+
+			consumedCycles_ = instruction.cycles + consumedCyclesForInterrupt_;
+			consumedCyclesForInterrupt_ = 0;
 
 			pc = pcNext_;
 		}

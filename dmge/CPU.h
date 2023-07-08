@@ -33,8 +33,9 @@ namespace dmge
 		// CPU命令を１つフェッチ＆実行しPCを進める
 		void run();
 
-		// 割り込みが有効かつ割り込み要求があれば実行する
-		void interrupt();
+		// 割り込みが有効かつ割り込み要求があれば割り込みハンドラに制御を移す／条件によりHALTを解除する
+		// 割り込みハンドラに制御を移した場合 true
+		bool interrupt();
 
 		// [DEBUG]現在の状態を出力
 		void dump();

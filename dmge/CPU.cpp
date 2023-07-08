@@ -62,19 +62,22 @@ namespace dmge
 			const auto& instruction = getInstruction_(pc);
 
 			pcNext_ = pc + instruction.bytes;
+			consumedCycles_ = instruction.cycles;
 
 			if (instruction.inst != nullptr)
 			{
 				(this->*(instruction.inst))(instruction);
 			}
 
-			consumedCycles_ = instruction.cycles + consumedCyclesForInterrupt_;
-			consumedCyclesForInterrupt_ = 0;
+			//consumedCycles_ += consumedCyclesForInterrupt_;
+			//consumedCyclesForInterrupt_ = 0;
 
 			pc = pcNext_;
 		}
 
-		void interrupt()
+		// 割り込み要求をチェックし、必要ならハンドラに制御を移す／HALTを解除する
+		// 割り込みハンドラに制御を移した場合 true
+		bool interrupt()
 		{
 			// 低電力モードから抜ける？
 
@@ -85,7 +88,7 @@ namespace dmge
 					powerSavingMode_ = false;
 				}
 
-				return;
+				return false;
 			}
 
 			// 割り込みを実行
@@ -112,15 +115,18 @@ namespace dmge
 					pc = intAddr[i];
 
 					// 割り込み関係で 5 M-cycle 消費する(?)
-					consumedCyclesForInterrupt_ = 5 * 4;
+					// TODO: これでスタックしてしまうカートリッジがあるため要調査
+					//consumedCycles_ = 5 * 4;
 
 					// 低電力モードから抜ける
 					powerSavingMode_ = false;
 
 					// 割り込みを１つ実行して、この回は終了
-					break;
+					return true;
 				}
 			}
+
+			return false;
 		}
 
 		void dump()
@@ -2283,9 +2289,9 @@ namespace dmge
 		cpuDetail_->run();
 	}
 
-	void CPU::interrupt()
+	bool CPU::interrupt()
 	{
-		cpuDetail_->interrupt();
+		return cpuDetail_->interrupt();
 	}
 
 	void CPU::dump()

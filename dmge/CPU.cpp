@@ -69,9 +69,6 @@ namespace dmge
 				(this->*(instruction.inst))(instruction);
 			}
 
-			//consumedCycles_ += consumedCyclesForInterrupt_;
-			//consumedCyclesForInterrupt_ = 0;
-
 			pc = pcNext_;
 		}
 

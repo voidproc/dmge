@@ -31,7 +31,9 @@ namespace dmge
 	{
 		if (--freqTimer_ <= 0)
 		{
+			// Frequency Timerをリセット
 			freqTimer_ = (2048 - freq_) * 4;
+
 			dutyPos_ = (dutyPos_ + 1) % 8;
 		}
 	}
@@ -46,6 +48,9 @@ namespace dmge
 		envelope_.trigger();
 
 		length_.trigger(64);
+
+		// Frequency Timerをリセット
+		freqTimer_ = (2048 - freq_) * 4;
 	}
 
 	int SquareChannel::amplitude() const

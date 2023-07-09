@@ -19,7 +19,7 @@ namespace dmge
 
 		void update();
 
-		void draw(const Point& pos);
+		void draw(const Point& pos) const;
 
 		bool isVisibleTextbox() const;
 

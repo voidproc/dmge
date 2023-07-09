@@ -141,10 +141,12 @@ namespace dmge
 					dumpAddress_ = Min<uint16>(*addr, 0xffc0);
 				}
 			}
+
+			SimpleGUI::TextBoxAt(textStateDumpAddress_, Scene::Rect().bottomCenter().movedBy(0, -48));
 		}
 	}
 
-	void DebugMonitor::draw(const Point& pos)
+	void DebugMonitor::draw(const Point& pos) const
 	{
 		{
 			const ScopedViewport2D viewport{ pos.x, pos.y, size.x, Scene::Height() };
@@ -242,11 +244,6 @@ namespace dmge
 				d.drawText(U"ProCon : {}"_fmt(procon.isConnected() ? U"connected" : U"not found"));
 				d.drawEmptyLine();
 			}
-		}
-
-		if (showDumpAddressTextbox_)
-		{
-			SimpleGUI::TextBoxAt(textStateDumpAddress_, Scene::Rect().bottomCenter().movedBy(0, -48));
 		}
 	}
 

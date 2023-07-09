@@ -5,6 +5,19 @@
 
 namespace dmge
 {
+	namespace
+	{
+		int LimitFrequency(int freq, int samplingFreq = 44100)
+		{
+			if (131072.0 / (2048 - freq) > samplingFreq / 2)
+			{
+				return 2048 - 131072.0 / (samplingFreq / 2);
+			}
+
+			return freq;
+		}
+	}
+
 	uint8 SquareChannel::readRegister(uint16 addr) const
 	{
 		if (addr == Address::NR10)
@@ -55,6 +68,8 @@ namespace dmge
 
 	int SquareChannel::amplitude() const
 	{
+		if (LimitFrequency(freq_) != freq_) return 0;
+
 		return SquareWaveAmplitude(duty_, dutyPos_) * envelope_.volume();
 	}
 

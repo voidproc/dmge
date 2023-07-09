@@ -10,4 +10,24 @@ namespace dmge
 		// タイルデータの、左から dotNth 個目のドットの色番号を得る
 		uint8 GetColor(uint16 tileData, int dotNth, bool xFlip = false);
 	}
+
+
+	class Memory;
+
+	class TileDataTexture
+	{
+	public:
+		TileDataTexture(Memory& mem);
+
+		void update();
+
+		RectF draw(const Vec2& pos) const;
+
+		Size size() const;
+
+	private:
+		Memory& mem_;
+		Image tileImage_;
+		DynamicTexture texture_;
+	};
 }

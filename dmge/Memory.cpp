@@ -128,6 +128,8 @@ namespace dmge
 			// 0x8000 - 0x9fff
 
 			vram_[vramBank_][addr - Address::VRAM] = value;
+
+			vramTileDataModified_ = true;
 		}
 		else if (addr <= Address::SRAM_End)
 		{
@@ -701,5 +703,15 @@ namespace dmge
 	void Memory::disableBootROM()
 	{
 		mbc_->disableBootROM();
+	}
+
+	bool Memory::isVRAMTileDataModified()
+	{
+		return vramTileDataModified_;
+	}
+
+	void Memory::resetVRAMTileDataModified()
+	{
+		vramTileDataModified_ = false;
 	}
 }

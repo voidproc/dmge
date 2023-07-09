@@ -65,6 +65,9 @@ namespace dmge
 			writeHooks_.push_back(f);
 		}
 
+		bool isVRAMTileDataModified();
+		void resetVRAMTileDataModified();
+
 	private:
 		PPU* ppu_ = nullptr;
 		APU* apu_ = nullptr;
@@ -82,6 +85,7 @@ namespace dmge
 		// VRAM
 		std::array<std::array<uint8, 0x2000>, 2> vram_{};
 		int vramBank_ = 0;
+		bool vramTileDataModified_ = false;
 
 		// WRAM
 		std::array<std::array<uint8, 0x1000>, 8> wram_{};

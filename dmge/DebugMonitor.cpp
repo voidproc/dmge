@@ -7,15 +7,16 @@
 
 namespace dmge
 {
-	constexpr Color TextColor{ 210 };
-	constexpr Color SectionColor = Palette::Khaki;
-	constexpr Color BgColor{ 32 };
-	constexpr Size FontSize{ 5, 10 };
-	constexpr int LineHeight = FontSize.y + 1;
-
-
 	namespace
 	{
+		constexpr Color TextColor{ 210 };
+		constexpr Color SectionColor = Palette::Khaki;
+		constexpr Color BgColor{ 32 };
+		constexpr Size FontSize{ 5, 10 };
+		constexpr int LineHeight = FontSize.y + 1;
+		constexpr double ColumnWidth = FontSize.x * 30;
+		constexpr Vec2 Padding{ 4, 2 };
+
 		String Uint8ToHexAndBin(const uint8 num)
 		{
 			return U"{:02X} ({:08b})"_fmt(num, num);
@@ -103,13 +104,21 @@ namespace dmge
 			pos_.y += LineHeight;
 		}
 
+		void drawTileDataTexture(const TileDataTexture& tileDataTexture)
+		{
+			tileDataTexture.draw(pos_.movedBy(0, 2))
+				.drawFrame(0, 1, ColorF{ 0.5 });
+
+			pos_.y += LineHeight * (tileDataTexture.size().y / LineHeight + 1);
+		}
+
 	private:
 		Vec2 pos_{};
 	};
 
 
 	DebugMonitor::DebugMonitor(Memory* mem, CPU* cpu, APU* apu, Interrupt* interrupt)
-		: mem_{ mem }, cpu_{ cpu }, apu_{ apu }, interrupt_{ interrupt }
+		: mem_{ mem }, cpu_{ cpu }, apu_{ apu }, interrupt_{ interrupt }, tileDataTexture_{ *mem }
 	{
 		textStateDumpAddress_.text = U"0000";
 	}
@@ -144,6 +153,16 @@ namespace dmge
 
 			SimpleGUI::TextBoxAt(textStateDumpAddress_, Scene::Rect().bottomCenter().movedBy(0, -48));
 		}
+
+		static int cnt = 0;
+		if (cnt++ % 8 == 0)
+		{
+			if (mem_->isVRAMTileDataModified())
+			{
+				tileDataTexture_.update();
+				mem_->resetVRAMTileDataModified();
+			}
+		}
 	}
 
 	void DebugMonitor::draw(const Point& pos) const
@@ -154,7 +173,7 @@ namespace dmge
 			Scene::Rect().draw(BgColor);
 
 			{
-				DrawDebugItem d{ Vec2{ 4, 2 } };
+				DrawDebugItem d{ Vec2{ ColumnWidth * 0, 0 } + Padding };
 
 				// Timer
 
@@ -197,7 +216,7 @@ namespace dmge
 			}
 
 			{
-				DrawDebugItem d{ Vec2{ 4 + 5 * 30, 2 } };
+				DrawDebugItem d{ Vec2{ ColumnWidth * 1, 0 } + Padding };
 
 				// CPU
 
@@ -242,6 +261,14 @@ namespace dmge
 				d.drawText(U"Gamepad: {}"_fmt(gamepad.isConnected() ? U"connected" : U"not found"));
 				d.drawText(U"JoyCon : {}"_fmt(joyconL.isConnected() && joyconR.isConnected() ? U"connected" : U"not found"));
 				d.drawText(U"ProCon : {}"_fmt(procon.isConnected() ? U"connected" : U"not found"));
+				d.drawEmptyLine();
+			}
+
+			{
+				DrawDebugItem d{ Vec2{ ColumnWidth * 2, 0 } + Padding };
+
+				d.drawSection(U"Tile data");
+				d.drawTileDataTexture(tileDataTexture_);
 				d.drawEmptyLine();
 			}
 		}

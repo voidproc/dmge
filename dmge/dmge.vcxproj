@@ -379,6 +379,7 @@
     <ClInclude Include="Address.h" />
     <ClInclude Include="OAM.h" />
     <ClInclude Include="PPU.h" />
+    <ClInclude Include="PPUConstants.h" />
     <ClInclude Include="PPUMode.h" />
     <ClInclude Include="RTC.h" />
     <ClInclude Include="stdafx.h" />

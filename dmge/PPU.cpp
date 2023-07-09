@@ -1,4 +1,5 @@
 ﻿#include "PPU.h"
+#include "PPUConstants.h"
 #include "LCD.h"
 #include "Memory.h"
 #include "Interrupt.h"
@@ -9,13 +10,6 @@
 
 namespace dmge
 {
-	constexpr Size LCDSize{ 160, 144 };
-
-	constexpr int Mode2Dots = 80;
-	constexpr int Mode3DotsShort = 172;
-	constexpr int Mode3DotsLong = 289;
-	constexpr int LineDots = 456;
-	constexpr int FrameDots = 70224;
 
 	PPU::PPU(Memory* mem, LCD* lcd, Interrupt* interrupt)
 		:

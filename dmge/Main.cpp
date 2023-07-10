@@ -240,10 +240,7 @@ private:
 			}
 
 			// CPUコマンドを1回実行する
-			if (not cpu_.interrupt())
-			{
-				cpu_.run();
-			}
+			cpu_.run();
 
 			// RTC, DMA
 			mem_.update(cpu_.consumedCycles());
@@ -271,6 +268,9 @@ private:
 					bufferedSamples += apu_.run();
 				}
 			}
+
+			// 割り込み
+			cpu_.interrupt();
 
 			// 描画するか？
 

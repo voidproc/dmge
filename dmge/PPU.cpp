@@ -153,6 +153,7 @@ namespace dmge
 		bool requireSTATInt = false;
 		requireSTATInt |= (lcd_->isEnabledLYCInterrupt() && lcd_->lycFlag());
 		requireSTATInt |= (lcd_->isEnabledOAMScanInterrupt() && modeChangedToOAMScan());
+		requireSTATInt |= (lcd_->isEnabledOAMScanInterrupt() && modeChangedToVBlank()); //OAMScan INT 有効時にも Vblank INT が発火する？
 		requireSTATInt |= (lcd_->isEnabledHBlankInterrupt() && modeChangedToHBlank());
 		requireSTATInt |= (lcd_->isEnabledVBlankInterrupt() && modeChangedToVBlank());
 

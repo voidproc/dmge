@@ -39,6 +39,9 @@ namespace dmge
 		// コンソールを表示する
 		bool showConsole = true;
 
+		// ログ出力先
+		String logFilePath{};
+
 		// デバッグモニタを表示する
 		bool showDebugMonitor = true;
 

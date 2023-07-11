@@ -31,6 +31,8 @@ namespace dmge
 
 		config.showConsole = ParseOr<int>(ini[U"ShowConsole"], true);
 
+		config.logFilePath = ParseOr<String>(ini[U"LogFilePath"], U"");
+
 		config.showDebugMonitor = ParseOr<int>(ini[U"ShowDebugMonitor"], true);
 
 		config.breakOnLDBB = ParseOr<int>(ini[U"BreakOnLDBB"], false);
@@ -79,6 +81,7 @@ namespace dmge
 		DebugPrint::Writeln(U"ShowFPS={}"_fmt(showFPS));
 		DebugPrint::Writeln(U"Scale={}"_fmt(scale));
 		DebugPrint::Writeln(U"ShowConsole={}"_fmt(showConsole));
+		DebugPrint::Writeln(U"LogFilePath={}"_fmt(logFilePath));
 		DebugPrint::Writeln(U"ShowDebugMonitor={}"_fmt(showDebugMonitor));
 
 		DebugPrint::Writeln(U"BootROM={}"_fmt(bootROMPath));

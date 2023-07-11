@@ -235,6 +235,7 @@ private:
 			{
 				if (shouldDumpCPU)
 				{
+					dmge::DebugPrint::Writeln(U"dot={}"_fmt(ppu_.dot() % 456));
 					cpu_.dump();
 				}
 			}
@@ -242,35 +243,43 @@ private:
 			// CPUコマンドを1回実行する
 			cpu_.run();
 
-			// RTC, DMA
-			mem_.update(cpu_.consumedCycles());
-
-			// タイマーを更新
-
-			for (int i : step(cpu_.consumedCycles()))
+			const auto tickUnits = [&](int cycles)
 			{
-				timer_.update();
-			}
+				// RTC, DMA
+				mem_.update(cycles);
 
-			// PPU
+				// タイマーを更新
 
-			for (int i : step(cpu_.consumedCycles()))
-			{
-				ppu_.run();
-			}
-
-			// APU
-
-			if (enableAPU)
-			{
-				for (int i : step(cpu_.consumedCycles()))
+				for (int i : step(cycles))
 				{
-					bufferedSamples += apu_.run();
+					timer_.update();
 				}
-			}
+
+				// PPU
+
+				for (int i : step(cycles))
+				{
+					ppu_.run();
+				}
+
+				// APU
+
+				if (enableAPU)
+				{
+					for (int i : step(cycles))
+					{
+						bufferedSamples += apu_.run();
+					}
+				}
+			};
+
+			tickUnits(cpu_.consumedCycles());
 
 			// 割り込み
-			cpu_.interrupt();
+			if (cpu_.interrupt())
+			{
+				tickUnits(5 * 4);
+			}
 
 			// 描画するか？
 

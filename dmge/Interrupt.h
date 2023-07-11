@@ -12,7 +12,7 @@ namespace dmge
 
 		void reserveEnablingIME();
 
-		void disableIME();
+		void setIME(bool enable);
 
 		void updateIME();
 

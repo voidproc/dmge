@@ -8,9 +8,9 @@ namespace dmge
 		imeScheduled_ = true;
 	}
 
-	void Interrupt::disableIME()
+	void Interrupt::setIME(bool enable)
 	{
-		ime_ = false;
+		ime_ = enable;
 	}
 
 	void Interrupt::updateIME()

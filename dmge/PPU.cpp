@@ -140,7 +140,7 @@ namespace dmge
 
 	bool PPU::modeChangedToHBlank() const
 	{
-		return (dot_ < LCDSize.y * LineDots) && ((dot_ % LineDots) == Mode2Dots + Mode3DotsShort + 1);
+		return (dot_ < LCDSize.y * LineDots) && ((dot_ % LineDots) == Mode2Dots + Mode3DotsShort);
 	}
 
 	bool PPU::modeChangedToVBlank() const

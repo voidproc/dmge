@@ -103,7 +103,7 @@ namespace dmge
 				if (interrupt_->requested(i))
 				{
 					// 割り込みを無効に
-					interrupt_->disableIME();
+					interrupt_->setIME(false);
 					interrupt_->clearRequest(i);
 
 					// 現在のPCをスタックにプッシュし、割り込みベクタにジャンプ
@@ -1070,7 +1070,7 @@ namespace dmge
 		void di_(const Instruction&)
 		{
 			// opcode: 0xf3
-			interrupt_->disableIME();
+			interrupt_->setIME(false);
 		}
 
 		void ei_(const Instruction&)
@@ -1711,7 +1711,7 @@ namespace dmge
 			// opcode: 0xd9
 			pcNext_ = mem_->read16(sp);
 			sp += 2;
-			interrupt_->reserveEnablingIME(); //?
+			interrupt_->setIME(true);
 		}
 
 		// Other

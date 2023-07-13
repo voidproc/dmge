@@ -316,13 +316,7 @@ namespace dmge
 		const uint8 scy = lcd_->scy();
 		const uint8 scx = lcd_->scx();
 
-		// ※スクロール処理
-		// BG描画中（ウィンドウ描画中でないとき）、SCXの端数分を読み飛ばす
-		if (not drawingWindow_ && (scx % 8) > 0 && fetcherX_ < (scx % 8))
-		{
-			fetcherX_++;
-			return;
-		}
+		uint8 fetcherX = fetcherX_;
 
 		// このフレームでウィンドウに到達したかどうかを toDrawWindow_ に記録する
 		if (ly == lcd_->wy())
@@ -333,12 +327,12 @@ namespace dmge
 		// このスキャンラインでウィンドウのフェッチが開始したら
 		// ピクセルフェッチャーのX座標をリセットする
 		// ※スプライトの描画には、リセットされない canvasX_ を使用
-		if (not drawingWindow_ && toDrawWindow_ && (fetcherX_ >= lcd_->wx() - 7))
+		if (not drawingWindow_ && toDrawWindow_ && (fetcherX >= lcd_->wx() - 7))
 		{
 			if (lcd_->isEnabledWindow())
 			{
 				drawingWindow_ = true;
-				fetcherX_ = 0;
+				fetcherX_ = fetcherX = 0;
 			}
 		}
 
@@ -348,14 +342,17 @@ namespace dmge
 		if (drawingWindow_)
 		{
 			const uint16 tileMapAddrBase = lcd_->windowTileMapAddress();
-			const uint16 addrOffsetX = fetcherX_ / 8;
+			const uint16 addrOffsetX = fetcherX / 8;
 			const uint16 addrOffsetY = 32 * (windowLine_ / 8);
 			tileAddr = tileMapAddrBase + ((addrOffsetX + addrOffsetY) & 0x3ff);
 		}
 		else
 		{
+			// BGは、横方向のスクロールの端数分を読み飛ばす
+			fetcherX += scx % 8;
+
 			const uint16 tileMapAddrBase = lcd_->bgTileMapAddress();
-			const uint16 addrOffsetX = ((fetcherX_ / 8) + (scx / 8)) & 0x1f;
+			const uint16 addrOffsetX = ((fetcherX / 8) + (scx / 8)) & 0x1f;
 			const uint16 addrOffsetY = 32 * (((ly + scy) & 0xff) / 8);
 			tileAddr = tileMapAddrBase + ((addrOffsetX + addrOffsetY) & 0x3ff);
 		}
@@ -369,7 +366,7 @@ namespace dmge
 
 		// タイルデータを参照
 		const uint16 tileData = mem_->read16VRAMBank(tileDataAddr, tileMapAttr.attr.bank);
-		const uint8 color = TileData::GetColor(tileData, fetcherX_ % 8, tileMapAttr.attr.xFlip);
+		const uint8 color = TileData::GetColor(tileData, fetcherX % 8, tileMapAttr.attr.xFlip);
 
 		// 実際の描画色
 		Color dotColor;

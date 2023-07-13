@@ -19,6 +19,10 @@ namespace dmge
 			.split(U',')
 			.map([](const String& s) { return ParseInt<uint16>(s, 16); });
 
+		config.traceDumpStartAddress = ParseOr<String>(ini[U"TraceDumpStartAddress"], U"")
+			.split(U',')
+			.map([](const String& s) { return ParseInt<uint16>(s, 16); });
+
 		config.dumpAddress = ParseOr<String>(ini[U"DumpAddress"], U"")
 			.split(U',')
 			.map([](const String& s) { return ParseInt<uint16>(s, 16); });
@@ -67,6 +71,14 @@ namespace dmge
 				.map([](auto x) { return U"{:04X}"_fmt(x); })
 				.join(U","_sv, U""_sv, U""_sv);
 			DebugPrint::Writeln(U"BreakpointMemW={}"_fmt(breakpointsText));
+		}
+
+		if (not traceDumpStartAddress.empty())
+		{
+			const auto addrText = traceDumpStartAddress
+				.map([](auto x) { return U"{:04X}"_fmt(x); })
+				.join(U","_sv, U""_sv, U""_sv);
+			DebugPrint::Writeln(U"TraceDumpStartAddress={}"_fmt(addrText));
 		}
 
 		if (not dumpAddress.empty())

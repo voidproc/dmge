@@ -204,6 +204,12 @@ private:
 				dmge::DebugPrint::Writeln(U"Break: pc={:04X}"_fmt(cpu_.currentPC()));
 			}
 
+			// トレースダンプ開始
+			if (reachedTraceDumpAddress_())
+			{
+				alwaysDump_ = true;
+			}
+
 			// LD B,B 実行時にブレークする
 			if (config_.breakOnLDBB && mem_.read(cpu_.currentPC()) == 0x40)
 			{
@@ -488,6 +494,21 @@ private:
 		for (const auto bp : config_.breakpoints)
 		{
 			if (cpu_.currentPC() == bp)
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	bool reachedTraceDumpAddress_() const
+	{
+		if (not config_.traceDumpStartAddress) return false;
+
+		for (const auto addr : config_.traceDumpStartAddress)
+		{
+			if (cpu_.currentPC() == addr)
 			{
 				return true;
 			}

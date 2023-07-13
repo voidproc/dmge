@@ -23,6 +23,9 @@ namespace dmge
 		// 16進表記、コンマ区切りで複数指定可能
 		Array<uint16> breakpointsMemWrite{};
 
+		// トレースダンプを開始するアドレス
+		Array<uint16> traceDumpStartAddress{};
+
 		// メモリダンプ箇所
 		// 指定されたアドレスから16バイト分をダンプする
 		Array<uint16> dumpAddress{};

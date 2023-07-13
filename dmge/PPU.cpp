@@ -140,7 +140,7 @@ namespace dmge
 
 	bool PPU::modeChangedToHBlank() const
 	{
-		return (dot_ < LCDSize.y * LineDots) && ((dot_ % LineDots) == Mode2Dots + Mode3DotsShort);
+		return (dot_ < LCDSize.y * LineDots) && ((dot_ % LineDots) == Mode2Dots + mode3Length());
 	}
 
 	bool PPU::modeChangedToVBlank() const
@@ -167,6 +167,15 @@ namespace dmge
 	int PPU::dot() const
 	{
 		return dot_;
+	}
+
+	int PPU::mode3Length() const
+	{
+		const auto baseLength = Mode3DotsShort;
+
+		if (lcd_->ly() >= lcd_->wy()) return baseLength + 8;
+
+		return baseLength;
 	}
 
 	void PPU::setDisplayColorPalette(const std::array<Color, 4>& palette)
@@ -208,7 +217,7 @@ namespace dmge
 
 				mode_ = PPUMode::OAMScan;
 			}
-			else if (x < Mode2Dots + Mode3DotsShort)
+			else if (x < Mode2Dots + mode3Length())
 			{
 				// Mode3 の期間 : 172 dots
 				// ※スプライトの数に応じて可変（172～289）で実装すべきかもしれないが、とりあえず固定で実装

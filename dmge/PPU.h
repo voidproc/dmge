@@ -50,6 +50,8 @@ namespace dmge
 		// このフレームの描画ドット数
 		int dot() const;
 
+		int mode3Length() const;
+
 		// (DMG) カラーパレットを設定する
 		// （「色番号から実際の色への変換テーブル」を置き換える）
 		void setDisplayColorPalette(const std::array<Color, 4>& palette);

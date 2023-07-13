@@ -111,10 +111,6 @@ namespace dmge
 					mem_->write(--sp, pc & 0xff);
 					pc = intAddr[i];
 
-					// 割り込み関係で 5 M-cycle 消費する(?)
-					// TODO: これでスタックしてしまうカートリッジがあるため要調査
-					//consumedCycles_ = 5 * 4;
-
 					// 低電力モードから抜ける
 					powerSavingMode_ = false;
 

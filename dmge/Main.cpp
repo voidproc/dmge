@@ -20,7 +20,7 @@ void LoadAssets()
 {
 	const auto preloadText = U"0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ=-~^|@`[{;+:*]},<.>/?_";
 
-	FontAsset::Register(U"debug", 10, U"fonts/JF-Dot-MPlus10.ttf", FontStyle::Bitmap);
+	FontAsset::Register(U"debug", 10, Resource(U"fonts/JF-Dot-MPlus10.ttf"), FontStyle::Bitmap);
 	FontAsset::Load(U"debug", preloadText);
 }
 

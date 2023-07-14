@@ -36,14 +36,26 @@ namespace dmge
 	{
 		uint8 value = 0;
 
-		// 入力を統合
-
 		if (selected_ == SelectedButtons::Direction)
 		{
-			value |= (inputRight_.pressed() ? 0 : 1) << 0;
-			value |= (inputLeft_.pressed() ? 0 : 1) << 1;
-			value |= (inputUp_.pressed() ? 0 : 1) << 2;
-			value |= (inputDown_.pressed() ? 0 : 1) << 3;
+			bool inputRight = inputRight_.pressed();
+			bool inputLeft = inputLeft_.pressed();
+			bool inputUp = inputUp_.pressed();
+			bool inputDown = inputDown_.pressed();
+
+			if (const auto procon = ProController(0); procon.isConnected())
+			{
+				const auto lstick = procon.LStick();
+				inputRight |= lstick.x > 0.5;
+				inputLeft |= lstick.x < -0.5;
+				inputUp |= lstick.y < -0.5;
+				inputDown |= lstick.y > 0.5;
+			}
+
+			value |= (inputRight ? 0 : 1) << 0;
+			value |= (inputLeft ? 0 : 1) << 1;
+			value |= (inputUp ? 0 : 1) << 2;
+			value |= (inputDown ? 0 : 1) << 3;
 			value |= 0b11100000;
 		}
 		else
@@ -91,6 +103,8 @@ namespace dmge
 			inputB_ = inputB_ | joyConR.button2;
 			inputSelect_ = inputSelect_ | joyConR.button3;
 			inputStart_ = inputStart_ | joyConR.button1;
+
+			return;
 		}
 
 		// Proコントローラー
@@ -105,6 +119,8 @@ namespace dmge
 			inputB_ = inputB_ | procon.buttonB;
 			inputSelect_ = inputSelect_ | procon.buttonMinus;
 			inputStart_ = inputStart_ | procon.buttonPlus;
+
+			return;
 		}
 
 		// 汎用ゲームパッド

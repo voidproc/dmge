@@ -190,10 +190,13 @@ namespace dmge
 			dot_ = 0;
 		}
 
-		uint8 ly = static_cast<uint8>(dot_ / LineDots);
+		int dot = dot_;
+		if ((dot % LineDots) >= 452) dot += 456 - (dot % LineDots);
+
+		uint8 ly = static_cast<uint8>(dot / LineDots);
 
 		// "scanline 153 quirk"
-		if (ly == 153 && (dot_ % LineDots) >= 4)
+		if (ly == 153 && (dot % LineDots) >= 4)
 		{
 			ly = 0;
 		}

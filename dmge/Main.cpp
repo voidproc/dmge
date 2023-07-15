@@ -14,6 +14,7 @@
 #include "AppConfig.h"
 #include "DebugPrint.h"
 #include "DebugMonitor.h"
+#include "Version.h"
 
 
 void LoadAssets()
@@ -41,7 +42,7 @@ void InitScene(int scale, bool showDebugMonitor)
 {
 	SetWindowSize(scale, showDebugMonitor);
 
-	Window::SetTitle(U"dmge");
+	Window::SetTitle(U"dmge {}"_fmt(dmge::Version));
 
 	Scene::SetBackground(dmge::DebugMonitor::BgColor);
 

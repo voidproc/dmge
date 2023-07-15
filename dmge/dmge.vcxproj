@@ -387,6 +387,7 @@
     <ClInclude Include="TileMapAttribute.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="Timing.h" />
+    <ClInclude Include="Version.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App\example\obj\blacksmith.obj">

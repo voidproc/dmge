@@ -981,5 +981,11 @@
     <ClInclude Include="TileMapAttribute.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="PPUConstants.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Version.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

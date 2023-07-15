@@ -78,7 +78,7 @@ namespace dmge
 					mem->read(addr + row * 16 + 13),
 					mem->read(addr + row * 16 + 14),
 					mem->read(addr + row * 16 + 15)))
-					.draw(10, pos_, TextColor);
+					.draw(FontSize.y, pos_, TextColor);
 
 				pos_.y += LineHeight;
 			}
@@ -92,9 +92,9 @@ namespace dmge
 			{
 				const double amp01 = amp / 15.0;
 
-				constexpr SizeF rectSize{ 6.0, FontSize.y - 2 };
+				constexpr SizeF rectSize{ 6.0, LineHeight - 2 };
 				constexpr double xPadding = 3.0;
-				const Vec2 bottomLeft{ pos_.x + index * (rectSize.x + xPadding), pos_.y + FontSize.y };
+				const Vec2 bottomLeft{ pos_.x + index * (rectSize.x + xPadding), pos_.y + LineHeight };
 				const RectF rect{ Arg::bottomLeft = bottomLeft, rectSize };
 
 				if (apu->getMute(index))

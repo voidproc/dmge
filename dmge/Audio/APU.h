@@ -56,7 +56,13 @@ namespace dmge
 
 		// 各チャンネルの amplitude を取得
 		std::array<int, 4> getAmplitude() const;
-		
+
+		// 各チャンネルのミュート状態を設定
+		void setMute(int channel, bool mute);
+
+		// 各チャンネルのミュート状態を設定
+		bool getMute(int channel) const;
+
 	private:
 		Memory* mem_;
 
@@ -86,5 +92,9 @@ namespace dmge
 
 		// CGB Mode
 		bool cgbMode_ = false;
+
+		// 各チャンネルのミュート状態
+		std::array<int, 4> mute_;
+
 	};
 }

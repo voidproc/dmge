@@ -16,7 +16,8 @@ namespace dmge
 		ch2_{},
 		ch3_{},
 		ch4_{},
-		frameSeq_{}
+		frameSeq_{},
+		mute_{ false, false, false, false }
 	{
 	}
 
@@ -88,10 +89,10 @@ namespace dmge
 			cycles_ -= 1.0 * ClockFrequency / sampleRate_;
 
 			const std::array<int, 4> chAmp = {
-				1 * ch1_.amplitude() * ch1_.getEnable(),
-				1 * ch2_.amplitude() * ch2_.getEnable(),
-				1 * ch3_.amplitude() * ch3_.getEnable(),
-				1 * ch4_.amplitude() * ch4_.getEnable(),
+				(1 - mute_[0]) * ch1_.amplitude() * ch1_.getEnable(),
+				(1 - mute_[1]) * ch2_.amplitude() * ch2_.getEnable(),
+				(1 - mute_[2]) * ch3_.amplitude() * ch3_.getEnable(),
+				(1 - mute_[3]) * ch4_.amplitude() * ch4_.getEnable(),
 			};
 
 			// Input / Panning
@@ -457,5 +458,15 @@ namespace dmge
 			ch3_.amplitude() * ch3_.getEnable(),
 			ch4_.amplitude() * ch4_.getEnable(),
 		};
+	}
+
+	void APU::setMute(int channel, bool mute)
+	{
+		mute_[channel] = mute;
+	}
+
+	bool APU::getMute(int channel) const
+	{
+		return mute_[channel];
 	}
 }

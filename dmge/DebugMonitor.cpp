@@ -93,12 +93,20 @@ namespace dmge
 			{
 				const double amp01 = amp / 15.0;
 
-				const SizeF rectSize{ 6.0, FontSize.y - 2 };
-				const double xPadding = 2.0;
+				constexpr SizeF rectSize{ 6.0, FontSize.y - 2 };
+				constexpr double xPadding = 3.0;
 				const Vec2 bottomLeft{ pos_.x + index * (rectSize.x + xPadding), pos_.y + FontSize.y };
 				const RectF rect{ Arg::bottomLeft = bottomLeft, rectSize };
-				rect.draw(ColorF{ 1.0, 0.05 + 0.3 * amp01 });
-				rect.scaledAt(bottomLeft, 1.0, amp01).draw(ColorF{ 1.0, 1 - 0.5 * amp01 });
+
+				if (apu->getMute(index))
+				{
+					rect.draw(ColorF{ 0.05 }).drawFrame(0, 1, ColorF{ Palette::Red, 0.5 });
+				}
+				else
+				{
+					rect.draw(ColorF{ 1.0, 0.05 + 0.3 * amp01 });
+					rect.scaledAt(bottomLeft, 1.0, amp01).draw(ColorF{ 1.0, 1 - 0.5 * amp01 });
+				}
 			}
 
 			pos_.y += LineHeight;

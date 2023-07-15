@@ -177,8 +177,6 @@ private:
 
 		bool shouldDraw = false;
 
-		bool enableAPU = true;
-
 		int bufferedSamples = 0;
 
 		dmge::FPSKeeper fpsKeeper{};
@@ -207,7 +205,7 @@ private:
 			// トレースダンプ開始
 			if (reachedTraceDumpAddress_())
 			{
-				alwaysDump_ = true;
+				enableTraceDump_ = true;
 			}
 
 			// LD B,B 実行時にブレークする
@@ -219,7 +217,7 @@ private:
 			}
 
 			// [DEBUG]
-			if (alwaysDump_)
+			if (enableTraceDump_)
 			{
 				shouldDumpCPU = true;
 			}
@@ -270,7 +268,7 @@ private:
 
 				// APU
 
-				if (enableAPU)
+				if (enableAPU_)
 				{
 					for (int i : step(cycles))
 					{
@@ -289,7 +287,7 @@ private:
 
 			// 描画するか？
 
-			if (enableAPU)
+			if (enableAPU_)
 			{
 				// (1) オーディオバッファに1フレーム分のサンプルを書き込んだら描画する
 
@@ -331,21 +329,11 @@ private:
 					apu_.pause();
 				}
 
-				// [DEBUG]
-				if (Key1.down())
-				{
-					enableAPU = not enableAPU;
-					if (not enableAPU)
-					{
-						apu_.pause();
-					}
-				}
-
 				// PPUのレンダリング結果を画面表示
 				ppu_.draw(Vec2{ 0, 0 }, config_.scale);
 
 				// APU
-				if (enableAPU && mode_ != DmgeAppMode::Trace)
+				if (enableAPU_ && mode_ != DmgeAppMode::Trace)
 				{
 					apu_.playIfBufferEnough(2000);
 					apu_.pauseIfBufferNotEnough(512);
@@ -426,7 +414,9 @@ private:
 		// [DEBUG]常にダンプ
 		if (KeyD.down())
 		{
-			alwaysDump_ = not alwaysDump_;
+			enableTraceDump_ = not enableTraceDump_;
+
+			dmge::DebugPrint::Writeln(U"EnableTraceDump={}"_fmt(enableTraceDump_));
 		}
 
 		// パレット切り替え
@@ -452,6 +442,38 @@ private:
 				currentCartridgePath_ = openPath;
 				mode_ = DmgeAppMode::Reset;
 				quitApp_ = true;
+			}
+		}
+
+		// APUの各チャンネルをミュート
+
+		if (Key1.down())
+		{
+			apu_.setMute(0, not apu_.getMute(0));
+		}
+
+		if (Key2.down())
+		{
+			apu_.setMute(1, not apu_.getMute(1));
+		}
+
+		if (Key3.down())
+		{
+			apu_.setMute(2, not apu_.getMute(2));
+		}
+
+		if (Key4.down())
+		{
+			apu_.setMute(3, not apu_.getMute(3));
+		}
+
+		// APUの使用を切替
+		if (Key5.down())
+		{
+			enableAPU_ = not enableAPU_;
+			if (not enableAPU_)
+			{
+				apu_.pause();
 			}
 		}
 	}
@@ -557,14 +579,17 @@ private:
 		}
 	};
 
+	// APUを使用する
+	bool enableAPU_ = true;
+
 	// 現在の画面表示用パレット番号
 	int currentPalette_ = 0;
 
 	// デバッグ用モニタを表示する
 	bool showDebugMonitor_ = true;
 
-	// [DEBUG] 常にダンプする
-	bool alwaysDump_ = false;
+	// トレースダンプする
+	bool enableTraceDump_ = false;
 
 	// メモリダンプするアドレス設定用
 	uint16 dumpAddress_ = 0;

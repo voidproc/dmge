@@ -573,10 +573,23 @@ private:
 	// 画面表示用パレット
 	const Array<std::array<Color, 4>> paletteList_ = {
 		{
+			// BGB grey
 			{ Color{ 232 }, Color{ 160 }, Color{ 88 }, Color{ 16 }, },
+
+			// BGB lcd green
 			{ Color{ 224,248,208 }, Color{ 136,192,112 }, Color{ 52,104,86 }, Color{ 8,24,32 }, },
-			{ Color{ 134,163,90 }, Color{ 111,137,79 }, Color{ 88,117,79 }, Color{ 50,84,79 }, },
+
+			// BGB super gameboy
 			{ Color{ 255,239,206 }, Color{ 222,148,74 }, Color{ 173,41,33 }, Color{ 49,24,82 }, },
+
+			// GBP-NSO
+			{ Color{ U"#b5c69c" }, Color{ U"#8d9c7b" }, Color{ U"#637251" }, Color{ U"#303820" },  },
+
+			// DMG-NSO
+			{ Color{ U"#8cad28" }, Color{ U"#6c9421" }, Color{ U"#426b29" }, Color{ U"#214231" },  },
+
+			// SGB 4-H
+			{ Color{ U"#f8f8c8" }, Color{ U"#b8c058" }, Color{ U"#808840" }, Color{ U"#405028" },  },
 		}
 	};
 

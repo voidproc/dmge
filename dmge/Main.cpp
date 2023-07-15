@@ -239,7 +239,7 @@ private:
 			{
 				if (shouldDumpCPU)
 				{
-					dmge::DebugPrint::Writeln(U"dot={}"_fmt(ppu_.dot() % 456));
+					//dmge::DebugPrint::Writeln(U"dot={}"_fmt(ppu_.dot() % 456));
 					cpu_.dump();
 				}
 			}

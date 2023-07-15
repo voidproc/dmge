@@ -190,8 +190,10 @@ namespace dmge
 			dot_ = 0;
 		}
 
+		// 4 T-cycles 進めたときに LY + 1 となる状況では LY + 1 となるようにする
+		// ただし最終ラインは除く
 		int dot = dot_;
-		if ((dot % LineDots) >= 452) dot += 456 - (dot % LineDots);
+		if (dot < FrameDots - LineDots && (dot % LineDots) >= 452) dot += 456 - (dot % LineDots);
 
 		uint8 ly = static_cast<uint8>(dot / LineDots);
 

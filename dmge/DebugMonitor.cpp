@@ -11,7 +11,6 @@ namespace dmge
 	{
 		constexpr Color TextColor{ 210 };
 		constexpr Color SectionColor = Palette::Khaki;
-		constexpr Color BgColor{ 32 };
 		constexpr Size FontSize{ 5, 10 };
 		constexpr int LineHeight = FontSize.y + 1;
 		constexpr double ColumnWidth = FontSize.x * 30;
@@ -176,7 +175,7 @@ namespace dmge
 	void DebugMonitor::draw(const Point& pos) const
 	{
 		{
-			const ScopedViewport2D viewport{ pos.x, pos.y, size.x, Scene::Height() };
+			const ScopedViewport2D viewport{ pos.x, pos.y, ViewportSize.x, Scene::Height() };
 
 			Scene::Rect().draw(BgColor);
 

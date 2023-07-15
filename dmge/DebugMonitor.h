@@ -13,7 +13,10 @@ namespace dmge
 	{
 	public:
 		// 表示サイズは 横90 * 縦40 [chars] くらい
-		inline static constexpr Size size{ 5 * 90, 10 * 40 };
+		inline static constexpr Size ViewportSize{ 5 * 90, 10 * 40 };
+
+		// 背景色
+		inline static constexpr Color BgColor{ 32 };
 
 		DebugMonitor(Memory* mem, CPU* cpu, APU* apu, Interrupt* interrupt);
 

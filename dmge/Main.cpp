@@ -29,8 +29,8 @@ void SetWindowSize(int scale, bool showDebugMonitor)
 	const int width = 160 * scale;
 	const int height = 144 * scale;
 
-	const int widthWithDebugMonitor = width + dmge::DebugMonitor::size.x;
-	const int heightWithDebugMonitor = Max(height, dmge::DebugMonitor::size.y);
+	const int widthWithDebugMonitor = width + dmge::DebugMonitor::ViewportSize.x;
+	const int heightWithDebugMonitor = Max(height, dmge::DebugMonitor::ViewportSize.y);
 
 	const auto SceneSize = showDebugMonitor ? Size{ widthWithDebugMonitor, heightWithDebugMonitor } : Size{ width, height };
 	Scene::Resize(SceneSize);
@@ -43,7 +43,7 @@ void InitScene(int scale, bool showDebugMonitor)
 
 	Window::SetTitle(U"dmge");
 
-	Scene::SetBackground(Palette::Whitesmoke);
+	Scene::SetBackground(dmge::DebugMonitor::BgColor);
 
 	Scene::SetTextureFilter(TextureFilter::Nearest);
 
@@ -505,7 +505,6 @@ private:
 	void setPPUPalette_(int paletteIndex)
 	{
 		ppu_.setDisplayColorPalette(paletteList_[paletteIndex]);
-		Scene::SetBackground(paletteList_[paletteIndex][0]);
 	}
 
 	// ブレークポイントが有効かつブレークポイントに達したか

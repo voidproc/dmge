@@ -345,6 +345,8 @@ private:
 					debugMonitor_.update();
 
 					debugMonitor_.draw(Point{ 160 * config_.scale, 0 });
+
+					debugMonitor_.updateGUI();
 				}
 
 				// デバッグモニタのテキストボックス入力中はJOYPADを更新しない

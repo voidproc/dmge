@@ -144,7 +144,7 @@ namespace dmge
 
 		if (showDumpAddressTextbox_)
 		{
-			if (KeyEscape.down())
+			if (KeyEscape.down() || KeyEnter.down())
 			{
 				showDumpAddressTextbox_ = false;
 			}
@@ -157,8 +157,6 @@ namespace dmge
 					dumpAddress_ = Min<uint16>(*addr, 0xffc0);
 				}
 			}
-
-			SimpleGUI::TextBoxAt(textStateDumpAddress_, Scene::Rect().bottomCenter().movedBy(0, -48));
 		}
 
 		static int cnt = 0;
@@ -169,6 +167,14 @@ namespace dmge
 				tileDataTexture_.update();
 				mem_->resetVRAMTileDataModified();
 			}
+		}
+	}
+
+	void DebugMonitor::updateGUI()
+	{
+		if (showDumpAddressTextbox_)
+		{
+			SimpleGUI::TextBoxAt(textStateDumpAddress_, Scene::Rect().bottomCenter().movedBy(0, -48));
 		}
 	}
 

@@ -161,6 +161,7 @@ public:
 		apu_.setCGBMode(mem_.isCGBMode());
 		cpu_.setCGBMode(mem_.isCGBMode());
 		cpu_.reset(enableBootROM);
+		debugMonitor_.setCGBMode(mem_.isCGBMode());
 
 		mainLoop_();
 

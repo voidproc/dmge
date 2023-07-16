@@ -23,8 +23,12 @@ namespace dmge
 
 	constexpr Size TileImageSize{ 8 * 16, 8 * 24 };
 
-	TileDataTexture::TileDataTexture(Memory& mem)
-		: mem_{ mem }, tileImage_{ TileImageSize }, texture_{ TileImageSize }
+	TileDataTexture::TileDataTexture(Memory& mem, int vramBank)
+		:
+		mem_{ mem },
+		vramBank_{ vramBank },
+		tileImage_{ TileImageSize },
+		texture_{ TileImageSize }
 	{
 	}
 
@@ -39,7 +43,7 @@ namespace dmge
 
 			for (int y = 0; y < 8; ++y)
 			{
-				const uint16 tileData = mem_.read16(addr + y * 2);
+				const uint16 tileData = mem_.read16VRAMBank(addr + y * 2, vramBank_);
 
 				for (int x = 0, bit = 7; x < 8; ++x, --bit)
 				{

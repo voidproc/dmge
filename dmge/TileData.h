@@ -17,7 +17,7 @@ namespace dmge
 	class TileDataTexture
 	{
 	public:
-		TileDataTexture(Memory& mem);
+		TileDataTexture(Memory& mem, int vramBank = 0);
 
 		void update();
 
@@ -27,6 +27,8 @@ namespace dmge
 
 	private:
 		Memory& mem_;
+		int vramBank_ = 0;
+
 		Image tileImage_;
 		DynamicTexture texture_;
 	};

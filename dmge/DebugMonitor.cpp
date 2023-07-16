@@ -125,13 +125,18 @@ namespace dmge
 
 
 	DebugMonitor::DebugMonitor(Memory* mem, CPU* cpu, APU* apu, Interrupt* interrupt)
-		: mem_{ mem }, cpu_{ cpu }, apu_{ apu }, interrupt_{ interrupt }, tileDataTexture_{ *mem }
+		: mem_{ mem }, cpu_{ cpu }, apu_{ apu }, interrupt_{ interrupt }, tileDataTexture_{ *mem }, tileDataTextureCGB_{ *mem, 1 }
 	{
 		textStateDumpAddress_.text = U"0000";
 	}
 
 	DebugMonitor::~DebugMonitor()
 	{
+	}
+
+	void DebugMonitor::setCGBMode(bool value)
+	{
+		cgbMode_ = value;
 	}
 
 	void DebugMonitor::update()
@@ -160,11 +165,17 @@ namespace dmge
 		}
 
 		static int cnt = 0;
-		if (cnt++ % 8 == 0)
+		if (cnt++ % 16 == 0)
 		{
 			if (mem_->isVRAMTileDataModified())
 			{
 				tileDataTexture_.update();
+
+				if (cgbMode_)
+				{
+					tileDataTextureCGB_.update();
+				}
+
 				mem_->resetVRAMTileDataModified();
 			}
 		}
@@ -243,6 +254,7 @@ namespace dmge
 				d.drawLabelAndValue(U"SP  ", U"{:04X}"_fmt(cpuState.sp));
 				d.drawLabelAndValue(U"PC  ", U"{:04X}"_fmt(cpuState.pc));
 				d.drawLabelAndValue(U"Halt", U"{:d}"_fmt(cpuState.halt));
+				d.drawLabelAndValue(U"Double Speed", U"{:d}"_fmt(mem_->read(Address::KEY1) >> 7));
 				d.drawEmptyLine();
 
 				// Cartridge
@@ -283,6 +295,12 @@ namespace dmge
 				d.drawSection(U"Tile data");
 				d.drawTileDataTexture(tileDataTexture_);
 				d.drawEmptyLine();
+
+				if (cgbMode_)
+				{
+					d.drawTileDataTexture(tileDataTextureCGB_);
+					d.drawEmptyLine();
+				}
 			}
 		}
 	}

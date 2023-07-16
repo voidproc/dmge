@@ -22,6 +22,8 @@ namespace dmge
 
 		~DebugMonitor();
 
+		void setCGBMode(bool value);
+
 		void update();
 
 		void updateGUI();
@@ -36,6 +38,8 @@ namespace dmge
 		APU* apu_;
 		Interrupt* interrupt_;
 
+		bool cgbMode_ = false;
+
 		// メモリダンプ用
 
 		uint16 dumpAddress_ = 0x0000;
@@ -44,5 +48,6 @@ namespace dmge
 
 		// タイルデータ表示用
 		TileDataTexture tileDataTexture_;
+		TileDataTexture tileDataTextureCGB_;
 	};
 }

@@ -94,6 +94,8 @@ C++ / OpenSiv3D でゲームボーイのエミュレータを作っています�
   - [x] 一般的な命令の実装
   - [x] テスト ROM (cpu_instrs / instr_timing) による検証
   - [ ] STOP
+    - [x] 倍速モード (CGB) の切り替え
+    - [ ] STOP 状態の遷移
 - MBC
   - [x] ROM Only
   - [x] MBC1
@@ -122,8 +124,8 @@ C++ / OpenSiv3D でゲームボーイのエミュレータを作っています�
     - [ ] CGB
   - [ ] 通信関係
   - [ ] Joypad 割り込み
-  - [ ] CGB の倍速モード
-  - [ ] etc.
+  - [x] 倍速モード (CGB) 
+  - [ ] その他
 
 
 ## テスト ROM 実行結果

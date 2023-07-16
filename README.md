@@ -73,7 +73,7 @@ C++ / OpenSiv3D でゲームボーイのエミュレータを作っています�
 
 - `CartridgePath` : 読み込むカートリッジファイルのパス
 - `Breakpoint` : ブレークポイント（コンマ区切りで複数指定可能）
-- `BreakpointMemW` : メモリ書き込み時ブレークポイント（コンマ区切りで複数指定可能）
+- `MemoryWriteBreakpoint` : メモリ書き込み時ブレークポイント（コンマ区切りで複数指定可能）
 - `BreakOnLDBB` : LD B,B 実行時にブレークするかどうか
 - `EnableBreakpoint` : 上記ブレークポイントの有効／無効の切替
 - `TraceDumpStartAddress` : トレースダンプを開始するアドレス（コンマ区切りで複数指定可能）

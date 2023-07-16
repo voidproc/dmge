@@ -280,6 +280,8 @@ namespace dmge
 		// CGB Mode
 		bool cgbMode_ = false;
 
+		MooneyeTestResult mooneyeTestResult_ = MooneyeTestResult::Running;
+
 
 		// 命令セット
 		
@@ -306,18 +308,34 @@ namespace dmge
 		{
 			switch (inst.opcode)
 			{
-				// A
-				//case 0x7f: return;
-				//case 0x78: return;
-				//case 0x79: return;
-				//case 0x7a: return;
-				//case 0x7b: return;
-				//case 0x7c: return;
-				//case 0x7d: return;
-				//case 0x7e: return;
+			// A
+			//case 0x7f: return;
+			//case 0x78: return;
+			//case 0x79: return;
+			//case 0x7a: return;
+			//case 0x7b: return;
+			//case 0x7c: return;
+			//case 0x7d: return;
+			//case 0x7e: return;
 
-				// B
-			case 0x40: b = b; return;
+			// B
+			case 0x40:
+				b = b;
+				if (b == 3 &&
+					c == 5 &&
+					d == 8 &&
+					e == 13 &&
+					h == 21 &&
+					l == 34)
+				{
+					mooneyeTestResult_ = MooneyeTestResult::Passed;
+				}
+				else
+				{
+					mooneyeTestResult_ = MooneyeTestResult::Failed;
+				}
+				return;
+
 			case 0x41: b = c; return;
 			case 0x42: b = d; return;
 			case 0x43: b = e; return;
@@ -325,7 +343,7 @@ namespace dmge
 			case 0x45: b = l; return;
 			case 0x46: b = mem_->read(hl()); return;
 
-				// C
+			// C
 			case 0x48: c = b; return;
 			case 0x49: c = c; return;
 			case 0x4a: c = d; return;
@@ -334,7 +352,7 @@ namespace dmge
 			case 0x4d: c = l; return;
 			case 0x4e: c = mem_->read(hl()); return;
 
-				// D
+			// D
 			case 0x50: d = b; return;
 			case 0x51: d = c; return;
 			case 0x52: d = d; return;
@@ -343,7 +361,7 @@ namespace dmge
 			case 0x55: d = l; return;
 			case 0x56: d = mem_->read(hl()); return;
 
-				// E
+			// E
 			case 0x58: e = b; return;
 			case 0x59: e = c; return;
 			case 0x5a: e = d; return;
@@ -352,7 +370,7 @@ namespace dmge
 			case 0x5d: e = l; return;
 			case 0x5e: e = mem_->read(hl()); return;
 
-				//H
+			//H
 			case 0x60: h = b; return;
 			case 0x61: h = c; return;
 			case 0x62: h = d; return;
@@ -361,7 +379,7 @@ namespace dmge
 			case 0x65: h = l; return;
 			case 0x66: h = mem_->read(hl()); return;
 
-				// L
+			// L
 			case 0x68: l = b; return;
 			case 0x69: l = c; return;
 			case 0x6a: l = d; return;
@@ -370,7 +388,7 @@ namespace dmge
 			case 0x6d: l = l; return;
 			case 0x6e: l = mem_->read(hl()); return;
 
-				// (HL)
+			// (HL)
 			case 0x70: mem_->write(hl(), b); return;
 			case 0x71: mem_->write(hl(), c); return;
 			case 0x72: mem_->write(hl(), d); return;
@@ -2314,5 +2332,10 @@ namespace dmge
 			cpuDetail_->powerSavingMode_,
 			cpuDetail_->cgbMode_,
 		};
+	}
+
+	MooneyeTestResult CPU::mooneyeTestResult() const
+	{
+		return cpuDetail_->mooneyeTestResult_;
 	}
 }

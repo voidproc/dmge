@@ -50,6 +50,8 @@ namespace dmge
 		config.gamepadButtonAssign.buttonSelect = ParseOr<int>(ini[U"GamepadButtonSelect"], 2);
 		config.gamepadButtonAssign.buttonStart = ParseOr<int>(ini[U"GamepadButtonStart"], 3);
 
+		config.testMode = ParseOr<int>(ini[U"TestMode"], false);
+
 		return config;
 	}
 

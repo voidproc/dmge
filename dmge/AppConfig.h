@@ -60,6 +60,8 @@ namespace dmge
 		// ゲームパッドのボタン割り当て
 		GamepadButtonAssign gamepadButtonAssign;
 
+		bool testMode = false;
+
 		// config.ini のパース結果を返す
 		static AppConfig LoadConfig();
 

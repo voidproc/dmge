@@ -70,6 +70,12 @@ namespace
 		const auto directory = FileSystem::FullPath(defaultDirectory);
 		return Dialog::OpenFile({ FileFilter{ .name = U"GAMEBOY Cartridge", .patterns = {U"gb?"} } }, directory, U"ファイルを開く");
 	}
+
+	void SaveScreenshot(FilePathView path)
+	{
+		ScreenCapture::SaveCurrentFrame(path + U"");
+		System::Update();
+	}
 }
 
 
@@ -172,6 +178,11 @@ public:
 		return mode_;
 	}
 
+	dmge::MooneyeTestResult mooneyeTestResult() const
+	{
+		return mooneyeTestResult_;
+	}
+
 private:
 
 	void mainLoop_()
@@ -226,6 +237,17 @@ private:
 				{
 					//dmge::DebugPrint::Writeln(U"dot={}"_fmt(ppu_.dot() % 456));
 					cpu_.dump();
+				}
+			}
+
+			// テストモードの場合、テスト結果をチェック
+
+			if (config_.testMode)
+			{
+				mooneyeTestResult_ = cpu_.mooneyeTestResult();
+				if (mooneyeTestResult_ != dmge::MooneyeTestResult::Running)
+				{
+					return;
 				}
 			}
 
@@ -617,12 +639,62 @@ private:
 	// 一定のサイクル数を超過したら描画に移る
 	int cyclesFromPreviousDraw_ = 0;
 
+	dmge::MooneyeTestResult mooneyeTestResult_ = dmge::MooneyeTestResult::Running;
 
 };
+
+void runTest(dmge::AppConfig& config)
+{
+	config.bootROMPath.clear();
+	config.breakOnLDBB = false;
+	config.breakpoints.clear();
+	config.cartridgePath.clear();
+	config.dumpAddress.clear();
+	config.logFilePath.clear();
+	config.memoryWriteBreakpoints.clear();
+	config.showConsole = true;
+	config.showDebugMonitor = false;
+	config.showFPS = false;
+	config.traceDumpStartAddress.clear();
+	config.scale = 2;
+
+	dmge::DebugPrint::EnableConsole();
+
+	LoadAssets();
+
+	InitScene(config.scale, config.showDebugMonitor);
+
+	TextWriter writer{ U"mooneye_test_result.csv" };
+
+	const FilePath ssDirName = U"mooneye_test_result_{}"_fmt(DateTime::Now().format(U"yyyyMMdd_HHmmss"));
+
+	const auto mooneyeTestRoms = FileSystem::DirectoryContents(U"cartridges/test/mooneye", Recursive::Yes);
+
+	for (const auto& testRomPath : mooneyeTestRoms)
+	{
+		if (FileSystem::Extension(testRomPath) != U"gb") continue;
+
+		auto app = std::make_unique<DmgeApp>(config);
+
+		app->setCartridgePath(testRomPath);
+
+		app->run();
+
+		SaveScreenshot(U"{}/{}.png"_fmt(ssDirName, FileSystem::BaseName(testRomPath)));
+
+		writer.writeln(U"{},{}"_fmt(testRomPath, app->mooneyeTestResult() == dmge::MooneyeTestResult::Passed ? 1 : 0));
+	}
+}
 
 void Main()
 {
 	dmge::AppConfig config = dmge::AppConfig::LoadConfig();
+
+	if (config.testMode)
+	{
+		runTest(config);
+		return;
+	}
 
 	if (config.showConsole)
 	{

@@ -405,3 +405,4 @@ MigrationBackup/
 **/App/cartridges/
 **/App/boot/
 **/App/log/
+**/App/*_test_result.csv

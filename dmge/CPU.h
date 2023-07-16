@@ -18,6 +18,13 @@ namespace dmge
 		bool cgbMode;
 	};
 
+	enum class MooneyeTestResult
+	{
+		Running,
+		Passed,
+		Failed,
+	};
+
 	class CPU
 	{
 	public:
@@ -48,6 +55,8 @@ namespace dmge
 
 		// 現在のCPUの状態を取得（デバッグ用）
 		CPUState getCurrentCPUState() const;
+
+		MooneyeTestResult mooneyeTestResult() const;
 
 	private:
 		Memory* mem_;

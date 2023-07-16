@@ -15,6 +15,9 @@ namespace dmge
 		// 読み込むカートリッジのパス
 		String cartridgePath{};
 
+		// カートリッジを開くダイアログのデフォルトディレクトリ
+		String openCartridgeDirectory{};
+
 		// ブレークポイントを設定するアドレス
 		// 16進表記、コンマ区切りで複数指定可能
 		Array<uint16> breakpoints{};

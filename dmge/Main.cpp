@@ -17,50 +17,59 @@
 #include "Version.h"
 
 
-void LoadAssets()
+namespace
 {
-	const auto preloadText = U"0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ=-~^|@`[{;+:*]},<.>/?_";
+	void LoadAssets()
+	{
+		const auto preloadText = U"0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ=-~^|@`[{;+:*]},<.>/?_";
 
-	FontAsset::Register(U"debug", 10, Resource(U"fonts/JF-Dot-MPlus10.ttf"), FontStyle::Bitmap);
-	FontAsset::Load(U"debug", preloadText);
-}
+		FontAsset::Register(U"debug", 10, Resource(U"fonts/JF-Dot-MPlus10.ttf"), FontStyle::Bitmap);
+		FontAsset::Load(U"debug", preloadText);
+	}
 
-void SetWindowSize(int scale, bool showDebugMonitor)
-{
-	const int width = 160 * scale;
-	const int height = 144 * scale;
+	void SetWindowSize(int scale, bool showDebugMonitor)
+	{
+		const int width = 160 * scale;
+		const int height = 144 * scale;
 
-	const int widthWithDebugMonitor = width + dmge::DebugMonitor::ViewportSize.x;
-	const int heightWithDebugMonitor = Max(height, dmge::DebugMonitor::ViewportSize.y);
+		const int widthWithDebugMonitor = width + dmge::DebugMonitor::ViewportSize.x;
+		const int heightWithDebugMonitor = Max(height, dmge::DebugMonitor::ViewportSize.y);
 
-	const auto SceneSize = showDebugMonitor ? Size{ widthWithDebugMonitor, heightWithDebugMonitor } : Size{ width, height };
-	Scene::Resize(SceneSize);
-	Window::Resize(SceneSize);
-}
+		const auto SceneSize = showDebugMonitor ? Size{ widthWithDebugMonitor, heightWithDebugMonitor } : Size{ width, height };
+		Scene::Resize(SceneSize);
+		Window::Resize(SceneSize);
+	}
 
-void InitScene(int scale, bool showDebugMonitor)
-{
-	SetWindowSize(scale, showDebugMonitor);
+	void InitScene(int scale, bool showDebugMonitor)
+	{
+		SetWindowSize(scale, showDebugMonitor);
 
-	Window::SetTitle(U"dmge {}"_fmt(dmge::Version));
+		Window::SetTitle(U"dmge {}"_fmt(dmge::Version));
 
-	Scene::SetBackground(dmge::DebugMonitor::BgColor);
+		Scene::SetBackground(dmge::DebugMonitor::BgColor);
 
-	Scene::SetTextureFilter(TextureFilter::Nearest);
+		Scene::SetTextureFilter(TextureFilter::Nearest);
 
-	Graphics::SetVSyncEnabled(true);
+		Graphics::SetVSyncEnabled(true);
 
-	System::SetTerminationTriggers(UserAction::CloseButtonClicked);
+		System::SetTerminationTriggers(UserAction::CloseButtonClicked);
 
-	Profiler::EnableAssetCreationWarning(false);
-}
+		Profiler::EnableAssetCreationWarning(false);
+	}
 
-void DrawStatusText(StringView text)
-{
-	const Size size{ 5 * text.length(), 10 };
-	const Rect region{ Scene::Rect().tr().movedBy(-size.x, 0), size };
-	region.stretched(1, 1).draw(Color{0, 128});
-	FontAsset(U"debug")(text).draw(region.pos);
+	void DrawStatusText(StringView text)
+	{
+		const Size size{ 5 * text.length(), 10 };
+		const Rect region{ Scene::Rect().tr().movedBy(-size.x, 0), size };
+		region.stretched(1, 1).draw(Color{ 0, 128 });
+		FontAsset(U"debug")(text).draw(region.pos);
+	}
+
+	Optional<String> ChooseCartridge(FilePathView defaultDirectory)
+	{
+		const auto directory = FileSystem::FullPath(defaultDirectory);
+		return Dialog::OpenFile({ FileFilter{ .name = U"GAMEBOY Cartridge", .patterns = {U"gb?"} } }, directory, U"ファイルを開く");
+	}
 }
 
 
@@ -96,12 +105,6 @@ public:
 		setPPUPalette_(0);
 	}
 
-	Optional<String> chooseCartridge()
-	{
-		const auto cartDir = FileSystem::PathAppend(FileSystem::InitialDirectory(), U"cartridges");
-		return Dialog::OpenFile({ FileFilter{.name = U"GAMEBOY Cartridge", .patterns = {U"gb?"} } }, cartDir, U"ファイルを開く");
-	}
-
 	void setCartridgePath(const String& cartridgePath)
 	{
 		currentCartridgePath_ = cartridgePath;
@@ -113,7 +116,7 @@ public:
 		// ファイルを開くダイアログで選択する
 		if (not dmge::IsValidCartridgePath(currentCartridgePath_.value_or(U"")))
 		{
-			currentCartridgePath_ = chooseCartridge();
+			currentCartridgePath_ = ChooseCartridge(config_.openCartridgeDirectory);
 		}
 
 		// ファイルが開けない場合は終了する
@@ -359,7 +362,7 @@ private:
 		// 開く (Ctrl+O)
 		if (KeyO.down() && KeyControl.pressed())
 		{
-			if (const auto openPath = chooseCartridge();
+			if (const auto openPath = ChooseCartridge(FileSystem::ParentPath(currentCartridgePath_.value_or(U"")));
 				openPath)
 			{
 				currentCartridgePath_ = openPath;

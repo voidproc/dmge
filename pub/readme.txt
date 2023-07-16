@@ -52,6 +52,7 @@ C++ / OpenSiv3D でゲームボーイのエミュレータを作っています�
 また、`config.ini` を編集して以下の設定を行うことができます（`config.example.ini` を参考にしてください）。
 
 - `CartridgePath` : 読み込むカートリッジファイルのパス
+- `OpenCartridgeDirectory` : カートリッジを開くダイアログのデフォルトディレクトリ
 - `Breakpoint` : ブレークポイント（コンマ区切りで複数指定可能）
 - `MemoryWriteBreakpoint` : メモリ書き込み時ブレークポイント（コンマ区切りで複数指定可能）
 - `BreakOnLDBB` : LD B,B 実行時にブレークするかどうか

@@ -11,6 +11,8 @@ namespace dmge
 
 		config.cartridgePath = ParseOr<String>(ini[U"Cartridge"], U"");
 
+		config.openCartridgeDirectory = ParseOr<String>(ini[U"OpenCartridgeDirectory"], U"");
+
 		config.breakpoints = ParseOr<String>(ini[U"Breakpoint"], U"")
 			.split(U',')
 			.map([](const String& s) { return ParseInt<uint16>(s, 16); });
@@ -56,6 +58,8 @@ namespace dmge
 		DebugPrint::Writeln(U"* AppConfig:");
 
 		DebugPrint::Writeln(U"Cartridge={}"_fmt(cartridgePath));
+
+		DebugPrint::Writeln(U"OpenCartridgeDirectory={}"_fmt(openCartridgeDirectory));
 
 		if (not breakpoints.empty())
 		{

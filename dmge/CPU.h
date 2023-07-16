@@ -34,7 +34,7 @@ namespace dmge
 
 		void setCGBMode(bool value);
 
-		void enableDoubleSpeed(bool enable);
+		void setDoubleSpeed(bool enable);
 
 		// レジスタを初期状態にする
 		void reset(bool enableBootROM);

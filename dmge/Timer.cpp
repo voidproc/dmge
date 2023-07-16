@@ -39,7 +39,7 @@ namespace dmge
 	{
 		if (addr == Address::DIV)
 		{
-			return divInternal_ >> 8;
+			return div();
 		}
 		else if (addr == Address::TIMA)
 		{
@@ -144,6 +144,11 @@ namespace dmge
 	{
 		divInternal_ = 0;
 		divBitPrev_ = 0;
+	}
+
+	uint8 Timer::div() const
+	{
+		return divInternal_ >> 8;
 	}
 
 	void Timer::abortInterrupt_()

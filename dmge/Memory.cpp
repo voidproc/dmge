@@ -732,12 +732,14 @@ namespace dmge
 		vramTileDataModified_ = false;
 	}
 
-	void Memory::enableDoubleSpeed(bool enable)
+	void Memory::setDoubleSpeed(bool enable)
 	{
 		doubleSpeed_ = enable;
 		doubleSpeedPrepared_ = false;
 
 		timer_->resetDIV();
+
+		apu_->setDoubleSpeed(enable);
 	}
 
 	bool Memory::isDoubleSpeed() const

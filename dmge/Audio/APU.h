@@ -16,14 +16,18 @@ namespace dmge
 
 	class Memory;
 
+	class Timer;
+
 	class APUStream;
 
 	class APU
 	{
 	public:
-		APU(Memory* mem, int sampleRate = 44100);
+		APU(Timer& timer, int sampleRate = 44100);
 
 		void setCGBMode(bool value);
+
+		void setDoubleSpeed(bool value);
 
 		// サウンド処理を1クロック分実行し、
 		// サンプリングレートの周期にある場合はオーディオストリームにサンプルを書き込む
@@ -64,7 +68,7 @@ namespace dmge
 		bool getMute(int channel) const;
 
 	private:
-		Memory* mem_;
+		Timer& timer_;
 
 		int sampleRate_;
 
@@ -95,6 +99,9 @@ namespace dmge
 
 		// 各チャンネルのミュート状態
 		std::array<int, 4> mute_;
+
+		// 倍速モード時の DIV シフト量 (通常:0, 倍速:1)
+		int divShiftBits_ = 0;
 
 	};
 }

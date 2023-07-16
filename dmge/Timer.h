@@ -20,6 +20,8 @@ namespace dmge
 
 		void resetDIV();
 
+		uint8 div() const;
+
 	private:
 		Memory* mem_;
 		Interrupt* interrupt_;

@@ -1,14 +1,14 @@
 ﻿#include "APU.h"
 #include "APUStream.h"
-#include "../Memory.h"
 #include "../Address.h"
 #include "../Timing.h"
+#include "../Timer.h"
 
 namespace dmge
 {
-	APU::APU(Memory* mem, int sampleRate)
+	APU::APU(Timer& timer, int sampleRate)
 		:
-		mem_{ mem },
+		timer_{ timer },
 		sampleRate_{ sampleRate },
 		apuStream_{ std::make_shared<APUStream>() },
 		audio_{ apuStream_ },
@@ -24,6 +24,11 @@ namespace dmge
 	void APU::setCGBMode(bool value)
 	{
 		cgbMode_ = value;
+	}
+
+	void APU::setDoubleSpeed(bool value)
+	{
+		divShiftBits_ = value ? 1 : 0;
 	}
 
 	int APU::run()
@@ -45,7 +50,7 @@ namespace dmge
 
 		// Frame Sequencer
 
-		frameSeq_.step(mem_->read(Address::DIV));
+		frameSeq_.step(timer_.div() >> divShiftBits_);
 
 		const bool onExtraLengthClock = frameSeq_.onExtraLengthClock();
 		ch1_.setExtraLengthClockCondition(onExtraLengthClock);

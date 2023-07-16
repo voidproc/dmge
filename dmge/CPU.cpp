@@ -32,11 +32,11 @@ namespace dmge
 			cgbMode_ = value;
 		}
 
-		void enableDoubleSpeed(bool enable)
+		void setDoubleSpeed(bool enable)
 		{
 			doubleSpeed_ = enable;
 
-			mem_->enableDoubleSpeed(enable);
+			mem_->setDoubleSpeed(enable);
 		}
 
 		void reset(bool enableBootROM)
@@ -1089,7 +1089,7 @@ namespace dmge
 		{
 			// opcode: 0x10
 
-			mem_->enableDoubleSpeed(mem_->read(Address::KEY1) & 1);
+			mem_->setDoubleSpeed(mem_->read(Address::KEY1) & 1);
 		}
 
 		void di_(const Instruction&)
@@ -2301,9 +2301,9 @@ namespace dmge
 		cpuDetail_->setCGBMode(value);
 	}
 
-	void CPU::enableDoubleSpeed(bool enable)
+	void CPU::setDoubleSpeed(bool enable)
 	{
-		cpuDetail_->enableDoubleSpeed(enable);
+		cpuDetail_->setDoubleSpeed(enable);
 	}
 
 	void CPU::reset(bool enableBootROM)

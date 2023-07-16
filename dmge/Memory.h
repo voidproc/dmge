@@ -70,7 +70,7 @@ namespace dmge
 		bool isVRAMTileDataModified();
 		void resetVRAMTileDataModified();
 
-		void enableDoubleSpeed(bool enable);
+		void setDoubleSpeed(bool enable);
 		bool isDoubleSpeed() const;
 
 	private:

@@ -578,7 +578,7 @@ private:
 	// (APU)サンプリングレート
 	int sampleRate_ = 44100;
 
-	dmge::APU apu_{ &mem_, sampleRate_ };
+	dmge::APU apu_{ timer_, sampleRate_ };
 
 	dmge::Timer timer_{ &mem_, &interrupt_ };
 

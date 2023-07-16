@@ -69,7 +69,7 @@ C++ / OpenSiv3D でゲームボーイのエミュレータを作っています�
   - ステップ実行 : <kbd>F7</kbd>
   - ステップ実行を終了 : <kbd>F5</kbd>
 
-また、`config.ini` を編集して以下の設定を行うことができます（`config.example.ini` を参考にしてください）。
+また、`config.ini` を編集して以下の設定を行うことができます（[`config.example.ini`](https://github.com/voidproc/dmge/blob/main/dmge/App/config.example.ini) を参考にしてください）。
 
 - `CartridgePath` : 読み込むカートリッジファイルのパス
 - `OpenCartridgeDirectory` : カートリッジを開くダイアログのデフォルトディレクトリ

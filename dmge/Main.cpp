@@ -285,6 +285,7 @@ private:
 				}
 
 				fpsKeeper.sleep();
+
 				cyclesFromPreviousDraw_ = 0;
 
 			}

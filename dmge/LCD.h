@@ -2,6 +2,7 @@
 
 #include "Colors.h"
 #include "Address.h"
+#include "PPUMode.h"
 
 namespace dmge
 {
@@ -57,6 +58,10 @@ namespace dmge
 
 		// STAT.2 - LYC = LY Flag
 		bool lycFlag() const;
+
+		void setSTATLYCFlag(bool flag);
+
+		void setSTATPPUMode(PPUMode mode);
 
 		// SCY (0xff42)
 		uint8 scy() const;

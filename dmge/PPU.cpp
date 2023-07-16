@@ -85,6 +85,11 @@ namespace dmge
 			}
 		}
 
+		// VBlankに移行したので
+		// - このフレームの描画結果を RenderTexture に出力
+		// - ピクセルフェッチャーの状態をリセット
+		// - 割り込み要求
+
 		if (modeChangedToVBlank())
 		{
 			flushRenderingResult();
@@ -92,12 +97,7 @@ namespace dmge
 			toDrawWindow_ = false;
 			drawingWindow_ = false;
 			windowLine_ = 0;
-		}
 
-		// VBlank割り込み要求
-
-		if (modeChangedToVBlank())
-		{
 			interrupt_->request(BitMask::InterruptFlagBit::VBlank);
 		}
 
@@ -239,10 +239,7 @@ namespace dmge
 		}
 
 		// Set STAT.1-0 (PPU Mode)
-		// LCDがOFFの場合は mode=0 をセットする
-
-		const uint8 stat = lcd_->stat();
-		mem_->write(Address::STAT, 0x80 | (stat & ~3) | (lcd_->isEnabled() ? (uint8)mode_ : 0));
+		lcd_->setSTATPPUMode(mode_);
 	}
 
 	void PPU::updateSTAT_()
@@ -255,8 +252,7 @@ namespace dmge
 
 		if ((ly != prevLY_) || (lyc != prevLYC_))
 		{
-			const uint8 stat = lcd_->stat();
-			mem_->write(Address::STAT, 0x80 | (stat & ~4) | (ly == lyc ? 4 : 0));
+			lcd_->setSTATLYCFlag(ly == lyc);
 		}
 
 		prevLY_ = ly;
@@ -383,7 +379,7 @@ namespace dmge
 		const uint8 color = TileData::GetColor(tileData, fetcherX % 8, tileMapAttr.attr.xFlip);
 
 		// 実際の描画色
-		Color dotColor;
+		Color& dotColor = canvas_[ly][canvasX_];
 		if (not cgbMode_)
 		{
 			// LCDC.0 == 0 の場合はBGを描画しない
@@ -399,8 +395,6 @@ namespace dmge
 		{
 			dotColor = fetchOAMDot_(dotColor, color, tileMapAttr);
 		}
-
-		canvas_[ly][canvasX_] = dotColor;
 
 		fetcherX_++;
 		canvasX_++;

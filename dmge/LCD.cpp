@@ -92,6 +92,17 @@ namespace dmge
 		return (stat_ & BitMask::STAT::LYCFlag) > 0;
 	}
 
+	void LCD::setSTATLYCFlag(bool flag)
+	{
+		stat_ = 0x80 | (stat_ & ~4) | (flag ? 4 : 0);
+	}
+
+	void LCD::setSTATPPUMode(PPUMode mode)
+	{
+		// LCDがOFFの場合は mode=0 をセットする
+		stat_ = 0x80 | (stat_ & ~3) | (isEnabled() ? (uint8)mode : 0);
+	}
+
 	uint8 LCD::scy() const
 	{
 		return scy_;

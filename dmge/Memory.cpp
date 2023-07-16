@@ -317,10 +317,17 @@ namespace dmge
 
 			goto Fallback_WriteToMemory;
 		}
+		else if (addr <= Address::HDMA4)
+		{
+			// HDMA アドレス指定
+			// 0xff51 - 0xff54
+
+			goto Fallback_WriteToMemory;
+		}
 		else if (addr <= Address::HDMA5)
 		{
-			// HDMA
-			// 0xff51 - 0xff55
+			// HDMA 制御
+			// 0xff55
 
 			// 仮実装
 			const uint16 srcAddr = (read(Address::HDMA1) << 8) | (read(Address::HDMA2) & 0xf0);

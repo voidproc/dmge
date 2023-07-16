@@ -140,6 +140,12 @@ namespace dmge
 		}
 	}
 
+	void Timer::resetDIV()
+	{
+		divInternal_ = 0;
+		divBitPrev_ = 0;
+	}
+
 	void Timer::abortInterrupt_()
 	{
 		tmaCount_ = 0;

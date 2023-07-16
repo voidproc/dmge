@@ -285,7 +285,11 @@ namespace dmge
 		{
 			// (CGB) KEY1
 			// 0xff4d
-			// ...
+
+			if (value & 1)
+			{
+				doubleSpeedPrepared_ = true;
+			}
 
 			goto Fallback_WriteToMemory;
 		}
@@ -565,7 +569,8 @@ namespace dmge
 		{
 			// (CGB) KEY1
 			// 0xff4d
-			// ...
+
+			return ((uint8)doubleSpeed_ << 7) | ((uint8)doubleSpeedPrepared_);
 		}
 		else if (addr <= 0xff4e)
 		{
@@ -685,6 +690,11 @@ namespace dmge
 		return mbc_->ramBank();
 	}
 
+	int Memory::vramBank() const
+	{
+		return vramBank_;
+	}
+
 	void Memory::dumpCartridgeInfo()
 	{
 		mbc_->dumpCartridgeInfo();
@@ -720,5 +730,18 @@ namespace dmge
 	void Memory::resetVRAMTileDataModified()
 	{
 		vramTileDataModified_ = false;
+	}
+
+	void Memory::enableDoubleSpeed(bool enable)
+	{
+		doubleSpeed_ = enable;
+		doubleSpeedPrepared_ = false;
+
+		timer_->resetDIV();
+	}
+
+	bool Memory::isDoubleSpeed() const
+	{
+		return doubleSpeed_;
 	}
 }

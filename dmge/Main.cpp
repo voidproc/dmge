@@ -494,6 +494,9 @@ private:
 
 	void tickUnits_(int cycles)
 	{
+		bool doubleSpeed = mem_.isDoubleSpeed();
+		int doubleSpeedFactor = mem_.isDoubleSpeed() ? 2 : 1;
+
 		// RTC, DMA
 		mem_.update(cycles);
 
@@ -506,7 +509,7 @@ private:
 
 		// PPU
 
-		for (int i : step(cycles))
+		for (int i : step(cycles / doubleSpeedFactor))
 		{
 			ppu_.run();
 		}
@@ -515,7 +518,7 @@ private:
 
 		if (enableAPU_)
 		{
-			for (int i : step(cycles))
+			for (int i : step(cycles / doubleSpeedFactor))
 			{
 				bufferedSamples_ += apu_.run();
 			}
@@ -528,11 +531,13 @@ private:
 
 		// (1) オーディオバッファに1フレーム分のサンプルを書き込んだら描画する
 
+		int doubleSpeedFactor = mem_.isDoubleSpeed() ? 2 : 1;
+
 		if (enableAPU_)
 		{
-			if (bufferedSamples_ > 1.0 * sampleRate_ / 60.0)
+			if (bufferedSamples_ > 1.0 * sampleRate_ / 60.0 * doubleSpeedFactor)
 			{
-				bufferedSamples_ -= sampleRate_ / 60.0;
+				bufferedSamples_ -= sampleRate_ / 60.0 * doubleSpeedFactor;
 
 				shouldDraw = true;
 			}
@@ -542,9 +547,8 @@ private:
 
 		cyclesFromPreviousDraw_ += cpu_.consumedCycles();
 
-		if (cyclesFromPreviousDraw_ >= dmge::ClockFrequency / 59.50)
+		if (cyclesFromPreviousDraw_ >= dmge::ClockFrequency / 59.50 * doubleSpeedFactor)
 		{
-
 			shouldDraw = true;
 		}
 

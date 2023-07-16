@@ -51,6 +51,8 @@ namespace dmge
 
 		int ramBank() const;
 
+		int vramBank() const;
+
 		void dumpCartridgeInfo();
 
 		void dump(uint16 addrBegin, uint16 addrEnd);
@@ -67,6 +69,9 @@ namespace dmge
 
 		bool isVRAMTileDataModified();
 		void resetVRAMTileDataModified();
+
+		void enableDoubleSpeed(bool enable);
+		bool isDoubleSpeed() const;
 
 	private:
 		PPU* ppu_ = nullptr;
@@ -96,5 +101,9 @@ namespace dmge
 
 		// メモリ書き込み時フック
 		Array<std::function<void(uint16, uint8)>> writeHooks_{};
+
+		// (CGB)倍速モード
+		bool doubleSpeed_ = false;
+		bool doubleSpeedPrepared_ = false;
 	};
 }

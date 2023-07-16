@@ -18,6 +18,8 @@ namespace dmge
 
 		void update();
 
+		void resetDIV();
+
 	private:
 		Memory* mem_;
 		Interrupt* interrupt_;

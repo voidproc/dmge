@@ -826,6 +826,7 @@
       <Filter>Resource Files\engine\font\min</Filter>
     </None>
     <None Include="App\config.ini" />
+    <None Include="App\config.example.ini" />
   </ItemGroup>
   <ItemGroup>
     <Media Include="App\example\test.mp3">

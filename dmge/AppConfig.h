@@ -21,7 +21,7 @@ namespace dmge
 
 		// メモリ書き込み時ブレークポイントを設定するアドレス
 		// 16進表記、コンマ区切りで複数指定可能
-		Array<uint16> breakpointsMemWrite{};
+		Array<uint16> memoryWriteBreakpoints{};
 
 		// トレースダンプを開始するアドレス
 		Array<uint16> traceDumpStartAddress{};

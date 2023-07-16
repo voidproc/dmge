@@ -15,7 +15,7 @@ namespace dmge
 			.split(U',')
 			.map([](const String& s) { return ParseInt<uint16>(s, 16); });
 
-		config.breakpointsMemWrite = ParseOr<String>(ini[U"BreakpointMemW"], U"")
+		config.memoryWriteBreakpoints = ParseOr<String>(ini[U"MemoryWriteBreakpoint"], U"")
 			.split(U',')
 			.map([](const String& s) { return ParseInt<uint16>(s, 16); });
 
@@ -65,12 +65,12 @@ namespace dmge
 			DebugPrint::Writeln(U"Breakpoint={}"_fmt(breakpointsText));
 		}
 
-		if (not breakpointsMemWrite.empty())
+		if (not memoryWriteBreakpoints.empty())
 		{
-			const auto breakpointsText = breakpointsMemWrite
+			const auto breakpointsText = memoryWriteBreakpoints
 				.map([](auto x) { return U"{:04X}"_fmt(x); })
 				.join(U","_sv, U""_sv, U""_sv);
-			DebugPrint::Writeln(U"BreakpointMemW={}"_fmt(breakpointsText));
+			DebugPrint::Writeln(U"MemoryWriteBreakpoint={}"_fmt(breakpointsText));
 		}
 
 		if (not traceDumpStartAddress.empty())

@@ -85,7 +85,7 @@ public:
 		joypad_.setButtonAssign(config_.gamepadButtonAssign);
 
 		// メモリ書き込み時フックを設定
-		if (config_.enableBreakpoint && not config_.breakpointsMemWrite.empty())
+		if (config_.enableBreakpoint && not config_.memoryWriteBreakpoints.empty())
 		{
 			mem_.setWriteHook([&](uint16 addr, uint8 value) {
 				onMemoryWrite_(addr, value);
@@ -173,15 +173,10 @@ private:
 
 	void mainLoop_()
 	{
-		// 前回の描画からの経過サイクル数
-		uint64 cyclesFromPreviousDraw = 0;
-
-		bool shouldDraw = false;
-
-		int bufferedSamples = 0;
-
 		dmge::FPSKeeper fpsKeeper{};
 
+		// モニタのリフレッシュレートが 60Hz の場合は FPS 制御を Siv3D に任せる
+		// そうでない場合は FPSKeeper で 60[FPS] を保つ
 		if (System::GetCurrentMonitor().refreshRate == 60)
 		{
 			fpsKeeper.setEnable(false);
@@ -189,10 +184,7 @@ private:
 
 		while (not quitApp_)
 		{
-			bool shouldDumpCPU = false;
-
-			// ブレークポイントが有効で、ブレークポイントに達していたら
-			// トレースモードに切り替える
+			// ブレークポイントに達したらトレースモードに切り替える
 
 			if (reachedBreakpoint_())
 			{
@@ -203,27 +195,16 @@ private:
 				dmge::DebugPrint::Writeln(U"Break: pc={:04X}"_fmt(cpu_.currentPC()));
 			}
 
+			// トレースダンプを開始するアドレスに達していたら
 			// トレースダンプ開始
+
 			if (reachedTraceDumpAddress_())
 			{
 				enableTraceDump_ = true;
 			}
 
-			// LD B,B 実行時にブレークする
-			if (config_.breakOnLDBB && mem_.read(cpu_.currentPC()) == 0x40)
-			{
-				mode_ = DmgeAppMode::Trace;
-
-				apu_.pause();
-			}
-
-			// [DEBUG]
-			if (enableTraceDump_)
-			{
-				shouldDumpCPU = true;
-			}
-
-			// トレースモードなら、専用のループへ
+			// トレースモードならメモリ・CPUをダンプ
+			// トレースモード専用のループへ
 
 			if (mode_ == DmgeAppMode::Trace)
 			{
@@ -238,7 +219,7 @@ private:
 			}
 			else
 			{
-				if (shouldDumpCPU)
+				if (enableTraceDump_)
 				{
 					//dmge::DebugPrint::Writeln(U"dot={}"_fmt(ppu_.dot() % 456));
 					cpu_.dump();
@@ -248,71 +229,17 @@ private:
 			// CPUコマンドを1回実行する
 			cpu_.run();
 
-			const auto tickUnits = [&](int cycles)
-			{
-				// RTC, DMA
-				mem_.update(cycles);
-
-				// タイマーを更新
-
-				for (int i : step(cycles))
-				{
-					timer_.update();
-				}
-
-				// PPU
-
-				for (int i : step(cycles))
-				{
-					ppu_.run();
-				}
-
-				// APU
-
-				if (enableAPU_)
-				{
-					for (int i : step(cycles))
-					{
-						bufferedSamples += apu_.run();
-					}
-				}
-			};
-
-			tickUnits(cpu_.consumedCycles());
+			tickUnits_(cpu_.consumedCycles());
 
 			// 割り込み
 			if (cpu_.interrupt())
 			{
-				tickUnits(5 * 4);
+				tickUnits_(5 * 4);
 			}
-
-			// 描画するか？
-
-			if (enableAPU_)
-			{
-				// (1) オーディオバッファに1フレーム分のサンプルを書き込んだら描画する
-
-				if (bufferedSamples > 1.0 * sampleRate_ / 60.0)
-				{
-					shouldDraw = true;
-
-					bufferedSamples -= sampleRate_ / 60.0;
-				}
-			}
-
-			// (2) 描画されないまま一定のサイクル数が経過した場合に強制的に描画する
-
-			cyclesFromPreviousDraw += cpu_.consumedCycles();
-
-			if (cyclesFromPreviousDraw >= dmge::ClockFrequency / 59.50)
-			{
-				shouldDraw = true;
-			}
-
 
 			// キー入力と描画
 
-			if (shouldDraw)
+			if (checkShouldDraw_())
 			{
 				if (not System::Update())
 				{
@@ -343,11 +270,7 @@ private:
 				// デバッグ用モニタ表示
 				if (showDebugMonitor_)
 				{
-					debugMonitor_.update();
-
-					debugMonitor_.draw(Point{ 160 * config_.scale, 0 });
-
-					debugMonitor_.updateGUI();
+					updateDebugMonitor_();
 				}
 
 				// デバッグモニタのテキストボックス入力中はJOYPADを更新しない
@@ -359,9 +282,8 @@ private:
 				}
 
 				fpsKeeper.sleep();
+				cyclesFromPreviousDraw_ = 0;
 
-				shouldDraw = false;
-				cyclesFromPreviousDraw = 0;
 			}
 		}
 	}
@@ -396,9 +318,7 @@ private:
 			// デバッグ用モニタ表示
 			if (showDebugMonitor_)
 			{
-				debugMonitor_.update();
-
-				debugMonitor_.draw(Point{ 160 * config_.scale, 0 });
+				updateDebugMonitor_();
 			}
 
 			DrawStatusText(U"TRACE");
@@ -489,7 +409,7 @@ private:
 			return;
 		}
 
-		for (const auto& mem : config_.breakpointsMemWrite)
+		for (const auto& mem : config_.memoryWriteBreakpoints)
 		{
 			if (addr == mem)
 			{
@@ -523,6 +443,11 @@ private:
 			}
 		}
 
+		if (config_.breakOnLDBB && mem_.read(cpu_.currentPC()) == 0x40)
+		{
+			return true;
+		}
+
 		return false;
 	}
 
@@ -539,6 +464,74 @@ private:
 		}
 
 		return false;
+	}
+
+	void tickUnits_(int cycles)
+	{
+		// RTC, DMA
+		mem_.update(cycles);
+
+		// タイマーを更新
+
+		for (int i : step(cycles))
+		{
+			timer_.update();
+		}
+
+		// PPU
+
+		for (int i : step(cycles))
+		{
+			ppu_.run();
+		}
+
+		// APU
+
+		if (enableAPU_)
+		{
+			for (int i : step(cycles))
+			{
+				bufferedSamples_ += apu_.run();
+			}
+		}
+	}
+
+	bool checkShouldDraw_()
+	{
+		bool shouldDraw = false;
+
+		// (1) オーディオバッファに1フレーム分のサンプルを書き込んだら描画する
+
+		if (enableAPU_)
+		{
+			if (bufferedSamples_ > 1.0 * sampleRate_ / 60.0)
+			{
+				bufferedSamples_ -= sampleRate_ / 60.0;
+
+				shouldDraw = true;
+			}
+		}
+
+		// (2) 描画されないまま一定のサイクル数が経過した場合に強制的に描画する
+
+		cyclesFromPreviousDraw_ += cpu_.consumedCycles();
+
+		if (cyclesFromPreviousDraw_ >= dmge::ClockFrequency / 59.50)
+		{
+
+			shouldDraw = true;
+		}
+
+		return shouldDraw;
+	}
+
+	void updateDebugMonitor_()
+	{
+		debugMonitor_.update();
+
+		debugMonitor_.draw(Point{ 160 * config_.scale, 0 });
+
+		debugMonitor_.updateGUI();
 	}
 
 
@@ -611,6 +604,16 @@ private:
 
 	// ロードしているカートリッジのパス
 	Optional<String> currentCartridgePath_{};
+
+	// オーディオストリームに書き込んだサンプル数の合計
+	// 1フレーム分書き込んだら描画に移る
+	int bufferedSamples_ = 0;
+
+	// 前回の描画からの経過サイクル数
+	// 一定のサイクル数を超過したら描画に移る
+	int cyclesFromPreviousDraw_ = 0;
+
+
 };
 
 void Main()

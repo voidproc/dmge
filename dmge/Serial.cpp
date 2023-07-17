@@ -28,15 +28,21 @@ namespace dmge
 			break;
 
 		case Address::SC:
+		{
+			const SerialClockSource source = static_cast<SerialClockSource>(value & 1);
+
+			if (source != SerialClockSource::Internal) break;
+
 			if (value >> 7)
 			{
 				remainBits_ = (uint8)8;
 				clockSpeed_ = static_cast<SerialClockSpeed>((value >> 1) & 1);
-				clockSource_ = static_cast<SerialClockSource>(value & 1);
+				clockSource_ = source;
 
 				clock_ = SerialClockCycles(clockSpeed_);
 			}
 			break;
+		}
 		}
 	}
 

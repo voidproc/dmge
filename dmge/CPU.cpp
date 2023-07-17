@@ -32,13 +32,6 @@ namespace dmge
 			cgbMode_ = value;
 		}
 
-		void setDoubleSpeed(bool enable)
-		{
-			doubleSpeed_ = enable;
-
-			mem_->setDoubleSpeed(enable);
-		}
-
 		void reset(bool enableBootROM)
 		{
 			af(cgbMode_ ? 0x11b0 : 0x01b0); // GB/SGB:0x01b0, GBP:0xffb0, GBC:0x11b0
@@ -286,9 +279,6 @@ namespace dmge
 
 		// CGB Mode
 		bool cgbMode_ = false;
-
-		// (CGB) 倍速モード
-		bool doubleSpeed_ = false;
 
 		MooneyeTestResult mooneyeTestResult_ = MooneyeTestResult::Running;
 
@@ -1089,7 +1079,7 @@ namespace dmge
 		{
 			// opcode: 0x10
 
-			mem_->setDoubleSpeed(mem_->read(Address::KEY1) & 1);
+			mem_->switchDoubleSpeed();
 		}
 
 		void di_(const Instruction&)
@@ -2299,11 +2289,6 @@ namespace dmge
 	void CPU::setCGBMode(bool value)
 	{
 		cpuDetail_->setCGBMode(value);
-	}
-
-	void CPU::setDoubleSpeed(bool enable)
-	{
-		cpuDetail_->setDoubleSpeed(enable);
 	}
 
 	void CPU::reset(bool enableBootROM)

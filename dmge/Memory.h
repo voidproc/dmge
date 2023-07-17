@@ -101,6 +101,9 @@ namespace dmge
 		// OAM DMA
 		DMA dma_{ this };
 
+		// HDMA
+		bool hblankDMATransferring_ = false;
+
 		// メモリ書き込み時フック
 		Array<std::function<void(uint16, uint8)>> writeHooks_{};
 

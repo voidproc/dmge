@@ -335,6 +335,24 @@ namespace dmge
 			// 0xff55
 
 			// 仮実装
+
+			// HBlank DMA が開始され、その後 Bit7 がリセットされたときなにもしないで終了する（暫定）
+			{
+				if (value & 0x80)
+				{
+					hblankDMATransferring_ = true;
+				}
+
+				if (hblankDMATransferring_)
+				{
+					if ((value & 0x80) == 0)
+					{
+						hblankDMATransferring_ = false;
+						goto Fallback_WriteToMemory;
+					}
+				}
+			}
+
 			const uint16 srcAddr = (read(Address::HDMA1) << 8) | (read(Address::HDMA2) & 0xf0);
 			const uint16 dstAddr = (((read(Address::HDMA3) << 8) | read(Address::HDMA4)) & 0x1ff0) + 0x8000;
 			const auto length = ((value & 0x7f) + 1) * 0x10;
@@ -343,7 +361,7 @@ namespace dmge
 				write(dstAddr + i, read(srcAddr + i));
 			}
 
-			// FIXME: 転送モード（bit7）を考慮していないので、転送が終わったことにしている
+			// 転送が一瞬で終わったことにする
 			value = 0xff;
 
 			goto Fallback_WriteToMemory;

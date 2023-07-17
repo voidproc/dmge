@@ -11,6 +11,7 @@ namespace dmge
 	class APU;
 	class Timer;
 	class Joypad;
+	class Serial;
 	class LCD;
 	class Interrupt;
 
@@ -21,7 +22,7 @@ namespace dmge
 
 		~Memory();
 
-		void init(PPU* ppu, APU* apu, dmge::Timer* timer, dmge::Joypad* joypad, LCD* lcd, Interrupt* interrupt);
+		void init(PPU* ppu, APU* apu, dmge::Timer* timer, dmge::Joypad* joypad, LCD* lcd, Interrupt* interrupt, Serial* serial);
 
 		void reset();
 
@@ -78,6 +79,7 @@ namespace dmge
 		APU* apu_ = nullptr;
 		Timer* timer_ = nullptr;
 		Joypad* joypad_ = nullptr;
+		Serial* serial_ = nullptr;
 		LCD* lcd_ = nullptr;
 		Interrupt* interrupt_ = nullptr;
 

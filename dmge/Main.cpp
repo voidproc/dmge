@@ -8,6 +8,7 @@
 #include "Audio/APU.h"
 #include "Timer.h"
 #include "Joypad.h"
+#include "Serial.h"
 #include "Interrupt.h"
 #include "Address.h"
 #include "Timing.h"
@@ -95,7 +96,7 @@ public:
 
 		showDebugMonitor_ = config_.showDebugMonitor;
 
-		mem_.init(&ppu_, &apu_, &timer_, &joypad_, &lcd_, &interrupt_);
+		mem_.init(&ppu_, &apu_, &timer_, &joypad_, &lcd_, &interrupt_, &serial_);
 
 		joypad_.setButtonAssign(config_.gamepadButtonAssign);
 
@@ -508,6 +509,13 @@ private:
 			timer_.update();
 		}
 
+		// Serial
+
+		for (int i : step(cycles))
+		{
+			serial_.update();
+		}
+
 		// PPU
 
 		for (int i : step(cycles / doubleSpeedFactor))
@@ -586,6 +594,8 @@ private:
 	dmge::CPU cpu_{ &mem_, &interrupt_ };
 
 	dmge::Joypad joypad_{ &mem_ };
+
+	dmge::Serial serial_{ interrupt_ };
 
 	dmge::DebugMonitor debugMonitor_{ &mem_, &cpu_, &apu_, &interrupt_ };
 

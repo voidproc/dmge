@@ -144,6 +144,7 @@
     <ClCompile Include="Memory.cpp" />
     <ClCompile Include="PPU.cpp" />
     <ClCompile Include="RTC.cpp" />
+    <ClCompile Include="Serial.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
@@ -280,6 +281,7 @@
     <ClInclude Include="PPUConstants.h" />
     <ClInclude Include="PPUMode.h" />
     <ClInclude Include="RTC.h" />
+    <ClInclude Include="Serial.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="TileData.h" />
     <ClInclude Include="TileMapAttribute.h" />

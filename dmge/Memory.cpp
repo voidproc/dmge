@@ -5,6 +5,7 @@
 #include "Audio/APU.h"
 #include "Timer.h"
 #include "Joypad.h"
+#include "Serial.h"
 #include "Interrupt.h"
 #include "DebugPrint.h"
 
@@ -18,12 +19,13 @@ namespace dmge
 	{
 	}
 
-	void Memory::init(PPU* ppu, APU* apu, dmge::Timer* timer, dmge::Joypad* joypad, LCD* lcd, Interrupt* interrupt)
+	void Memory::init(PPU* ppu, APU* apu, dmge::Timer* timer, dmge::Joypad* joypad, LCD* lcd, Interrupt* interrupt, Serial* serial)
 	{
 		ppu_ = ppu;
 		apu_ = apu;
 		timer_ = timer;
 		joypad_ = joypad;
+		serial_ = serial;
 		lcd_ = lcd;
 		interrupt_ = interrupt;
 	}
@@ -185,9 +187,8 @@ namespace dmge
 		{
 			// Serial
 			// 0xff01 - 0xff02
-			// ...
 
-			goto Fallback_WriteToMemory;
+			serial_->writeRegister(addr, value);
 		}
 		else if (addr <= 0xff03)
 		{
@@ -507,7 +508,8 @@ namespace dmge
 		{
 			// Serial
 			// 0xff01 - 0xff02
-			// ...
+
+			return serial_->readRegister(addr);
 		}
 		else if (addr <= 0xff03)
 		{

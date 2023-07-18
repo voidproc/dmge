@@ -406,3 +406,5 @@ MigrationBackup/
 **/App/boot/
 **/App/log/
 **/App/*_test_result.csv
+
+tool/dmge_v**

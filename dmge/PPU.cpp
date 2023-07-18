@@ -15,7 +15,7 @@ namespace dmge
 	{
 		HLSL PPURenderingShader()
 		{
-			return HLSL{ U"shaders/lcd.hlsl", U"PS" };
+			return HLSL{ Resource(U"shaders/lcd.hlsl"), U"PS" };
 		}
 	}
 

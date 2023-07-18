@@ -11,6 +11,14 @@
 namespace dmge
 {
 
+	namespace
+	{
+		HLSL PPURenderingShader()
+		{
+			return HLSL{ U"shaders/lcd.hlsl", U"PS" };
+		}
+	}
+
 	PPU::PPU(Memory* mem, LCD* lcd, Interrupt* interrupt)
 		:
 		mem_{ mem },
@@ -18,7 +26,7 @@ namespace dmge
 		interrupt_{ interrupt },
 		canvas_{ LCDSize.x + 8, LCDSize.y },
 		texture_{ canvas_.size() },
-		renderTexture_{ LCDSize }
+		pixelShader_{ PPURenderingShader() }
 	{
 		dot_ = FrameDots - 52 + 4;
 		canvas_.fill(Palette::White);
@@ -32,6 +40,15 @@ namespace dmge
 	void PPU::setCGBMode(bool value)
 	{
 		cgbMode_ = value;
+
+		cbRenderingSetting_->gamma = value ? gamma_ : 1.0;
+	}
+
+	void PPU::setGamma(double gamma)
+	{
+		gamma_ = gamma;
+
+		if (cgbMode_) cbRenderingSetting_->gamma = gamma;
 	}
 
 	void PPU::run()
@@ -111,10 +128,7 @@ namespace dmge
 
 	void PPU::flushRenderingResult()
 	{
-		const ScopedRenderStates2D renderState{ SamplerState::ClampNearest };
-		const ScopedRenderTarget2D renderTarget{ renderTexture_ };
 		texture_.fill(canvas_);
-		texture_.draw();
 	}
 
 	void PPU::draw(const Vec2& pos, int scale)
@@ -125,7 +139,11 @@ namespace dmge
 
 		const Transformer2D transformer{ Mat3x2::Scale(scale).translated(pos) };
 
-		renderTexture_.draw();
+		Graphics2D::SetPSConstantBuffer(1, cbRenderingSetting_);
+
+		const ScopedCustomShader2D shader{ pixelShader_ };
+
+		texture_.draw();
 	}
 
 	PPUMode PPU::mode() const

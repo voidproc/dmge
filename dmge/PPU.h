@@ -11,6 +11,12 @@ namespace dmge
 	struct OAM;
 	union TileMapAttribute;
 
+	// ピクセルシェーダに渡すパラメータ
+	struct RenderingSetting
+	{
+		float gamma = 1;
+	};
+
 	class PPU
 	{
 	public:
@@ -19,6 +25,8 @@ namespace dmge
 		~PPU();
 
 		void setCGBMode(bool value);
+
+		void setGamma(double gamma);
 
 		// このフレームのレンダリングを1ドット進める
 		// LY・PPUモード・STATを更新する
@@ -79,7 +87,11 @@ namespace dmge
 		// レンダリング結果
 		Image canvas_;
 		DynamicTexture texture_;
-		RenderTexture renderTexture_;
+
+		const PixelShader pixelShader_;
+		ConstantBuffer<RenderingSetting> cbRenderingSetting_{};
+
+		double gamma_ = 1;
 
 		// ピクセルフェッチャーのいるX座標
 		// ウィンドウフェッチが開始すると0にリセットされる

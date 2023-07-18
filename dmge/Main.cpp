@@ -110,6 +110,9 @@ public:
 
 		// 画面表示用パレット初期化
 		setPPUPalette_(0);
+
+		// ピクセルシェーダ用パラメータ
+		ppu_.setGamma(config_.cgbColorGamma);
 	}
 
 	void setCartridgePath(const String& cartridgePath)

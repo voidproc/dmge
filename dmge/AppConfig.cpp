@@ -35,6 +35,8 @@ namespace dmge
 
 		config.scale = ParseOr<int>(ini[U"Scale"], 3);
 
+		config.cgbColorGamma = ParseOr<double>(ini[U"CGBColorGamma"], 1.0);
+
 		config.showConsole = ParseOr<int>(ini[U"ShowConsole"], true);
 
 		config.logFilePath = ParseOr<String>(ini[U"LogFilePath"], U"");
@@ -98,6 +100,7 @@ namespace dmge
 		DebugPrint::Writeln(U"EnableBreakpoint={}"_fmt(enableBreakpoint));
 		DebugPrint::Writeln(U"ShowFPS={}"_fmt(showFPS));
 		DebugPrint::Writeln(U"Scale={}"_fmt(scale));
+		DebugPrint::Writeln(U"CGBColorGamma={}"_fmt(cgbColorGamma));
 		DebugPrint::Writeln(U"ShowConsole={}"_fmt(showConsole));
 		DebugPrint::Writeln(U"LogFilePath={}"_fmt(logFilePath));
 		DebugPrint::Writeln(U"ShowDebugMonitor={}"_fmt(showDebugMonitor));

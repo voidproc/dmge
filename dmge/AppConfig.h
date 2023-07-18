@@ -42,6 +42,9 @@ namespace dmge
 		// 表示倍率
 		int scale = 3;
 
+		// CGB モードでのカラー補正（ガンマ値）
+		double cgbColorGamma = 1.0;
+
 		// コンソールを表示する
 		bool showConsole = true;
 

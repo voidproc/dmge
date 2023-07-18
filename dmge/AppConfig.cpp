@@ -9,50 +9,50 @@ namespace dmge
 
 		INI ini{ U"config.ini" };
 
-		config.cartridgePath = ParseOr<String>(ini[U"Cartridge"], U"");
+		config.cartridgePath = ini.getOr<String>(U"Cartridge", U"");
 
-		config.openCartridgeDirectory = ParseOr<String>(ini[U"OpenCartridgeDirectory"], U"");
+		config.openCartridgeDirectory = ini.getOr<String>(U"OpenCartridgeDirectory", U"");
 
-		config.breakpoints = ParseOr<String>(ini[U"Breakpoint"], U"")
+		config.breakpoints = ini.getOr<String>(U"Breakpoint", U"")
 			.split(U',')
 			.map([](const String& s) { return ParseInt<uint16>(s, 16); });
 
-		config.memoryWriteBreakpoints = ParseOr<String>(ini[U"MemoryWriteBreakpoint"], U"")
+		config.memoryWriteBreakpoints = ini.getOr<String>(U"MemoryWriteBreakpoint", U"")
 			.split(U',')
 			.map([](const String& s) { return ParseInt<uint16>(s, 16); });
 
-		config.traceDumpStartAddress = ParseOr<String>(ini[U"TraceDumpStartAddress"], U"")
+		config.traceDumpStartAddress = ini.getOr<String>(U"TraceDumpStartAddress", U"")
 			.split(U',')
 			.map([](const String& s) { return ParseInt<uint16>(s, 16); });
 
-		config.dumpAddress = ParseOr<String>(ini[U"DumpAddress"], U"")
+		config.dumpAddress = ini.getOr<String>(U"DumpAddress", U"")
 			.split(U',')
 			.map([](const String& s) { return ParseInt<uint16>(s, 16); });
 
-		config.enableBreakpoint = ParseOr<int>(ini[U"EnableBreakpoint"], false);
+		config.enableBreakpoint = ini.getOr<int>(U"EnableBreakpoint", 0);
 
-		config.showFPS = ParseOr<int>(ini[U"ShowFPS"], true);
+		config.showFPS = ini.getOr<int>(U"ShowFPS", true);
 
-		config.scale = ParseOr<int>(ini[U"Scale"], 3);
+		config.scale = ini.getOr<int>(U"Scale", 3);
 
-		config.cgbColorGamma = ParseOr<double>(ini[U"CGBColorGamma"], 1.0);
+		config.cgbColorGamma = ini.getOr<double>(U"CGBColorGamma", 1.0);
 
-		config.showConsole = ParseOr<int>(ini[U"ShowConsole"], true);
+		config.showConsole = ini.getOr<int>(U"ShowConsole", true);
 
-		config.logFilePath = ParseOr<String>(ini[U"LogFilePath"], U"");
+		config.logFilePath = ini.getOr<String>(U"LogFilePath", U"");
 
-		config.showDebugMonitor = ParseOr<int>(ini[U"ShowDebugMonitor"], true);
+		config.showDebugMonitor = ini.getOr<int>(U"ShowDebugMonitor", true);
 
-		config.breakOnLDBB = ParseOr<int>(ini[U"BreakOnLDBB"], false);
+		config.breakOnLDBB = ini.getOr<int>(U"BreakOnLDBB", false);
 
-		config.bootROMPath = ParseOr<String>(ini[U"BootROM"], U"");
+		config.bootROMPath = ini.getOr<String>(U"BootROM", U"");
 
-		config.gamepadButtonAssign.buttonA = ParseOr<int>(ini[U"GamepadButtonA"], 0);
-		config.gamepadButtonAssign.buttonB = ParseOr<int>(ini[U"GamepadButtonB"], 1);
-		config.gamepadButtonAssign.buttonSelect = ParseOr<int>(ini[U"GamepadButtonSelect"], 2);
-		config.gamepadButtonAssign.buttonStart = ParseOr<int>(ini[U"GamepadButtonStart"], 3);
+		config.gamepadButtonAssign.buttonA = ini.getOr<int>(U"GamepadButtonA", 0);
+		config.gamepadButtonAssign.buttonB = ini.getOr<int>(U"GamepadButtonB", 1);
+		config.gamepadButtonAssign.buttonSelect = ini.getOr<int>(U"GamepadButtonSelect", 2);
+		config.gamepadButtonAssign.buttonStart = ini.getOr<int>(U"GamepadButtonStart", 3);
 
-		config.testMode = ParseOr<int>(ini[U"TestMode"], false);
+		config.testMode = ini.getOr<int>(U"TestMode", false);
 
 		return config;
 	}
@@ -97,6 +97,7 @@ namespace dmge
 			DebugPrint::Writeln(U"DumpAddress={}"_fmt(addrText));
 		}
 
+		DebugPrint::Writeln(U"BreakOnLDBB={}"_fmt(breakOnLDBB));
 		DebugPrint::Writeln(U"EnableBreakpoint={}"_fmt(enableBreakpoint));
 		DebugPrint::Writeln(U"ShowFPS={}"_fmt(showFPS));
 		DebugPrint::Writeln(U"Scale={}"_fmt(scale));
@@ -104,7 +105,6 @@ namespace dmge
 		DebugPrint::Writeln(U"ShowConsole={}"_fmt(showConsole));
 		DebugPrint::Writeln(U"LogFilePath={}"_fmt(logFilePath));
 		DebugPrint::Writeln(U"ShowDebugMonitor={}"_fmt(showDebugMonitor));
-
 		DebugPrint::Writeln(U"BootROM={}"_fmt(bootROMPath));
 	}
 }

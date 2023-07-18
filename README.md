@@ -80,6 +80,7 @@ C++ / OpenSiv3D でゲームボーイのエミュレータを作っています�
 - `TraceDumpStartAddress` : トレースダンプを開始するアドレス（コンマ区切りで複数指定可能）
 - `ShowFPS` : 画面上部にFPSを表示するかどうか
 - `Scale` : 画面の表示倍率
+- `CGBColorGamma` : CGB モードでのカラー補正（ガンマ値）
 - `ShowConsole` : コンソールを表示するかどうか
 - `LogFilePath` : トレースダンプなどの出力先のパス
 - `ShowDebugMonitor` : デバッグモニタを表示するかどうか

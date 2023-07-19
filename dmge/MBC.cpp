@@ -444,9 +444,9 @@ namespace dmge
 		else if (addr <= Address::MBC_RAMBank_End)
 		{
 			// RAM Bank Number / RTC Register Select
-			if (value <= 3)
+			if (value <= 7)
 			{
-				MBC1::write(addr, value);
+				ramBank_ = value & 0b111;
 
 				rtc_.unselect();
 			}

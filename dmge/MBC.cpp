@@ -107,6 +107,10 @@ namespace dmge
 		{
 			return std::make_unique<MBC5>(cartridgePath);
 		}
+		else if (header.type == CartridgeType::HUC1_RAM_BATTERY)
+		{
+			return std::make_unique<HuC1>(cartridgePath);
+		}
 
 		return nullptr;
 	}
@@ -638,6 +642,89 @@ namespace dmge
 			if (not ramEnabled_)
 			{
 				return 0xff;
+			}
+
+			const uint16 offset = addr - Address::SRAM;
+			return sram_[ramBank_ * 0x2000 + offset];
+		}
+
+		return 0;
+	}
+
+	// ------------------------------------------------
+	// HuC1
+	// ------------------------------------------------
+
+	void HuC1::write(uint16 addr, uint8 value)
+	{
+		if (addr <= Address::MBC_RAMEnable_End)
+		{
+			// RAM / IR select
+
+			ir_ = value == 0xe;
+		}
+		else if (addr <= Address::MBC_ROMBank_End)
+		{
+			// ROM bank select
+			// bank number of at least 6 bits here.
+
+			romBank_ = value;
+		}
+		else if (addr <= Address::MBC_RAMBank_End)
+		{
+			// RAM Bank Select
+
+			ramBank_ = value;
+		}
+		else if (addr <= 0x7fff)
+		{
+			// Nothing
+		}
+		else if (addr <= Address::SRAM_End)
+		{
+			// Cart RAM or IR register
+
+			if (ir_)
+			{
+				// 赤外線制御
+				// ...
+				return;
+			}
+
+			const uint16 offset = addr - Address::SRAM;
+			sram_[ramBank_ * 0x2000 + offset] = value;
+		}
+	}
+
+	uint8 HuC1::read(uint16 addr) const
+	{
+		if (addr < 0x100 && boot_)
+		{
+			// BootROM
+			return boot_[addr];
+		}
+		else if (addr <= Address::ROMBank0_End)
+		{
+			// ROM Bank 0
+			return rom_[addr];
+		}
+		else if (addr <= Address::SwitchableROMBank_End)
+		{
+			// ROM Bank 0-
+			return MBC1::read(addr);
+		}
+		else if (addr <= Address::SRAM_End)
+		{
+			// External RAM
+
+			if (ir_)
+			{
+				// 赤外線の受信
+				// ...
+
+				// 0xC1: 受信した
+				// 0xC0: 受信しない
+				return 0xc0;
 			}
 
 			const uint16 offset = addr - Address::SRAM;

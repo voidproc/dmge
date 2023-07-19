@@ -125,4 +125,17 @@ namespace dmge
 		uint8 read(uint16 addr) const override;
 
 	};
+
+	class HuC1 : public MBC1
+	{
+	public:
+		using MBC1::MBC1;
+
+		void write(uint16 addr, uint8 value) override;
+
+		uint8 read(uint16 addr) const override;
+
+	private:
+		bool ir_ = false;
+	};
 }

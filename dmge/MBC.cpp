@@ -40,10 +40,10 @@ namespace dmge
 		switch (type)
 		{
 		case CartridgeType::MBC3_TIMER_BATTERY:
-		case CartridgeType::MBC3_TIMER_RAM_BATTERY_2:
+		case CartridgeType::MBC3_TIMER_RAM_BATTERY:
 		case CartridgeType::MBC3:
-		case CartridgeType::MBC3_RAM_2:
-		case CartridgeType::MBC3_RAM_BATTERY_2:
+		case CartridgeType::MBC3_RAM:
+		case CartridgeType::MBC3_RAM_BATTERY:
 			return true;
 		}
 
@@ -55,7 +55,7 @@ namespace dmge
 		switch (type)
 		{
 		case CartridgeType::MBC3_TIMER_BATTERY:
-		case CartridgeType::MBC3_TIMER_RAM_BATTERY_2:
+		case CartridgeType::MBC3_TIMER_RAM_BATTERY:
 			return true;
 		}
 

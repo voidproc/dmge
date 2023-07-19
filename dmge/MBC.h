@@ -62,7 +62,6 @@ namespace dmge
 		int romBank_ = 1;
 		int ramBank_ = 0;
 		int ramEnabled_ = false;
-		int bankingMode_ = 0;
 
 		void loadCartridge_(FilePath cartridgePath);
 	};
@@ -85,6 +84,15 @@ namespace dmge
 		void write(uint16 addr, uint8 value) override;
 
 		uint8 read(uint16 addr) const override;
+
+	private:
+		int secondaryBank_ = 0;
+		int bankingMode_ = 0;
+
+		int ramBankInBankingMode_() const;
+		int rom0BankInBankingMode_() const;
+		bool requiredRomBanking_() const;
+		bool requiredRamBanking_() const;
 	};
 
 	class MBC2 : public MBC1

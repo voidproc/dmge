@@ -165,24 +165,11 @@ namespace dmge
 
 	int MBC::romBank() const
 	{
-		if (IsMBC1(cartridgeHeader_.type))
-		{
-			if (cartridgeHeader_.romSizeKB >= 1024)
-			{
-				return romBank_ + (ramBank_ << 5);
-			}
-		}
-
 		return romBank_;
 	}
 
 	int MBC::ramBank() const
 	{
-		if (IsMBC1(cartridgeHeader_.type))
-		{
-			return bankingMode_ == 0 ? 0 : ramBank_;
-		}
-
 		return ramBank_;
 	}
 
@@ -237,6 +224,25 @@ namespace dmge
 	// MBC1
 	// ------------------------------------------------
 
+
+	namespace
+	{
+		int RomBankMask(int romSizeKB)
+		{
+			switch (romSizeKB)
+			{
+			case 32:   return 0b00000001;
+			case 64:   return 0b00000011;
+			case 128:  return 0b00000111;
+			case 256:  return 0b00001111;
+			case 512:  return 0b00011111;
+			case 1024: return 0b00011111;
+			case 2048: return 0b00011111;
+			}
+			return 0b00011111;
+		}
+	}
+
 	void MBC1::write(uint16 addr, uint8 value)
 	{
 		if (addr <= Address::MBC_RAMEnable_End)
@@ -251,36 +257,41 @@ namespace dmge
 			// ROM Bank
 			// set the ROM Bank Number
 
-			switch (cartridgeHeader_.romSizeKB)
-			{
-			case 32:   value &= 0b00000001; break;
-			case 64:   value &= 0b00000011; break;
-			case 128:  value &= 0b00000111; break;
-			case 256:  value &= 0b00001111; break;
-			case 512:  value &= 0b00011111; break;
-			case 1024: value &= 0b00011111; break;
-			case 2048: value &= 0b00011111; break;
-			}
+			value &= 0b11111;
 
 			if (value == 0)
 			{
 				value = 1;
 			}
 
-			romBank_ = value;
+			const int mask = RomBankMask(cartridgeHeader_.romSizeKB);
+
+			romBank_ = ((secondaryBank_ << 5) | value) & mask;
 		}
 		else if (addr <= Address::MBC_RAMBank_End)
 		{
-			// RAM Bank
-			// set the 2 bits of the RAM bank number to the lowest 2 bits of the written value
+			// RAM Bank Number / Upper Bits of ROM Bank Number
 
-			ramBank_ = value & 0b11;
+			if (requiredRamBanking_())
+			{
+				ramBank_ = value & 0b11;
+			}
+
+			if (requiredRomBanking_())
+			{
+				const int mask = RomBankMask(cartridgeHeader_.romSizeKB);
+
+				secondaryBank_ = value & 0b11;
+				romBank_ = ((secondaryBank_ << 5) | (romBank_ & mask)) % cartridgeHeader_.romBankMax;
+			}
 		}
 		else if (addr <= Address::MBC_BankingMode_End)
 		{
 			// MBC1:
 			// Mode Select
 			// set the Mode Flag to the lowest bit of the written value
+
+			if (not requiredRomBanking_() && not requiredRamBanking_()) return;
 
 			bankingMode_ = value & 1;
 		}
@@ -295,7 +306,7 @@ namespace dmge
 
 			const uint16 offset = addr - Address::SRAM;
 
-			sram_[bankingMode_ == 0 ? offset : ramBank_ * 0x2000 + offset] = value;
+			sram_[ramBankInBankingMode_() * 0x2000 + offset] = value;
 		}
 	}
 
@@ -310,20 +321,20 @@ namespace dmge
 		{
 			// ROM Bank 0
 
-			if (cartridgeHeader_.romSizeKB < 1024)
+			if (not requiredRomBanking_())
 			{
 				return rom_[addr];
 			}
 			else
 			{
-				return rom_[0x4000 * (romBank() | (ramBank_ << 5)) + addr];
+				return rom_[addr + rom0BankInBankingMode_() * 0x4000];
 			}
 		}
 		else if (addr <= Address::SwitchableROMBank_End)
 		{
 			// ROM Bank 1-
 			const uint16 offset = addr - Address::SwitchableROMBank;
-			return rom_[romBank() * 0x4000 + offset];
+			return rom_[romBank_ * 0x4000 + offset];
 		}
 		else if (addr <= Address::SRAM_End)
 		{
@@ -338,10 +349,30 @@ namespace dmge
 			}
 
 			const uint16 offset = addr - Address::SRAM;
-			return sram_[bankingMode_ == 0 ? offset : ramBank_ * 0x2000 + offset];
+			return sram_[ramBankInBankingMode_() * 0x2000 + offset];
 		}
 
 		return 0;
+	}
+
+	int MBC1::ramBankInBankingMode_() const
+	{
+		return bankingMode_ == 0 ? 0 : ramBank_;
+	}
+
+	int MBC1::rom0BankInBankingMode_() const
+	{
+		return bankingMode_ == 0 ? 0 : ((secondaryBank_ << 5) % cartridgeHeader_.romBankMax);
+	}
+
+	bool MBC1::requiredRomBanking_() const
+	{
+		return cartridgeHeader_.romSizeKB >= 1024;
+	}
+
+	bool MBC1::requiredRamBanking_() const
+	{
+		return cartridgeHeader_.ramSizeKB == 32;
 	}
 
 	// ------------------------------------------------
@@ -595,9 +626,10 @@ namespace dmge
 		else if (addr <= Address::MBC_RAMBank_End)
 		{
 			// RAM Bank Number
+
 			if (value <= 0xf)
 			{
-				MBC1::write(addr, value);
+				ramBank_ = value;
 			}
 		}
 		else if (addr <= 0x7fff)

@@ -2,5 +2,5 @@
 
 namespace dmge
 {
-	inline constexpr StringView Version = U"v1.1.2"_sv;
+	inline constexpr StringView Version = U"v1.2.0"_sv;
 }

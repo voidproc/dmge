@@ -103,9 +103,9 @@ C++ / OpenSiv3D でゲームボーイのエミュレータを作っています�
   - [x] MBC2
   - [x] MBC3
     - [x] RTC
-  - [ ] MBC5
-    - [x] MBC5 の Rumble 以外の機能
-    - [ ] Rumble
+    - [x] MBC30
+  - [x] MBC5 (Rumble を除く)
+  - [x] HuC1 (赤外線通信を除く)
   - [ ] その他
 - PPU
   - [x] DMG
@@ -126,7 +126,6 @@ C++ / OpenSiv3D でゲームボーイのエミュレータを作っています�
   - [ ] Bootstrap ROM の読み込み
     - [x] DMG
     - [ ] CGB
-  - [ ] シリアル通信以外の通信関係
   - [ ] Joypad 割り込み
   - [x] 倍速モード (CGB) 
   - [ ] その他

@@ -1,6 +1,19 @@
 # スクリーンショット
 
 
+## 目次
+- [スクリーンショット](#スクリーンショット)
+  - [目次](#目次)
+  - [No MBC](#no-mbc)
+  - [MBC1](#mbc1)
+    - [Tobu Tobu Girl Deluxe](#tobu-tobu-girl-deluxe)
+  - [MBC2](#mbc2)
+  - [MBC3](#mbc3)
+  - [MBC5](#mbc5)
+  - [HuC1](#huc1)
+  - [デバッグ表示](#デバッグ表示)
+
+
 ## No MBC
 
 ![Tetris](screenshot/tetris.png)
@@ -24,11 +37,11 @@
 
 ![Burger Time Deluxe](screenshot/burgerti.png)
 
-### Tobu Tobu Girl
+### Tobu Tobu Girl Deluxe
 
-https://tangramgames.dk/tobutobugirl/
+https://tangramgames.dk/tobutobugirldx/
 
-![Tobu Tobu Girl](screenshot/tobu.png)
+![Tobu Tobu Girl Deluxe](screenshot/tobudx.png)
 
 
 ## MBC2
@@ -44,7 +57,11 @@ https://tangramgames.dk/tobutobugirl/
 
 ## MBC5
 
-- 2friendly
+![2 friendly](screenshot/2friendly.png)
+
+## HuC1
+
+![Pokemon Card GB](screenshot/pokecardgb.png)
 
 ## デバッグ表示
 

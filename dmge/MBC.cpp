@@ -615,6 +615,7 @@ namespace dmge
 
 			romBank_ &= 0x100;
 			romBank_ |= value;
+			romBank_ %= cartridgeHeader_.romBankMax;
 		}
 		else if (addr <= Address::MBC_ROMBankHigh_End)
 		{
@@ -622,6 +623,7 @@ namespace dmge
 
 			romBank_ &= 0xff;
 			romBank_ |= (value & 1) << 8;
+			romBank_ %= cartridgeHeader_.romBankMax;
 		}
 		else if (addr <= Address::MBC_RAMBank_End)
 		{

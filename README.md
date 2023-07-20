@@ -137,7 +137,7 @@ C++ / OpenSiv3D でゲームボーイのエミュレータを作っています�
 |---|---|
 |✅ blarg/​cpu_instrs|![cpu_instrs](screenshot/test_result/cpu_instrs.png)|
 |✅ blarg/instr_timing|![instr_timing](screenshot/test_result/instr_timing.png)|
-|❌ blarg/interrupt_time|![interrupt_time](screenshot/test_result/interrupt_time.png)|
+|✅ blarg/interrupt_time|![interrupt_time](screenshot/test_result/interrupt_time.png)|
 |❌ blarg/dmg_sound|Failed: 03#3, 05#4, 07#5, 09, 10, 12 |
 |✅ acid/dmg-acid2|![dmg-acid2](screenshot/test_result/dmg-acid2.png)|
 |✅ acid/cgb-acid2|![cgb-acid2](screenshot/test_result/cgb-acid2.png)|

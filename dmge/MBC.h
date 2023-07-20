@@ -63,6 +63,8 @@ namespace dmge
 		int ramBank_ = 0;
 		int ramEnabled_ = false;
 
+		int romBankCount_;
+
 		void loadCartridge_(FilePath cartridgePath);
 	};
 
@@ -95,20 +97,20 @@ namespace dmge
 		bool requiredRamBanking_() const;
 	};
 
-	class MBC2 : public MBC1
+	class MBC2 : public MBC
 	{
 	public:
-		using MBC1::MBC1;
+		using MBC::MBC;
 
 		void write(uint16 addr, uint8 value) override;
 
 		uint8 read(uint16 addr) const override;
 	};
 
-	class MBC3 : public MBC1
+	class MBC3 : public MBC
 	{
 	public:
-		using MBC1::MBC1;
+		using MBC::MBC;
 
 		void write(uint16 addr, uint8 value) override;
 
@@ -123,10 +125,10 @@ namespace dmge
 		virtual void saveSRAM_(FilePathView saveFilePath) override;
 	};
 
-	class MBC5 : public MBC1
+	class MBC5 : public MBC
 	{
 	public:
-		using MBC1::MBC1;
+		using MBC::MBC;
 
 		void write(uint16 addr, uint8 value) override;
 
@@ -134,10 +136,10 @@ namespace dmge
 
 	};
 
-	class HuC1 : public MBC1
+	class HuC1 : public MBC
 	{
 	public:
-		using MBC1::MBC1;
+		using MBC::MBC;
 
 		void write(uint16 addr, uint8 value) override;
 

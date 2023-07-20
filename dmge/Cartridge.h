@@ -58,8 +58,6 @@ namespace dmge
 		// RAM size (0x0149)
 		int ramSizeKB{};
 
-		int romBankMax{};
-
 		CartridgeHeader() = default;
 
 		CartridgeHeader(FilePath cartridgePath);

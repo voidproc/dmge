@@ -81,6 +81,8 @@ namespace dmge
 	MBC::MBC(FilePath cartridgePath)
 	{
 		loadCartridge_(cartridgePath);
+
+		romBankCount_ = cartridgeHeader_.romSizeKB / 16;
 	}
 
 	std::unique_ptr<MBC> MBC::LoadCartridge(FilePath cartridgePath)
@@ -245,7 +247,7 @@ namespace dmge
 				value = 1;
 			}
 
-			romBank_ = ((secondaryBank_ << 5) | value) % cartridgeHeader_.romBankMax;
+			romBank_ = ((secondaryBank_ << 5) | value) % romBankCount_;
 		}
 		else if (addr <= Address::MBC_RAMBank_End)
 		{
@@ -259,7 +261,7 @@ namespace dmge
 			if (requiredRomBanking_())
 			{
 				secondaryBank_ = value & 0b11;
-				romBank_ = ((secondaryBank_ << 5) | (romBank_ & 0x1f)) % cartridgeHeader_.romBankMax;
+				romBank_ = ((secondaryBank_ << 5) | (romBank_ & 0x1f)) % romBankCount_;
 			}
 		}
 		else if (addr <= Address::MBC_BankingMode_End)
@@ -310,6 +312,7 @@ namespace dmge
 		else if (addr <= Address::SwitchableROMBank_End)
 		{
 			// ROM Bank 1-
+
 			const uint16 offset = addr - Address::SwitchableROMBank;
 			return rom_[romBank_ * 0x4000 + offset];
 		}
@@ -339,7 +342,7 @@ namespace dmge
 
 	int MBC1::rom0BankInBankingMode_() const
 	{
-		return bankingMode_ == 0 ? 0 : ((secondaryBank_ << 5) % cartridgeHeader_.romBankMax);
+		return bankingMode_ == 0 ? 0 : ((secondaryBank_ << 5) % romBankCount_);
 	}
 
 	bool MBC1::requiredRomBanking_() const
@@ -373,7 +376,7 @@ namespace dmge
 					value = 1;
 				}
 
-				romBank_ = value % cartridgeHeader_.romBankMax;
+				romBank_ = value % romBankCount_;
 			}
 		}
 		else if (addr <= 0x7fff)
@@ -444,14 +447,14 @@ namespace dmge
 			// ROM Bank
 			// set the ROM Bank Number
 
-			value &= 0b01111111;
+			value &= 0x7f;
 
 			if (value == 0)
 			{
 				value = 1;
 			}
 
-			romBank_ = value;
+			romBank_ = value % romBankCount_;
 		}
 		else if (addr <= Address::MBC_RAMBank_End)
 		{
@@ -508,7 +511,9 @@ namespace dmge
 		else if (addr <= Address::SwitchableROMBank_End)
 		{
 			// ROM Bank 1-
-			return MBC1::read(addr);
+
+			const uint16 offset = addr - Address::SwitchableROMBank;
+			return rom_[romBank_ * 0x4000 + offset];
 		}
 		else if (addr <= Address::SRAM_End)
 		{
@@ -592,7 +597,7 @@ namespace dmge
 
 			romBank_ &= 0x100;
 			romBank_ |= value;
-			romBank_ %= cartridgeHeader_.romBankMax;
+			romBank_ %= romBankCount_;
 		}
 		else if (addr <= Address::MBC_ROMBankHigh_End)
 		{
@@ -600,16 +605,13 @@ namespace dmge
 
 			romBank_ &= 0xff;
 			romBank_ |= (value & 1) << 8;
-			romBank_ %= cartridgeHeader_.romBankMax;
+			romBank_ %= romBankCount_;
 		}
 		else if (addr <= Address::MBC_RAMBank_End)
 		{
 			// RAM Bank Number
 
-			if (value <= 0xf)
-			{
-				ramBank_ = value;
-			}
+			ramBank_ = value & 0xf;
 		}
 		else if (addr <= 0x7fff)
 		{
@@ -644,7 +646,9 @@ namespace dmge
 		else if (addr <= Address::SwitchableROMBank_End)
 		{
 			// ROM Bank 0-
-			return MBC1::read(addr);
+
+			const uint16 offset = addr - Address::SwitchableROMBank;
+			return rom_[romBank_ * 0x4000 + offset];
 		}
 		else if (addr <= Address::SRAM_End)
 		{
@@ -679,7 +683,7 @@ namespace dmge
 			// ROM bank select
 			// bank number of at least 6 bits here.
 
-			romBank_ = value;
+			romBank_ = value % romBankCount_;
 		}
 		else if (addr <= Address::MBC_RAMBank_End)
 		{
@@ -721,8 +725,10 @@ namespace dmge
 		}
 		else if (addr <= Address::SwitchableROMBank_End)
 		{
-			// ROM Bank 0-
-			return MBC1::read(addr);
+			// ROM Bank 1-
+
+			const uint16 offset = addr - Address::SwitchableROMBank;
+			return rom_[romBank_ * 0x4000 + offset];
 		}
 		else if (addr <= Address::SRAM_End)
 		{

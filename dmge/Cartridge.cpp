@@ -29,8 +29,6 @@ namespace dmge
 		const uint8 romSize = header[Address::ROMSize];
 		romSizeKB = 32 * (1 << romSize);
 
-		romBankMax = romSizeKB / 16;
-
 		// RAM size
 
 		const uint8 ramSize = header[Address::RAMSize];

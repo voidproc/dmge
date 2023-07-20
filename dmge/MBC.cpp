@@ -385,18 +385,18 @@ namespace dmge
 		{
 			if ((addr & 0x0100) == 0)
 			{
-				ramEnabled_ = value == 0xa;
+				ramEnabled_ = (value & 0xf) == 0xa;
 			}
 			else
 			{
-				value &= 0b1111;
+				value &= 0xf;
 
 				if (value == 0)
 				{
 					value = 1;
 				}
 
-				romBank_ = value;
+				romBank_ = value % cartridgeHeader_.romBankMax;
 			}
 		}
 		else if (addr <= 0x7fff)
@@ -411,7 +411,7 @@ namespace dmge
 				return;
 			}
 
-			sram_[addr - Address::SRAM] = value;
+			sram_[addr - Address::SRAM] = value & 0xf;
 		}
 	}
 
@@ -442,7 +442,7 @@ namespace dmge
 				return 0xff;
 			}
 
-			return sram_[(addr - Address::SRAM) & 0x1ff];
+			return sram_[(addr - Address::SRAM) & 0x1ff] & 0xf | 0xf0;
 		}
 
 		return 0;

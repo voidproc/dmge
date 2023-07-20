@@ -99,7 +99,7 @@ C++ / OpenSiv3D でゲームボーイのエミュレータを作っています�
     - [ ] STOP 状態の遷移
 - MBC
   - [x] ROM Only
-  - [x] MBC1
+  - [x] MBC1 (マルチカートを除く)
   - [x] MBC2
   - [x] MBC3
     - [x] RTC

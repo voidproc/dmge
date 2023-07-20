@@ -224,25 +224,6 @@ namespace dmge
 	// MBC1
 	// ------------------------------------------------
 
-
-	namespace
-	{
-		int RomBankMask(int romSizeKB)
-		{
-			switch (romSizeKB)
-			{
-			case 32:   return 0b00000001;
-			case 64:   return 0b00000011;
-			case 128:  return 0b00000111;
-			case 256:  return 0b00001111;
-			case 512:  return 0b00011111;
-			case 1024: return 0b00011111;
-			case 2048: return 0b00011111;
-			}
-			return 0b00011111;
-		}
-	}
-
 	void MBC1::write(uint16 addr, uint8 value)
 	{
 		if (addr <= Address::MBC_RAMEnable_End)
@@ -257,16 +238,14 @@ namespace dmge
 			// ROM Bank
 			// set the ROM Bank Number
 
-			value &= 0b11111;
+			value &= 0x1f;
 
 			if (value == 0)
 			{
 				value = 1;
 			}
 
-			const int mask = RomBankMask(cartridgeHeader_.romSizeKB);
-
-			romBank_ = ((secondaryBank_ << 5) | value) & mask;
+			romBank_ = ((secondaryBank_ << 5) | value) % cartridgeHeader_.romBankMax;
 		}
 		else if (addr <= Address::MBC_RAMBank_End)
 		{
@@ -279,10 +258,8 @@ namespace dmge
 
 			if (requiredRomBanking_())
 			{
-				const int mask = RomBankMask(cartridgeHeader_.romSizeKB);
-
 				secondaryBank_ = value & 0b11;
-				romBank_ = ((secondaryBank_ << 5) | (romBank_ & mask)) % cartridgeHeader_.romBankMax;
+				romBank_ = ((secondaryBank_ << 5) | (romBank_ & 0x1f)) % cartridgeHeader_.romBankMax;
 			}
 		}
 		else if (addr <= Address::MBC_BankingMode_End)

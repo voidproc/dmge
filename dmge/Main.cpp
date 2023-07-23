@@ -499,7 +499,6 @@ private:
 
 	void tickUnits_(int cycles)
 	{
-		bool doubleSpeed = mem_.isDoubleSpeed();
 		int doubleSpeedFactor = mem_.isDoubleSpeed() ? 2 : 1;
 
 		// RTC, DMA

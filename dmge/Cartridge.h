@@ -41,6 +41,12 @@ namespace dmge
 		CGBOnly = 0xC0,
 	};
 
+	enum class SGBFlag : uint8
+	{
+		None = 0x00,
+		SGBSupport = 0x03,
+	};
+
 	struct CartridgeHeader
 	{
 		// Title (0x0134 - 0x0143)
@@ -48,6 +54,9 @@ namespace dmge
 
 		// CGB flag
 		CGBFlag cgbFlag{};
+
+		// SGB flag (0x0146)
+		SGBFlag sgbFlag{};
 
 		// Cartridge type (0x0147)
 		CartridgeType type{};

@@ -32,7 +32,9 @@ namespace dmge
 
 		~CPU();
 
-		void setCGBMode(bool value);
+		void setCGBMode(bool enableCGBMode);
+
+		void setSGBMode(bool enableSGBMode);
 
 		// レジスタを初期状態にする
 		void reset(bool enableBootROM);

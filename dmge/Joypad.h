@@ -2,14 +2,6 @@
 
 namespace dmge
 {
-	// 選択状態
-	// JOYP:0xff00 の 4-5bit
-	enum class SelectedButtons
-	{
-		Direction,
-		Action,
-	};
-
 	class Memory;
 
 	struct GamepadButtonAssign;
@@ -24,7 +16,7 @@ namespace dmge
 		void writeRegister(uint8 value);
 
 		// IOレジスタからの読み込み
-		uint8 readRegister() const;
+		uint8 readRegister();
 
 		// 現在の選択状態（方向orアクション）に応じてIOレジスタを更新する
 		void update();
@@ -36,11 +28,29 @@ namespace dmge
 		// ボタン割り当てを設定
 		void setButtonAssign(const GamepadButtonAssign& gamepadButtonAssign);
 
+		// (SGB)
+		void setPlayerCount(int count);
+
+		// (SGB)
+		void incrementJoypadID();
+
+		// (SGB)
+		void resetJoypadID();
+
 	private:
 		Memory* mem_;
-		SelectedButtons selected_ = SelectedButtons::Direction;
 		bool enabled_ = true;
-		uint8 joyp_ = 0;
+
+		// P1 & 0x30
+		uint8 selected_ = 0;
+
+		// P1 & 0x0F
+		uint8 dirState_ = 0;
+
+		// P1 & 0x0F
+		uint8 actState_ = 0;
+
+		//uint8 joyp_ = 0;
 
 		InputGroup inputRight_;
 		InputGroup inputLeft_;
@@ -50,5 +60,13 @@ namespace dmge
 		InputGroup inputB_;
 		InputGroup inputSelect_;
 		InputGroup inputStart_;
+
+		// (SGB) プレイヤー人数: 0 or 1 or 3 (MLT_REQ)
+		uint8 playerCount_ = 0;
+
+		// (SGB) Joypad ID
+		uint8 joypadId_ = 0xf;
+		bool readyForJoypadIdInc_ = false;
+
 	};
 }

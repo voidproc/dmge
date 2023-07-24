@@ -165,6 +165,11 @@ namespace dmge
 		return cartridgeHeader_.cgbFlag;
 	}
 
+	SGBFlag MBC::sgbFlag() const
+	{
+		return cartridgeHeader_.sgbFlag;
+	}
+
 	int MBC::romBank() const
 	{
 		return romBank_;

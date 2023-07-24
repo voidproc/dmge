@@ -27,15 +27,20 @@ namespace dmge
 		{
 		}
 
-		void setCGBMode(bool value)
+		void setCGBMode(bool enableCGBMode)
 		{
-			cgbMode_ = value;
+			cgbMode_ = enableCGBMode;
+		}
+
+		void setSGBMode(bool enableSGBMode)
+		{
+			sgbMode_ = enableSGBMode;
 		}
 
 		void reset(bool enableBootROM)
 		{
 			af(cgbMode_ ? 0x11b0 : 0x01b0); // GB/SGB:0x01b0, GBP:0xffb0, GBC:0x11b0
-			bc(cgbMode_ ? 0x0000 : 0x0013);
+			bc(cgbMode_ ? 0x0000 : (sgbMode_ ? 0x0014 : 0x0013));
 			de(0x00d8);
 			hl(0x014d);
 			sp = 0xfffe;
@@ -279,6 +284,9 @@ namespace dmge
 
 		// CGB Mode
 		bool cgbMode_ = false;
+
+		// SGB Mode
+		bool sgbMode_ = false;
 
 		MooneyeTestResult mooneyeTestResult_ = MooneyeTestResult::Running;
 
@@ -2286,9 +2294,14 @@ namespace dmge
 	{
 	}
 
-	void CPU::setCGBMode(bool value)
+	void CPU::setCGBMode(bool enableCGBMode)
 	{
-		cpuDetail_->setCGBMode(value);
+		cpuDetail_->setCGBMode(enableCGBMode);
+	}
+
+	void CPU::setSGBMode(bool enableSGBMode)
+	{
+		cpuDetail_->setSGBMode(enableSGBMode);
 	}
 
 	void CPU::reset(bool enableBootROM)

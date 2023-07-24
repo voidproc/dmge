@@ -21,6 +21,9 @@ namespace dmge
 		// CGB flag
 		cgbFlag = static_cast<CGBFlag>(header[Address::CGBFlag]);
 
+		// SGB flag
+		sgbFlag = static_cast<SGBFlag>(header[Address::SGBFlag]);
+
 		// Type
 		type = static_cast<CartridgeType>(header[Address::CartridgeType]);
 
@@ -51,6 +54,9 @@ namespace dmge
 
 		const auto cgbFlagStr = magic_enum::enum_name(cgbFlag);
 		DebugPrint::Writeln(U"CGBFlag={}"_fmt(Unicode::WidenAscii(cgbFlagStr)));
+
+		const auto sgbFlagStr = magic_enum::enum_name(sgbFlag);
+		DebugPrint::Writeln(U"SGBFlag={}"_fmt(Unicode::WidenAscii(sgbFlagStr)));
 
 		const auto typeStr = magic_enum::enum_name(type);
 		DebugPrint::Writeln(U"Type={}"_fmt(Unicode::WidenAscii(typeStr)));

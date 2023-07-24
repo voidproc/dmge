@@ -26,6 +26,8 @@ namespace dmge
 
 		CGBFlag cgbFlag() const;
 
+		SGBFlag sgbFlag() const;
+
 		int romBank() const;
 
 		int ramBank() const;

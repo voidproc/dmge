@@ -7,6 +7,7 @@
 #include "Joypad.h"
 #include "Serial.h"
 #include "Interrupt.h"
+#include "SGB.h"
 #include "DebugPrint.h"
 
 namespace dmge
@@ -19,7 +20,7 @@ namespace dmge
 	{
 	}
 
-	void Memory::init(PPU* ppu, APU* apu, dmge::Timer* timer, dmge::Joypad* joypad, LCD* lcd, Interrupt* interrupt, Serial* serial)
+	void Memory::init(PPU* ppu, APU* apu, dmge::Timer* timer, dmge::Joypad* joypad, LCD* lcd, Interrupt* interrupt, Serial* serial, SGBCommand* sgbCommand)
 	{
 		ppu_ = ppu;
 		apu_ = apu;
@@ -28,15 +29,14 @@ namespace dmge
 		serial_ = serial;
 		lcd_ = lcd;
 		interrupt_ = interrupt;
+		sgbCommand_ = sgbCommand;
 	}
 
 	void Memory::reset()
 	{
-		const bool cgb = isCGBMode();
-
 		writeDirect(0xff00, 0xcf); // P1
 		writeDirect(0xff01, 0x00); // SB
-		writeDirect(0xff02, cgb ? 0x7f : 0x7e); // SC
+		writeDirect(0xff02, isCGBMode() ? 0x7f : 0x7e); // SC
 
 		write(0xff05, 0x00); // TIMA
 		write(0xff06, 0x00); // TMA
@@ -62,12 +62,12 @@ namespace dmge
 		write(0xff23, 0xbf); // NR44
 		write(0xff24, 0x77); // NR50
 		write(0xff25, 0xf3); // NR51
-		write(0xff26, 0xf1); // NR52 (GB:0xf1, SGB:0xf0)
+		write(0xff26, isSGBMode() ? 0xf0 : 0xf1); // NR52 (GB:0xf1, SGB:0xf0)
 		write(0xff40, 0x91); // LCDC
 		write(0xff42, 0x00); // SCY
 		write(0xff43, 0x00); // SCX
 		write(0xff45, 0x00); // LYC
-		writeDirect(0xff46, cgb ? 0x00 : 0xff); // DMA
+		writeDirect(0xff46, isCGBMode() ? 0x00 : 0xff); // DMA
 		write(0xff47, 0xfc); // BGP
 		write(0xff48, 0xff); // OBP0
 		write(0xff49, 0xff); // OBP1
@@ -88,9 +88,6 @@ namespace dmge
 		}
 
 		mem_.resize(0x10000);
-
-		// メモリを初期状態にリセット
-		reset();
 
 		return true;
 	}
@@ -182,6 +179,11 @@ namespace dmge
 			// 0xff00
 
 			joypad_->writeRegister(value);
+
+			if (isSGBMode())
+			{
+				sgbCommand_->send((value >> 4) & 0b11);
+			}
 		}
 		else if (addr <= Address::SC)
 		{
@@ -695,9 +697,34 @@ namespace dmge
 		dma_.update(cycles);
 	}
 
-	bool Memory::isCGBMode() const
+	bool Memory::isSupportedCGBMode() const
 	{
 		return (static_cast<uint8>(mbc_->cgbFlag()) & 0x80) == 0x80;
+	}
+
+	bool Memory::isSupportedSGBMode() const
+	{
+		return static_cast<uint8>(mbc_->sgbFlag()) == 0x03;
+	}
+
+	void Memory::setCGBMode(bool enableCGBMode)
+	{
+		cgbMode_ = enableCGBMode;
+	}
+
+	bool Memory::isCGBMode() const
+	{
+		return cgbMode_;
+	}
+
+	void Memory::setSGBMode(bool enableSGBMode)
+	{
+		sgbMode_ = enableSGBMode;
+	}
+
+	bool Memory::isSGBMode() const
+	{
+		return sgbMode_;
 	}
 
 	int Memory::romBank() const

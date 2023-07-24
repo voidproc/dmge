@@ -9,6 +9,7 @@
 #include "Timer.h"
 #include "Joypad.h"
 #include "Serial.h"
+#include "SGB.h"
 #include "Interrupt.h"
 #include "Address.h"
 #include "Timing.h"
@@ -96,7 +97,7 @@ public:
 
 		showDebugMonitor_ = config_.showDebugMonitor;
 
-		mem_.init(&ppu_, &apu_, &timer_, &joypad_, &lcd_, &interrupt_, &serial_);
+		mem_.init(&ppu_, &apu_, &timer_, &joypad_, &lcd_, &interrupt_, &serial_, &sgbCommand_);
 
 		joypad_.setButtonAssign(config_.gamepadButtonAssign);
 
@@ -161,11 +162,26 @@ public:
 		mem_.dumpCartridgeInfo();
 
 		// CGBモードの適用
-		ppu_.setCGBMode(mem_.isCGBMode());
-		apu_.setCGBMode(mem_.isCGBMode());
-		cpu_.setCGBMode(mem_.isCGBMode());
+		if (mem_.isSupportedCGBMode())
+		{
+			mem_.setCGBMode(true);
+			ppu_.setCGBMode(true);
+			apu_.setCGBMode(true);
+			cpu_.setCGBMode(true);
+			debugMonitor_.setCGBMode(true);
+		}
+
 		cpu_.reset(enableBootROM);
-		debugMonitor_.setCGBMode(mem_.isCGBMode());
+
+		// SGBモードの適用
+		//if (not mem_.isCGBMode() && mem_.isSupportedSGBMode())
+		//{
+		//	mem_.setSGBMode(true);
+		//	cpu_.setSGBMode(true);
+		//}
+
+		// メモリの内容をリセット（SGB/CGBモード確定後にリセットする必要がある）
+		mem_.reset();
 
 		mainLoop_();
 
@@ -598,6 +614,8 @@ private:
 	dmge::Joypad joypad_{ &mem_ };
 
 	dmge::Serial serial_{ interrupt_ };
+
+	dmge::SGBCommand sgbCommand_{ joypad_ };
 
 	dmge::DebugMonitor debugMonitor_{ &mem_, &cpu_, &apu_, &interrupt_ };
 

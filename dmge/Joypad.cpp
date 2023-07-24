@@ -12,14 +12,7 @@ namespace dmge
 
 	void Joypad::writeRegister(uint8 value)
 	{
-		if ((value & (1 << 4)) == 0)
-		{
-			selected_ = SelectedButtons::Direction;
-		}
-		else if ((value & (1 << 5)) == 0)
-		{
-			selected_ = SelectedButtons::Action;
-		}
+		selected_ = value & 0x30;
 
 		if (enabled_)
 		{
@@ -27,47 +20,63 @@ namespace dmge
 		}
 	}
 
-	uint8 Joypad::readRegister() const
+	uint8 Joypad::readRegister()
 	{
-		return joyp_;
+		const auto selected = selected_ & 0x30;
+
+		if (selected == 0x30)
+		{
+			if (playerCount_ == 0)
+			{
+				return 0xf0 | (dirState_ | actState_);
+			}
+			else
+			{
+				const int id = 0xf - joypadId_;
+				const int newId = (id + 1) % (playerCount_ + 1);
+				joypadId_ = 0xf - newId;
+				return joypadId_;
+			}
+		}
+		else if (selected == 0x20)
+		{
+			return 0xc0 | selected | dirState_;
+		}
+		else if (selected == 0x10)
+		{
+			return 0xc0 | selected | actState_;
+		}
+
+		return 0xff;
 	}
 
 	void Joypad::update()
 	{
-		uint8 value = 0;
+		bool inputRight = inputRight_.pressed();
+		bool inputLeft = inputLeft_.pressed();
+		bool inputUp = inputUp_.pressed();
+		bool inputDown = inputDown_.pressed();
 
-		if (selected_ == SelectedButtons::Direction)
+		if (const auto procon = ProController(0); procon.isConnected())
 		{
-			bool inputRight = inputRight_.pressed();
-			bool inputLeft = inputLeft_.pressed();
-			bool inputUp = inputUp_.pressed();
-			bool inputDown = inputDown_.pressed();
-
-			if (const auto procon = ProController(0); procon.isConnected())
-			{
-				const auto lstick = procon.LStick();
-				inputRight |= lstick.x > 0.5;
-				inputLeft |= lstick.x < -0.5;
-				inputUp |= lstick.y < -0.5;
-				inputDown |= lstick.y > 0.5;
-			}
-
-			value |= (inputRight ? 0 : 1) << 0;
-			value |= (inputLeft ? 0 : 1) << 1;
-			value |= (inputUp ? 0 : 1) << 2;
-			value |= (inputDown ? 0 : 1) << 3;
-			value |= 0b11100000;
-		}
-		else
-		{
-			value |= (inputA_.pressed() ? 0 : 1) << 0;
-			value |= (inputB_.pressed() ? 0 : 1) << 1;
-			value |= (inputSelect_.pressed() ? 0 : 1) << 2;
-			value |= (inputStart_.pressed() ? 0 : 1) << 3;
-			value |= 0b11010000;
+			const auto lstick = procon.LStick();
+			inputRight |= lstick.x > 0.5;
+			inputLeft |= lstick.x < -0.5;
+			inputUp |= lstick.y < -0.5;
+			inputDown |= lstick.y > 0.5;
 		}
 
-		joyp_ = value;
+		dirState_ = 0;
+		dirState_ |= (inputRight ? 0 : 1) << 0;
+		dirState_ |= (inputLeft ? 0 : 1) << 1;
+		dirState_ |= (inputUp ? 0 : 1) << 2;
+		dirState_ |= (inputDown ? 0 : 1) << 3;
+
+		actState_ = 0;
+		actState_ |= (inputA_.pressed() ? 0 : 1) << 0;
+		actState_ |= (inputB_.pressed() ? 0 : 1) << 1;
+		actState_ |= (inputSelect_.pressed() ? 0 : 1) << 2;
+		actState_ |= (inputStart_.pressed() ? 0 : 1) << 3;
 	}
 
 	void Joypad::setEnable(bool enable)
@@ -144,5 +153,19 @@ namespace dmge
 			if (gamepad.buttons.size() > gamepadButtonAssign.buttonStart)
 				inputStart_ = inputStart_ | gamepad.buttons[gamepadButtonAssign.buttonStart];
 		}
+	}
+	void Joypad::setPlayerCount(int count)
+	{
+		playerCount_ = count;
+	}
+
+	void Joypad::incrementJoypadID()
+	{
+		if (--joypadId_ < 0xc) joypadId_ = 0xf;
+	}
+
+	void Joypad::resetJoypadID()
+	{
+		joypadId_ = 0xf;
 	}
 }

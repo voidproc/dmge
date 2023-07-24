@@ -14,6 +14,7 @@ namespace dmge
 	class Serial;
 	class LCD;
 	class Interrupt;
+	class SGBCommand;
 
 	class Memory
 	{
@@ -22,7 +23,7 @@ namespace dmge
 
 		~Memory();
 
-		void init(PPU* ppu, APU* apu, dmge::Timer* timer, dmge::Joypad* joypad, LCD* lcd, Interrupt* interrupt, Serial* serial);
+		void init(PPU* ppu, APU* apu, dmge::Timer* timer, dmge::Joypad* joypad, LCD* lcd, Interrupt* interrupt, Serial* serial, SGBCommand* sgbCommand);
 
 		void reset();
 
@@ -46,7 +47,17 @@ namespace dmge
 
 		void update(int cycles);
 
+		bool isSupportedCGBMode() const;
+
+		bool isSupportedSGBMode() const;
+
+		void setCGBMode(bool enableCGBMode);
+
 		bool isCGBMode() const;
+
+		void setSGBMode(bool enableSGBMode);
+
+		bool isSGBMode() const;
 
 		int romBank() const;
 
@@ -82,6 +93,7 @@ namespace dmge
 		Serial* serial_ = nullptr;
 		LCD* lcd_ = nullptr;
 		Interrupt* interrupt_ = nullptr;
+		SGBCommand* sgbCommand_ = nullptr;
 
 		// MBC
 		std::unique_ptr<MBC> mbc_;
@@ -107,8 +119,14 @@ namespace dmge
 		// メモリ書き込み時フック
 		Array<std::function<void(uint16, uint8)>> writeHooks_{};
 
+		// CGB Mode
+		bool cgbMode_ = false;
+
 		// (CGB)倍速モード
 		bool doubleSpeed_ = false;
 		bool doubleSpeedPrepared_ = false;
+
+		// SGB Mode
+		bool sgbMode_ = false;
 	};
 }

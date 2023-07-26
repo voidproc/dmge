@@ -4,6 +4,12 @@ namespace dmge
 {
 	class Joypad;
 
+	enum class SGBTransferState
+	{
+		Stop,
+		Transfering,
+	};
+
 	class SGBCommand
 	{
 	public:
@@ -22,6 +28,8 @@ namespace dmge
 		Array<uint8> received_;
 		uint8 currentByte_ = 0;
 		uint8 currentByteReceivedBits_ = 0;
+
+		SGBTransferState state_ = SGBTransferState::Stop;
 
 		void processCommand_();
 	};

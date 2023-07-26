@@ -12,41 +12,52 @@ namespace dmge
 
 	void SGBCommand::send(uint8 transferBits)
 	{
-		if (prevBits_ == 0b11)
+		if (prevBits_ == 0b11 && transferBits != 0b11)
 		{
 			if (transferBits == 0)
 			{
-				// Reset
+				if (state_ == SGBTransferState::Stop)
+				{
+					// Reset
 
-				received_.clear();
-				currentByte_ = 0;
-				currentByteReceivedBits_ = 0;
+					received_.clear();
+					currentByte_ = 0;
+					currentByteReceivedBits_ = 0;
+					state_ = SGBTransferState::Transfering;
+				}
 			}
 			else if (transferBits == 0b10)
 			{
 				// 0
 
-				if (received_.size() == 16)
+				if (state_ == SGBTransferState::Transfering)
 				{
-					// Stop
+					if (received_.size() == 16)
+					{
+						// Stop
 
-					dump();
+						dump();
 
-					processCommand_();
+						processCommand_();
 
-					received_.clear();
-				}
-				else
-				{
-					++currentByteReceivedBits_;
+						received_.clear();
+						state_ = SGBTransferState::Stop;
+					}
+					else
+					{
+						++currentByteReceivedBits_;
+					}
 				}
 			}
 			else if (transferBits == 0b01)
 			{
 				// 1
 
-				currentByte_ |= 1 << currentByteReceivedBits_;
-				++currentByteReceivedBits_;
+				if (state_ == SGBTransferState::Transfering)
+				{
+					currentByte_ |= 1 << currentByteReceivedBits_;
+					++currentByteReceivedBits_;
+				}
 			}
 
 			if (currentByteReceivedBits_ >= 8)

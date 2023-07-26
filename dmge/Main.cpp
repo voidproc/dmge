@@ -174,11 +174,11 @@ public:
 		cpu_.reset(enableBootROM);
 
 		// SGBモードの適用
-		//if (not mem_.isCGBMode() && mem_.isSupportedSGBMode())
-		//{
-		//	mem_.setSGBMode(true);
-		//	cpu_.setSGBMode(true);
-		//}
+		if (not mem_.isCGBMode() && mem_.isSupportedSGBMode())
+		{
+			mem_.setSGBMode(true);
+			cpu_.setSGBMode(true);
+		}
 
 		// メモリの内容をリセット（SGB/CGBモード確定後にリセットする必要がある）
 		mem_.reset();

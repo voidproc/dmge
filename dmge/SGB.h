@@ -3,6 +3,8 @@
 namespace dmge
 {
 	class Joypad;
+	class LCD;
+	class PPU;
 
 	namespace SGB
 	{
@@ -46,10 +48,10 @@ namespace dmge
 			Transfering,
 		};
 
-		class PacketTransfer
+		class Command
 		{
 		public:
-			PacketTransfer(Joypad& joypad);
+			Command(Joypad& joypad, LCD& lcd, PPU& ppu);
 
 			// transferBits: (JOYP.4 | (JOYP.5 << 1))
 			void send(uint8 transferBits);
@@ -58,6 +60,8 @@ namespace dmge
 
 		private:
 			Joypad& joypad_;
+			LCD& lcd_;
+			PPU& ppu_;
 
 			uint8 prevBits_ = 0b11;
 

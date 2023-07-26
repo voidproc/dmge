@@ -1,19 +1,21 @@
 ﻿#include "stdafx.h"
 #include "SGB.h"
 #include "Joypad.h"
+#include "LCD.h"
+#include "PPU.h"
 #include <magic_enum/magic_enum.hpp>
 
 namespace dmge
 {
 	namespace SGB
 	{
-		PacketTransfer::PacketTransfer(Joypad& joypad)
-			: joypad_{ joypad }
+		Command::Command(Joypad& joypad, LCD& lcd, PPU& ppu)
+			: joypad_{ joypad }, lcd_{ lcd }, ppu_{ ppu }
 		{
 			received_.reserve(128);
 		}
 
-		void PacketTransfer::send(uint8 transferBits)
+		void Command::send(uint8 transferBits)
 		{
 			if (prevBits_ == 0b11 && transferBits != 0b11)
 			{
@@ -74,7 +76,7 @@ namespace dmge
 			prevBits_ = transferBits;
 		}
 
-		void PacketTransfer::dump() const
+		void Command::dump() const
 		{
 			if (received_.isEmpty()) return;
 
@@ -90,17 +92,25 @@ namespace dmge
 			Console.writeln();
 		}
 
-		void PacketTransfer::processCommand_()
+		void Command::processCommand_()
 		{
 			if (received_.isEmpty()) return;
 
-			const uint8 command = received_[0] >> 3;
+			const Functions func = static_cast<Functions>(received_[0] >> 3);
 
-			if (command == 0x11)
+			switch (func)
 			{
-				// MLT_REQ
+			case Functions::PAL_TRN:
+				lcd_.transferSystemColorPalette();
+				break;
 
+			case Functions::ATTR_TRN:
+				ppu_.transferAttributeFile();
+				break;
+
+			case Functions::MLT_REQ:
 				joypad_.setPlayerCount(received_[1] & 3);
+				break;
 			}
 		}
 	}

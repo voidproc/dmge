@@ -201,6 +201,14 @@ namespace dmge
 		std::copy(palette.cbegin(), palette.cend(), displayColorPalette_.begin());
 	}
 
+	void PPU::transferAttributeFile()
+	{
+		for (uint16 addr = 0x8000, index = 0; index <= 0xfd1; ++addr, ++index)
+		{
+			sgbAttributeFile_[index] = mem_->read(addr);
+		}
+	}
+
 	void PPU::updateLY_()
 	{
 		if (not lcd_->isEnabled())

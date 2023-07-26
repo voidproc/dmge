@@ -6,11 +6,15 @@
 
 namespace dmge
 {
+	class Memory;
+
 	// LCDレジスタ（0xff40-0xff4b, 0xff68-0xff6c）の表示・制御
 
 	class LCD
 	{
 	public:
+		LCD(Memory& mem);
+
 		// LCD Control (0xff40)
 		uint8 lcdc() const;
 
@@ -117,8 +121,12 @@ namespace dmge
 		// IOレジスタからの読み込み
 		uint8 readRegister(uint16 addr) const;
 
+		// (SGB) PAL_TRN
+		void transferSystemColorPalette();
 
 	private:
+		Memory& mem_;
+
 		// LCD Registers
 
 		uint8 lcdc_ = 0;
@@ -156,5 +164,8 @@ namespace dmge
 
 		std::array<std::array<ColorF, 4>, 8> displayBGColorPalette_{};
 		std::array<std::array<ColorF, 4>, 8> displayOBJColorPalette_{};
+
+		// (SGB) System Color Palette
+		std::array<uint16, 512 * 4> sgbSystemColorPalette_{};
 	};
 }

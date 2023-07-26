@@ -1,4 +1,5 @@
 ﻿#include "LCD.h"
+#include "Memory.h"
 #include "BitMask/LCDC.h"
 #include "BitMask/STAT.h"
 
@@ -16,6 +17,11 @@ namespace dmge
 		}
 	}
 
+	LCD::LCD(Memory& mem)
+		: mem_{ mem }
+	{
+
+	}
 
 	uint8 LCD::lcdc() const
 	{
@@ -349,5 +355,13 @@ namespace dmge
 		}
 
 		return 0;
+	}
+
+	void LCD::transferSystemColorPalette()
+	{
+		for (uint16 addr = 0x8000, index = 0; addr < 0x8fff; addr += 2, ++index)
+		{
+			sgbSystemColorPalette_[index] = mem_.read16(addr);
+		}
 	}
 }

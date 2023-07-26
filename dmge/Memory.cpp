@@ -28,7 +28,7 @@ namespace dmge
 		serial_ = serial;
 		lcd_ = lcd;
 		interrupt_ = interrupt;
-		sgbPacket_ = std::make_unique<SGB::PacketTransfer>(*joypad_);
+		sgbCommand_ = std::make_unique<SGB::Command>(*joypad_, *lcd_, *ppu_);
 	}
 
 	void Memory::reset()
@@ -181,7 +181,7 @@ namespace dmge
 
 			if (isSGBMode())
 			{
-				sgbPacket_->send((value >> 4) & 0b11);
+				sgbCommand_->send((value >> 4) & 0b11);
 			}
 		}
 		else if (addr <= Address::SC)

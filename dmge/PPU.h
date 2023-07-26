@@ -64,6 +64,9 @@ namespace dmge
 		// （「色番号から実際の色への変換テーブル」を置き換える）
 		void setDisplayColorPalette(const std::array<Color, 4>& palette);
 
+		// (SGB) ATTR_TRN
+		void transferAttributeFile();
+
 	private:
 		Memory* mem_;
 		LCD* lcd_;
@@ -119,6 +122,9 @@ namespace dmge
 
 		// (DMG) 色番号から実際の色への変換テーブル
 		std::array<Color, 4> displayColorPalette_{};
+
+		// (SGB) Attribute File
+		std::array<uint8, 4050> sgbAttributeFile_{};
 
 
 		void updateLY_();

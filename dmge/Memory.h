@@ -127,7 +127,7 @@ namespace dmge
 		bool doubleSpeedPrepared_ = false;
 
 		// SGB
-		std::unique_ptr<SGB::PacketTransfer> sgbPacket_;
+		std::unique_ptr<SGB::Command> sgbCommand_;
 
 		// SGB Mode
 		bool sgbMode_ = false;

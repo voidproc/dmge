@@ -598,7 +598,7 @@ private:
 
 	dmge::Interrupt interrupt_{};
 
-	dmge::LCD lcd_{};
+	dmge::LCD lcd_{ mem_ };
 
 	dmge::PPU ppu_{ &mem_, &lcd_, &interrupt_ };
 

@@ -16,6 +16,7 @@ namespace dmge
 			PAL12 = 0x03,
 			PAL_SET = 0x0a,
 			PAL_TRN = 0x0b,
+			PAL_PRI = 0x19,
 
 			ATTR_BLK = 0x04,
 			ATTR_LIN = 0x05,

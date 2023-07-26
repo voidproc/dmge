@@ -3,6 +3,7 @@
 #include "Cartridge.h"
 #include "Address.h"
 #include "DMA.h"
+#include "SGB.h"
 
 namespace dmge
 {
@@ -14,7 +15,7 @@ namespace dmge
 	class Serial;
 	class LCD;
 	class Interrupt;
-	class SGBCommand;
+	class PacketTransfer;
 
 	class Memory
 	{
@@ -23,7 +24,7 @@ namespace dmge
 
 		~Memory();
 
-		void init(PPU* ppu, APU* apu, dmge::Timer* timer, dmge::Joypad* joypad, LCD* lcd, Interrupt* interrupt, Serial* serial, SGBCommand* sgbCommand);
+		void init(PPU* ppu, APU* apu, dmge::Timer* timer, dmge::Joypad* joypad, LCD* lcd, Interrupt* interrupt, Serial* serial);
 
 		void reset();
 
@@ -93,7 +94,6 @@ namespace dmge
 		Serial* serial_ = nullptr;
 		LCD* lcd_ = nullptr;
 		Interrupt* interrupt_ = nullptr;
-		SGBCommand* sgbCommand_ = nullptr;
 
 		// MBC
 		std::unique_ptr<MBC> mbc_;
@@ -125,6 +125,9 @@ namespace dmge
 		// (CGB)倍速モード
 		bool doubleSpeed_ = false;
 		bool doubleSpeedPrepared_ = false;
+
+		// SGB
+		std::unique_ptr<SGB::PacketTransfer> sgbPacket_;
 
 		// SGB Mode
 		bool sgbMode_ = false;

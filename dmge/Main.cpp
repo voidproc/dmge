@@ -97,7 +97,7 @@ public:
 
 		showDebugMonitor_ = config_.showDebugMonitor;
 
-		mem_.init(&ppu_, &apu_, &timer_, &joypad_, &lcd_, &interrupt_, &serial_, &sgbCommand_);
+		mem_.init(&ppu_, &apu_, &timer_, &joypad_, &lcd_, &interrupt_, &serial_);
 
 		joypad_.setButtonAssign(config_.gamepadButtonAssign);
 
@@ -614,8 +614,6 @@ private:
 	dmge::Joypad joypad_{ &mem_ };
 
 	dmge::Serial serial_{ interrupt_ };
-
-	dmge::SGBCommand sgbCommand_{ joypad_ };
 
 	dmge::DebugMonitor debugMonitor_{ &mem_, &cpu_, &apu_, &interrupt_ };
 

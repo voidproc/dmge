@@ -7,7 +7,6 @@
 #include "Joypad.h"
 #include "Serial.h"
 #include "Interrupt.h"
-#include "SGB.h"
 #include "DebugPrint.h"
 
 namespace dmge
@@ -20,7 +19,7 @@ namespace dmge
 	{
 	}
 
-	void Memory::init(PPU* ppu, APU* apu, dmge::Timer* timer, dmge::Joypad* joypad, LCD* lcd, Interrupt* interrupt, Serial* serial, SGBCommand* sgbCommand)
+	void Memory::init(PPU* ppu, APU* apu, dmge::Timer* timer, dmge::Joypad* joypad, LCD* lcd, Interrupt* interrupt, Serial* serial)
 	{
 		ppu_ = ppu;
 		apu_ = apu;
@@ -29,7 +28,7 @@ namespace dmge
 		serial_ = serial;
 		lcd_ = lcd;
 		interrupt_ = interrupt;
-		sgbCommand_ = sgbCommand;
+		sgbPacket_ = std::make_unique<SGB::PacketTransfer>(*joypad_);
 	}
 
 	void Memory::reset()
@@ -182,7 +181,7 @@ namespace dmge
 
 			if (isSGBMode())
 			{
-				sgbCommand_->send((value >> 4) & 0b11);
+				sgbPacket_->send((value >> 4) & 0b11);
 			}
 		}
 		else if (addr <= Address::SC)

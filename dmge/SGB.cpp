@@ -1,101 +1,107 @@
 ﻿#include "stdafx.h"
 #include "SGB.h"
 #include "Joypad.h"
+#include <magic_enum/magic_enum.hpp>
 
 namespace dmge
 {
-	SGBCommand::SGBCommand(Joypad& joypad)
-		: joypad_{ joypad }
+	namespace SGB
 	{
-		received_.reserve(128);
-	}
-
-	void SGBCommand::send(uint8 transferBits)
-	{
-		if (prevBits_ == 0b11 && transferBits != 0b11)
+		PacketTransfer::PacketTransfer(Joypad& joypad)
+			: joypad_{ joypad }
 		{
-			if (transferBits == 0)
-			{
-				if (state_ == SGBTransferState::Stop)
-				{
-					// Reset
+			received_.reserve(128);
+		}
 
-					received_.clear();
-					currentByte_ = 0;
-					currentByteReceivedBits_ = 0;
-					state_ = SGBTransferState::Transfering;
-				}
-			}
-			else if (transferBits == 0b10)
+		void PacketTransfer::send(uint8 transferBits)
+		{
+			if (prevBits_ == 0b11 && transferBits != 0b11)
 			{
-				// 0
-
-				if (state_ == SGBTransferState::Transfering)
+				if (transferBits == 0)
 				{
-					if (received_.size() == 16)
+					if (state_ == TransferState::Stop)
 					{
-						// Stop
-
-						dump();
-
-						processCommand_();
+						// Reset
 
 						received_.clear();
-						state_ = SGBTransferState::Stop;
+						currentByte_ = 0;
+						currentByteReceivedBits_ = 0;
+						state_ = TransferState::Transfering;
 					}
-					else
+				}
+				else if (transferBits == 0b10)
+				{
+					// 0
+
+					if (state_ == TransferState::Transfering)
 					{
+						if (received_.size() == 16)
+						{
+							// Stop
+
+							dump();
+
+							processCommand_();
+
+							received_.clear();
+							state_ = TransferState::Stop;
+						}
+						else
+						{
+							++currentByteReceivedBits_;
+						}
+					}
+				}
+				else if (transferBits == 0b01)
+				{
+					// 1
+
+					if (state_ == TransferState::Transfering)
+					{
+						currentByte_ |= 1 << currentByteReceivedBits_;
 						++currentByteReceivedBits_;
 					}
 				}
-			}
-			else if (transferBits == 0b01)
-			{
-				// 1
 
-				if (state_ == SGBTransferState::Transfering)
+				if (currentByteReceivedBits_ >= 8)
 				{
-					currentByte_ |= 1 << currentByteReceivedBits_;
-					++currentByteReceivedBits_;
+					received_.push_back(currentByte_);
+					currentByte_ = 0;
+					currentByteReceivedBits_ = 0;
 				}
 			}
 
-			if (currentByteReceivedBits_ >= 8)
+			prevBits_ = transferBits;
+		}
+
+		void PacketTransfer::dump() const
+		{
+			if (received_.isEmpty()) return;
+
+			const uint8 command = received_[0] >> 3;
+			const auto commandName = magic_enum::enum_name((Functions)command);
+			Console.write(U"SGB Command={:02X} {:10s} Length={} "_fmt(command, Unicode::WidenAscii(commandName), received_[0] & 7));
+
+			for (const auto byte : received_)
 			{
-				received_.push_back(currentByte_);
-				currentByte_ = 0;
-				currentByteReceivedBits_ = 0;
+				Console.write(U"{:02X} "_fmt(byte));
 			}
+
+			Console.writeln();
 		}
 
-		prevBits_ = transferBits;
-	}
-
-	void SGBCommand::dump() const
-	{
-		if (received_.isEmpty()) return;
-
-		Console.write(U"SGB Command={:02X} Length={} "_fmt(received_[0] >> 3, received_[0] & 7));
-
-		for (const auto byte : received_)
+		void PacketTransfer::processCommand_()
 		{
-			Console.write(U"{:02X} "_fmt(byte));
-		}
+			if (received_.isEmpty()) return;
 
-		Console.writeln();
-	}
+			const uint8 command = received_[0] >> 3;
 
-	void SGBCommand::processCommand_()
-	{
-		if (received_.isEmpty()) return;
+			if (command == 0x11)
+			{
+				// MLT_REQ
 
-		const uint8 command = received_[0] >> 3;
-
-		if (command == 0x11)
-		{
-			// MLT_REQ
-
-			joypad_.setPlayerCount(received_[1] & 3);
+				joypad_.setPlayerCount(received_[1] & 3);
+			}
 		}
 	}
 }

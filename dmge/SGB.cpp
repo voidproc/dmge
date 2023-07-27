@@ -25,7 +25,7 @@ namespace dmge
 					{
 						// Reset
 
-						if (packetLength_ == 0)
+						if (packetLength_ <= 0)
 						{
 							received_.clear();
 							receivedSizePartial_ = 0;
@@ -50,11 +50,11 @@ namespace dmge
 							// パケットの長さを調べる
 							// 長さが 2 以上なら今のコマンドを継続して受け取る必要がある
 							if (packetLength_ == 0)
-								packetLength_ = (received_[0] & 0b111) - 1;
-							else
-								packetLength_--;
+							{
+								packetLength_ = received_[0] & 0b111;
+							}
 
-							if (packetLength_ <= 0)
+							if (--packetLength_ <= 0)
 							{
 								dump();
 
@@ -116,71 +116,54 @@ namespace dmge
 
 			const Functions func = static_cast<Functions>(received_[0] >> 3);
 
+			// PALXX : 色番号 0 をパレット 0～3 に適用
+
 			switch (func)
 			{
 			case Functions::PAL01:
-			{
+			case Functions::PAL23:
+			case Functions::PAL03:
+			case Functions::PAL12:
 				const uint16 color0 = received_[1] | (received_[2] << 8);
-
 				for (int i = 0; i < 4; i++)
+				{
 					lcd_.setSGBPalette(i, 0, color0);
+				}
+			}
 
+			switch (func)
+			{
+			case Functions::PAL01:
 				for (int i = 0; i < 3; i++)
 				{
 					lcd_.setSGBPalette(0, i + 1, received_[3 + i * 2] | (received_[3 + i * 2 + 1] << 8));
 					lcd_.setSGBPalette(1, i + 1, received_[9 + i * 2] | (received_[9 + i * 2 + 1] << 8));
 				}
-
 				break;
-			}
 
 			case Functions::PAL23:
-			{
-				const uint16 color0 = received_[1] | (received_[2] << 8);
-
-				for (int i = 0; i < 4; i++)
-					lcd_.setSGBPalette(i, 0, color0);
-
 				for (int i = 0; i < 3; i++)
 				{
 					lcd_.setSGBPalette(2, i + 1, received_[3 + i * 2] | (received_[3 + i * 2 + 1] << 8));
 					lcd_.setSGBPalette(3, i + 1, received_[9 + i * 2] | (received_[9 + i * 2 + 1] << 8));
 				}
-
 				break;
-			}
 
 			case Functions::PAL03:
-			{
-				const uint16 color0 = received_[1] | (received_[2] << 8);
-
-				for (int i = 0; i < 4; i++)
-					lcd_.setSGBPalette(i, 0, color0);
-
 				for (int i = 0; i < 3; i++)
 				{
 					lcd_.setSGBPalette(0, i + 1, received_[3 + i * 2] | (received_[3 + i * 2 + 1] << 8));
 					lcd_.setSGBPalette(3, i + 1, received_[9 + i * 2] | (received_[9 + i * 2 + 1] << 8));
 				}
-
 				break;
-			}
 
 			case Functions::PAL12:
-			{
-				const uint16 color0 = received_[1] | (received_[2] << 8);
-
-				for (int i = 0; i < 4; i++)
-					lcd_.setSGBPalette(i, 0, color0);
-
 				for (int i = 0; i < 3; i++)
 				{
 					lcd_.setSGBPalette(1, i + 1, received_[3 + i * 2] | (received_[3 + i * 2 + 1] << 8));
 					lcd_.setSGBPalette(2, i + 1, received_[9 + i * 2] | (received_[9 + i * 2 + 1] << 8));
 				}
-
 				break;
-			}
 
 			case Functions::PAL_SET:
 			{

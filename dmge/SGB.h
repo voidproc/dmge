@@ -67,8 +67,10 @@ namespace dmge
 			uint8 prevBits_ = 0b11;
 
 			Array<uint8> received_;
+			int receivedSizePartial_ = 0;
 			uint8 currentByte_ = 0;
 			uint8 currentByteReceivedBits_ = 0;
+			int packetLength_ = 0;
 
 			TransferState state_ = TransferState::Stop;
 

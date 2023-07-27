@@ -24,7 +24,9 @@ namespace dmge
 
 		~PPU();
 
-		void setCGBMode(bool value);
+		void setCGBMode(bool enableCGBMode);
+
+		void setSGBMode(bool enableSGBMode);
 
 		void setGamma(double gamma);
 
@@ -62,7 +64,7 @@ namespace dmge
 
 		// (DMG) カラーパレットを設定する
 		// （「色番号から実際の色への変換テーブル」を置き換える）
-		void setDisplayColorPalette(const std::array<Color, 4>& palette);
+		void setDisplayColorPalette(const std::array<ColorF, 4>& palette);
 
 		// (SGB) ATTR_TRN
 		void transferAttributeFile();
@@ -120,8 +122,11 @@ namespace dmge
 		// CGB Mode
 		bool cgbMode_ = false;
 
+		// SGB Mode
+		bool sgbMode_ = false;
+
 		// (DMG) 色番号から実際の色への変換テーブル
-		std::array<Color, 4> displayColorPalette_{};
+		std::array<ColorF, 4> displayColorPalette_{};
 
 		// (SGB) Attribute File
 		std::array<uint8, 4050> sgbAttributeFile_{};
@@ -132,7 +137,7 @@ namespace dmge
 		void updateSTAT_();
 		void scanOAM_();
 		void renderDot_();
-		Color fetchOAMDot_(const Color& initialDotColor, uint8 bgColor, const TileMapAttribute& bgTileMapAttr) const;
+		ColorF fetchOAMDot_(const ColorF& initialDotColor, uint8 bgColor, const TileMapAttribute& bgTileMapAttr) const;
 
 	};
 }

@@ -25,7 +25,13 @@ namespace dmge
 					{
 						// Reset
 
-						received_.clear();
+						if (packetLength_ == 0)
+						{
+							received_.clear();
+							receivedSizePartial_ = 0;
+							packetLength_ = 0;
+						}
+
 						currentByte_ = 0;
 						currentByteReceivedBits_ = 0;
 						state_ = TransferState::Transfering;
@@ -37,15 +43,26 @@ namespace dmge
 
 					if (state_ == TransferState::Transfering)
 					{
-						if (received_.size() == 16)
+						if (receivedSizePartial_ == 16)
 						{
 							// Stop
 
-							dump();
+							// パケットの長さを調べる
+							// 長さが 2 以上なら今のコマンドを継続して受け取る必要がある
+							if (packetLength_ == 0)
+								packetLength_ = (received_[0] & 0b111) - 1;
+							else
+								packetLength_--;
 
-							processCommand_();
+							if (packetLength_ <= 0)
+							{
+								dump();
 
-							received_.clear();
+								processCommand_();
+								received_.clear();
+							}
+
+							receivedSizePartial_ = 0;
 							state_ = TransferState::Stop;
 						}
 						else
@@ -68,6 +85,7 @@ namespace dmge
 				if (currentByteReceivedBits_ >= 8)
 				{
 					received_.push_back(currentByte_);
+					++receivedSizePartial_;
 					currentByte_ = 0;
 					currentByteReceivedBits_ = 0;
 				}
@@ -100,6 +118,84 @@ namespace dmge
 
 			switch (func)
 			{
+			case Functions::PAL01:
+			{
+				const uint16 color0 = received_[1] | (received_[2] << 8);
+
+				for (int i = 0; i < 4; i++)
+					lcd_.setSGBPalette(i, 0, color0);
+
+				for (int i = 0; i < 3; i++)
+				{
+					lcd_.setSGBPalette(0, i + 1, received_[3 + i * 2] | (received_[3 + i * 2 + 1] << 8));
+					lcd_.setSGBPalette(1, i + 1, received_[9 + i * 2] | (received_[9 + i * 2 + 1] << 8));
+				}
+
+				break;
+			}
+
+			case Functions::PAL23:
+			{
+				const uint16 color0 = received_[1] | (received_[2] << 8);
+
+				for (int i = 0; i < 4; i++)
+					lcd_.setSGBPalette(i, 0, color0);
+
+				for (int i = 0; i < 3; i++)
+				{
+					lcd_.setSGBPalette(2, i + 1, received_[3 + i * 2] | (received_[3 + i * 2 + 1] << 8));
+					lcd_.setSGBPalette(3, i + 1, received_[9 + i * 2] | (received_[9 + i * 2 + 1] << 8));
+				}
+
+				break;
+			}
+
+			case Functions::PAL03:
+			{
+				const uint16 color0 = received_[1] | (received_[2] << 8);
+
+				for (int i = 0; i < 4; i++)
+					lcd_.setSGBPalette(i, 0, color0);
+
+				for (int i = 0; i < 3; i++)
+				{
+					lcd_.setSGBPalette(0, i + 1, received_[3 + i * 2] | (received_[3 + i * 2 + 1] << 8));
+					lcd_.setSGBPalette(3, i + 1, received_[9 + i * 2] | (received_[9 + i * 2 + 1] << 8));
+				}
+
+				break;
+			}
+
+			case Functions::PAL12:
+			{
+				const uint16 color0 = received_[1] | (received_[2] << 8);
+
+				for (int i = 0; i < 4; i++)
+					lcd_.setSGBPalette(i, 0, color0);
+
+				for (int i = 0; i < 3; i++)
+				{
+					lcd_.setSGBPalette(1, i + 1, received_[3 + i * 2] | (received_[3 + i * 2 + 1] << 8));
+					lcd_.setSGBPalette(2, i + 1, received_[9 + i * 2] | (received_[9 + i * 2 + 1] << 8));
+				}
+
+				break;
+			}
+
+			case Functions::PAL_SET:
+			{
+				const uint16 palette0 = received_[1] | (received_[2] << 8);
+				const uint16 palette1 = received_[3] | (received_[4] << 8);
+				const uint16 palette2 = received_[5] | (received_[6] << 8);
+				const uint16 palette3 = received_[7] | (received_[8] << 8);
+				lcd_.setSGBPalette(palette0, palette1, palette2, palette3);
+
+				// アトリビュートファイルの指定 (received_[9])
+				//...
+
+				break;
+			}
+
 			case Functions::PAL_TRN:
 				lcd_.transferSystemColorPalette();
 				break;

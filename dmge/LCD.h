@@ -32,6 +32,8 @@ namespace dmge
 		// 0x8000 or 0x9000
 		uint16 tileDataAddress() const;
 
+		uint16 tileDataAddressTop() const;
+
 		// LCDC.3 - BG tile map area
 		// 0x9800 or 0x9C00
 		uint16 bgTileMapAddress() const;
@@ -124,6 +126,18 @@ namespace dmge
 		// (SGB) PAL_TRN
 		void transferSystemColorPalette();
 
+		// (SGB) PAL_SET
+		void setSGBPalette(uint16 palette0, uint16 palette1, uint16 palette2, uint16 palette3);
+
+		// (SGB) PALXX
+		void setSGBPalette(int palette, int colorId, uint16 color);
+
+		// (SGB) 実際の描画色
+		const ColorF& sgbPaletteColor(uint8 palette, uint8 color) const;
+
+		// (SGB) 
+		//ColorF sgbSystemColorPaletteMemoryData(int palette, int color) const;
+
 	private:
 		Memory& mem_;
 
@@ -147,6 +161,7 @@ namespace dmge
 		uint16 windowTileMapAddress_ = Address::TileMap0;
 		uint16 bgTileMapAddress_ = Address::TileMap0;
 		uint16 tileDataAddress_ = Address::TileData0;
+		uint16 tileDataAddressTop_ = Address::TileData0;
 
 		// (CGB) BG/OBJ Palette Index
 
@@ -165,7 +180,11 @@ namespace dmge
 		std::array<std::array<ColorF, 4>, 8> displayBGColorPalette_{};
 		std::array<std::array<ColorF, 4>, 8> displayOBJColorPalette_{};
 
-		// (SGB) System Color Palette
-		std::array<uint16, 512 * 4> sgbSystemColorPalette_{};
+		// (SGB) System Color Palette Memory
+		std::array<uint16, 512 * 4> sgbSystemColorPaletteMemory_{};
+
+		// (SGB) 色番号から実際の色への変換テーブル
+		std::array<std::array<ColorF, 4>, 4> sgbDisplayColorPalette_{};
+
 	};
 }

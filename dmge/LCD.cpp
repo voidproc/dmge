@@ -48,6 +48,11 @@ namespace dmge
 		return tileDataAddress_;
 	}
 
+	uint16 LCD::tileDataAddressTop() const
+	{
+		return tileDataAddressTop_;
+	}
+
 	uint16 LCD::bgTileMapAddress() const
 	{
 		return bgTileMapAddress_;
@@ -200,6 +205,7 @@ namespace dmge
 			windowTileMapAddress_ = (value & BitMask::LCDC::WindowTileMapArea) > 0 ? Address::TileMap1 : Address::TileMap0;
 			bgTileMapAddress_ = (value & BitMask::LCDC::BGTileMapArea) > 0 ? Address::TileMap1 : Address::TileMap0;
 			tileDataAddress_ = (value & BitMask::LCDC::BGAndWindowTileDataArea) > 0 ? Address::TileData0 : Address::TileData2;
+			tileDataAddressTop_ = (value & BitMask::LCDC::BGAndWindowTileDataArea) > 0 ? Address::TileData0 : Address::TileData1;
 		}
 		else if (addr == Address::STAT)
 		{
@@ -359,9 +365,36 @@ namespace dmge
 
 	void LCD::transferSystemColorPalette()
 	{
-		for (uint16 addr = 0x8000, index = 0; addr < 0x8fff; addr += 2, ++index)
+		for (uint16 addrOffset = 0, index = 0; addrOffset < 0x1000; addrOffset += 2, ++index)
 		{
-			sgbSystemColorPalette_[index] = mem_.read16(addr);
+			const uint16 addr = tileDataAddressTop() + addrOffset;
+			sgbSystemColorPaletteMemory_[index] = mem_.read16(addr);
 		}
 	}
+
+	void LCD::setSGBPalette(uint16 palette0, uint16 palette1, uint16 palette2, uint16 palette3)
+	{
+		for (int color = 0; color < 4; ++color)
+		{
+			sgbDisplayColorPalette_[0][color] = ConvertColorFrom555(sgbSystemColorPaletteMemory_[palette0 * 4 + color]);
+			sgbDisplayColorPalette_[1][color] = ConvertColorFrom555(sgbSystemColorPaletteMemory_[palette1 * 4 + color]);
+			sgbDisplayColorPalette_[2][color] = ConvertColorFrom555(sgbSystemColorPaletteMemory_[palette2 * 4 + color]);
+			sgbDisplayColorPalette_[3][color] = ConvertColorFrom555(sgbSystemColorPaletteMemory_[palette3 * 4 + color]);
+		}
+	}
+
+	void LCD::setSGBPalette(int palette, int colorId, uint16 color)
+	{
+		sgbDisplayColorPalette_[palette][colorId] = ConvertColorFrom555(color);
+	}
+
+	const ColorF& LCD::sgbPaletteColor(uint8 palette, uint8 color) const
+	{
+		return sgbDisplayColorPalette_[palette][color];
+	}
+
+	//ColorF LCD::sgbSystemColorPaletteMemoryData(int palette, int color) const
+	//{
+	//	return ConvertColorFrom555(sgbSystemColorPaletteMemory_[palette * 4 + color]);
+	//}
 }

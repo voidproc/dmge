@@ -177,6 +177,7 @@ public:
 		if (not mem_.isCGBMode() && mem_.isSupportedSGBMode())
 		{
 			mem_.setSGBMode(true);
+			ppu_.setSGBMode(true);
 			cpu_.setSGBMode(true);
 		}
 
@@ -624,25 +625,25 @@ private:
 	bool quitApp_ = false;
 
 	// 画面表示用パレット
-	const Array<std::array<Color, 4>> paletteList_ = {
+	const Array<std::array<ColorF, 4>> paletteList_ = {
 		{
 			// BGB grey
-			{ Color{ 232 }, Color{ 160 }, Color{ 88 }, Color{ 16 }, },
+			{ ColorF{ U"#e8e8e8" }, ColorF{ U"#a0a0a0" }, ColorF{ U"#585858" }, ColorF{ U"#101010" }, },
 
 			// BGB lcd green
-			{ Color{ 224,248,208 }, Color{ 136,192,112 }, Color{ 52,104,86 }, Color{ 8,24,32 }, },
+			{ ColorF{ U"#e0f8d0" }, ColorF{ U"88c070" }, ColorF{ U"#346856" }, ColorF{ U"#081820"}, },
 
 			// BGB super gameboy
-			{ Color{ 255,239,206 }, Color{ 222,148,74 }, Color{ 173,41,33 }, Color{ 49,24,82 }, },
+			{ ColorF{ U"#ffefce" }, ColorF{ U"#de944a" }, ColorF{ U"#ad2921" }, ColorF{ U"#311852" }, },
 
 			// GBP-NSO
-			{ Color{ U"#b5c69c" }, Color{ U"#8d9c7b" }, Color{ U"#637251" }, Color{ U"#303820" },  },
+			{ ColorF{ U"#b5c69c" }, ColorF{ U"#8d9c7b" }, ColorF{ U"#637251" }, ColorF{ U"#303820" }, },
 
 			// DMG-NSO
-			{ Color{ U"#8cad28" }, Color{ U"#6c9421" }, Color{ U"#426b29" }, Color{ U"#214231" },  },
+			{ ColorF{ U"#8cad28" }, ColorF{ U"#6c9421" }, ColorF{ U"#426b29" }, ColorF{ U"#214231" }, },
 
 			// SGB 4-H
-			{ Color{ U"#f8f8c8" }, Color{ U"#b8c058" }, Color{ U"#808840" }, Color{ U"#405028" },  },
+			{ ColorF{ U"#f8f8c8" }, ColorF{ U"#b8c058" }, ColorF{ U"#808840" }, ColorF{ U"#405028" }, },
 		}
 	};
 

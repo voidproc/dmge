@@ -37,11 +37,16 @@ namespace dmge
 	{
 	}
 
-	void PPU::setCGBMode(bool value)
+	void PPU::setCGBMode(bool enableCGBMode)
 	{
-		cgbMode_ = value;
+		cgbMode_ = enableCGBMode;
 
-		cbRenderingSetting_->gamma = value ? gamma_ : 1.0;
+		cbRenderingSetting_->gamma = enableCGBMode ? gamma_ : 1.0;
+	}
+
+	void PPU::setSGBMode(bool enableSGBMode)
+	{
+		sgbMode_ = enableSGBMode;
 	}
 
 	void PPU::setGamma(double gamma)
@@ -196,14 +201,14 @@ namespace dmge
 		return baseLength;
 	}
 
-	void PPU::setDisplayColorPalette(const std::array<Color, 4>& palette)
+	void PPU::setDisplayColorPalette(const std::array<ColorF, 4>& palette)
 	{
 		std::copy(palette.cbegin(), palette.cend(), displayColorPalette_.begin());
 	}
 
 	void PPU::transferAttributeFile()
 	{
-		for (uint16 addr = 0x8000, index = 0; index <= 0xfd1; ++addr, ++index)
+		for (uint16 addr = lcd_->tileDataAddressTop(), index = 0; index <= 0xfd1; ++addr, ++index)
 		{
 			sgbAttributeFile_[index] = mem_->read(addr);
 		}
@@ -409,7 +414,9 @@ namespace dmge
 		if (not cgbMode_)
 		{
 			// LCDC.0 == 0 の場合はBGを描画しない
-			dotColor = displayColorPalette_[lcd_->isEnabledBgAndWindow() ? (size_t)lcd_->bgp(color) : 0u];
+			const auto bgPaletteColor = lcd_->isEnabledBgAndWindow() ? (size_t)lcd_->bgp(color) : 0u;
+
+			dotColor = sgbMode_ ? lcd_->sgbPaletteColor(0, bgPaletteColor) : displayColorPalette_[bgPaletteColor];
 		}
 		else
 		{
@@ -426,14 +433,14 @@ namespace dmge
 		canvasX_++;
 	}
 
-	Color PPU::fetchOAMDot_(const Color& initialDotColor, uint8 bgColor, const TileMapAttribute& bgTileMapAttr) const
+	ColorF PPU::fetchOAMDot_(const ColorF& initialDotColor, uint8 bgColor, const TileMapAttribute& bgTileMapAttr) const
 	{
 		const bool opri = lcd_->opri() & 1;
 		int oamPriorityVal = 999;
 		int oamIndex = 0;
 
 		// 描画結果
-		Color fetched = initialDotColor;
+		ColorF fetched = initialDotColor;
 
 		for (const auto& oam : oamBuffer_)
 		{
@@ -458,7 +465,8 @@ namespace dmge
 			{
 				if (oamColor != 0 && not (oam.priority == 1 && bgColor != 0))
 				{
-					fetched = displayColorPalette_[(int)lcd_->obp(oam.palette, oamColor)];
+					const auto oamPaletteColor = (int)lcd_->obp(oam.palette, oamColor);
+					fetched = sgbMode_ ? lcd_->sgbPaletteColor(0, oamPaletteColor) : displayColorPalette_[oamPaletteColor];
 				}
 			}
 			else

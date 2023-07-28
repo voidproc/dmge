@@ -67,7 +67,13 @@ namespace dmge
 		void setDisplayColorPalette(const std::array<ColorF, 4>& palette);
 
 		// (SGB) ATTR_TRN
-		void transferAttributeFile();
+		void transferAttributeFiles();
+
+		// (SGB) アトリビュートを設定（Attr files から）
+		void setAttribute(int index);
+
+		// [DEBUG]
+		void dumpAttributeFile(int index);
 
 	private:
 		Memory* mem_;
@@ -128,8 +134,11 @@ namespace dmge
 		// (DMG) 色番号から実際の色への変換テーブル
 		std::array<ColorF, 4> displayColorPalette_{};
 
-		// (SGB) Attribute File
-		std::array<uint8, 4050> sgbAttributeFile_{};
+		// (SGB) Attribute Files
+		std::array<uint8, 4050> sgbAttrFile_{};
+
+		// (SGB) 現在のアトリビュート
+		std::array<uint8, 90> sgbCurrentAttr_{};
 
 
 		void updateLY_();
@@ -138,6 +147,9 @@ namespace dmge
 		void scanOAM_();
 		void renderDot_();
 		ColorF fetchOAMDot_(const ColorF& initialDotColor, uint8 bgColor, const TileMapAttribute& bgTileMapAttr) const;
+
+		void setAttribute_(int x, int y, uint8 palette);
+		uint8 getAttribute_(int x, int y) const;
 
 	};
 }

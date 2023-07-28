@@ -206,12 +206,29 @@ namespace dmge
 		std::copy(palette.cbegin(), palette.cend(), displayColorPalette_.begin());
 	}
 
-	void PPU::transferAttributeFile()
+	void PPU::transferAttributeFiles()
 	{
 		for (uint16 addr = lcd_->tileDataAddressTop(), index = 0; index <= 0xfd1; ++addr, ++index)
 		{
-			sgbAttributeFile_[index] = mem_->read(addr);
+			sgbAttrFile_[index] = mem_->read(addr);
 		}
+	}
+
+	void PPU::setAttribute(int index)
+	{
+		for (int i : step(90))
+		{
+			sgbCurrentAttr_[i] = sgbAttrFile_[index * 90 + i];
+		}
+	}
+
+	void PPU::dumpAttributeFile(int index)
+	{
+		for (int i : step(90))
+		{
+			Console.write(U"{:02X} "_fmt(sgbAttrFile_[index * 90 + i]));
+		}
+		Console.writeln();
 	}
 
 	void PPU::updateLY_()
@@ -414,9 +431,18 @@ namespace dmge
 		if (not cgbMode_)
 		{
 			// LCDC.0 == 0 の場合はBGを描画しない
-			const auto bgPaletteColor = lcd_->isEnabledBgAndWindow() ? (size_t)lcd_->bgp(color) : 0u;
+			const uint8 bgPaletteColor = lcd_->isEnabledBgAndWindow() ? (uint8)lcd_->bgp(color) : 0u;
 
-			dotColor = sgbMode_ ? lcd_->sgbPaletteColor(0, bgPaletteColor) : displayColorPalette_[bgPaletteColor];
+			if (not sgbMode_)
+			{
+				dotColor = displayColorPalette_[bgPaletteColor];
+			}
+			else
+			{
+				// (SGB) カラー0は透明なので、最新の背景色を表示する?
+				const uint8 palette = bgPaletteColor == 0 ? 0 : getAttribute_(canvasX_, ly);
+				dotColor = lcd_->sgbPaletteColor(palette, bgPaletteColor);
+			}
 		}
 		else
 		{
@@ -465,8 +491,18 @@ namespace dmge
 			{
 				if (oamColor != 0 && not (oam.priority == 1 && bgColor != 0))
 				{
-					const auto oamPaletteColor = (int)lcd_->obp(oam.palette, oamColor);
-					fetched = sgbMode_ ? lcd_->sgbPaletteColor(0, oamPaletteColor) : displayColorPalette_[oamPaletteColor];
+					const uint8 oamPaletteColor = (uint8)lcd_->obp(oam.palette, oamColor);
+
+					if (not sgbMode_)
+					{
+						fetched = displayColorPalette_[oamPaletteColor];
+					}
+					else
+					{
+						// (SGB) カラー0は透明なので、最新の背景色を表示する?
+						const uint8 palette = oamPaletteColor == 0 ? 0 : getAttribute_(oamX, lcd_->ly());
+						fetched = lcd_->sgbPaletteColor(palette, oamPaletteColor);
+					}
 				}
 			}
 			else
@@ -491,5 +527,22 @@ namespace dmge
 		}
 
 		return fetched;
+	}
+
+	void PPU::setAttribute_(int x, int y, uint8 palette)
+	{
+		const uint8 index = (y / 8) * 5 + x / 8 / 4;
+		const uint8 shiftBits = ((3 - ((x / 8) % 4)) * 2);
+
+		sgbCurrentAttr_[index] &= ~(0x3 << shiftBits);
+		sgbCurrentAttr_[index] |= (palette << shiftBits);
+	}
+
+	uint8 PPU::getAttribute_(int x, int y) const
+	{
+		const uint8 index = (y / 8) * 5 + x / 8 / 4;
+		const uint8 shiftBits = ((3 - ((x / 8) % 4)) * 2);
+
+		return (sgbCurrentAttr_[index] >> shiftBits) & 0x3;
 	}
 }

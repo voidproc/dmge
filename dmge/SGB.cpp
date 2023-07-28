@@ -173,8 +173,12 @@ namespace dmge
 				const uint16 palette3 = received_[7] | (received_[8] << 8);
 				lcd_.setSGBPalette(palette0, palette1, palette2, palette3);
 
-				// アトリビュートファイルの指定 (received_[9])
-				//...
+				// アトリビュートファイルの指定
+				if (received_[9] & 0x80)
+				{
+					const int atf = Min(received_[9] & 0x3f, 0x2c);
+					ppu_.setAttribute(atf);
+				}
 
 				break;
 			}
@@ -184,7 +188,7 @@ namespace dmge
 				break;
 
 			case Functions::ATTR_TRN:
-				ppu_.transferAttributeFile();
+				ppu_.transferAttributeFiles();
 				break;
 
 			case Functions::MLT_REQ:

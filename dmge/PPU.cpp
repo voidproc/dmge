@@ -500,7 +500,7 @@ namespace dmge
 					else
 					{
 						// (SGB) カラー0は透明なので、最新の背景色を表示する?
-						const uint8 palette = oamPaletteColor == 0 ? 0 : getAttribute_(oamX, lcd_->ly());
+						const uint8 palette = oamPaletteColor == 0 ? 0 : getAttribute_(canvasX_, lcd_->ly());
 						fetched = lcd_->sgbPaletteColor(palette, oamPaletteColor);
 					}
 				}

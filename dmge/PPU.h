@@ -72,6 +72,14 @@ namespace dmge
 		// (SGB) アトリビュートを設定（Attr files から）
 		void setAttribute(int index);
 
+		// (SGB) アトリビュートを設定
+		// x, y はキャラクタ単位の座標
+		void setAttribute(int x, int y, uint8 palette);
+
+		// (SGB) アトリビュートを取得
+		// x, y はキャラクタ単位の座標
+		uint8 getAttribute(int x, int y) const;
+
 		// [DEBUG]
 		void dumpAttributeFile(int index);
 
@@ -147,9 +155,6 @@ namespace dmge
 		void scanOAM_();
 		void renderDot_();
 		ColorF fetchOAMDot_(const ColorF& initialDotColor, uint8 bgColor, const TileMapAttribute& bgTileMapAttr) const;
-
-		void setAttribute_(int x, int y, uint8 palette);
-		uint8 getAttribute_(int x, int y) const;
 
 	};
 }

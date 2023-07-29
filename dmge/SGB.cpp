@@ -176,7 +176,7 @@ namespace dmge
 				// アトリビュートファイルの指定
 				if (received_[9] & 0x80)
 				{
-					const int atf = Min(received_[9] & 0x3f, 0x2c);
+					const int atf = Min<uint8>(received_[9] & 0x3f, 0x2c);
 					ppu_.setAttribute(atf);
 				}
 
@@ -186,6 +186,72 @@ namespace dmge
 			case Functions::PAL_TRN:
 				lcd_.transferSystemColorPalette();
 				break;
+
+			case Functions::ATTR_BLK:
+			{
+				const uint8 groupCount = Min<uint8>(received_[1] & 0x1f, 0x12);
+
+				for (int group = 0; group < groupCount; ++group)
+				{
+					const auto offset = group * 6;
+					const uint8 controlCode = received_[2 + offset] & 7;
+					const uint8 paletteInsideArea = received_[3 + offset] & 3;
+					const uint8 paletteOnBorder = (received_[3 + offset] >> 2) & 3;
+					const uint8 paletteOutsideArea = (received_[3 + offset] >> 4) & 3;
+					const uint8 left = received_[4 + offset] & 0x1f;
+					const uint8 top = received_[5 + offset] & 0x1f;
+					const uint8 right = received_[6 + offset] & 0x1f;
+					const uint8 bottom = received_[7 + offset] & 0x1f;
+
+					// Outside the square
+
+					if (controlCode & 0b100)
+					{
+						for (int y = 0; y < 144 / 8; ++y)
+						{
+							for (int x = 0; x < 160 / 8; ++x)
+							{
+								if ((x < left || x > right || y < top || y > bottom))
+								{
+									ppu_.setAttribute(x, y, paletteOutsideArea);
+								}
+							}
+						}
+					}
+
+					// Inside the square
+
+					if (controlCode & 0b001)
+					{
+						for (int y = top; y <= bottom; ++y)
+						{
+							for (int x = left; x <= right; ++x)
+							{
+								ppu_.setAttribute(x, y, paletteInsideArea);
+							}
+						}
+					}
+
+					// On border
+
+					if (controlCode & 0b010)
+					{
+						for (int x = left; x <= right; ++x)
+						{
+							ppu_.setAttribute(x, top, paletteOnBorder);
+							ppu_.setAttribute(x, bottom, paletteOnBorder);
+						}
+
+						for (int y = top + 1; y <= bottom - 1; ++y)
+						{
+							ppu_.setAttribute(left, y, paletteOnBorder);
+							ppu_.setAttribute(right, y, paletteOnBorder);
+						}
+					}
+				}
+
+				break;
+			}
 
 			case Functions::ATTR_TRN:
 				ppu_.transferAttributeFiles();

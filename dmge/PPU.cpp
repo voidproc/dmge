@@ -428,6 +428,7 @@ namespace dmge
 
 		// 実際の描画色
 		Color& dotColor = canvas_[ly][canvasX_];
+
 		if (not cgbMode_)
 		{
 			// LCDC.0 == 0 の場合はBGを描画しない
@@ -440,7 +441,7 @@ namespace dmge
 			else
 			{
 				// (SGB) カラー0は透明なので、最新の背景色を表示する?
-				const uint8 palette = bgPaletteColor == 0 ? 0 : getAttribute_(canvasX_, ly);
+				const uint8 palette = bgPaletteColor == 0 ? 0 : getAttribute(canvasX_ / 8, ly / 8);
 				dotColor = lcd_->sgbPaletteColor(palette, bgPaletteColor);
 			}
 		}
@@ -500,7 +501,7 @@ namespace dmge
 					else
 					{
 						// (SGB) カラー0は透明なので、最新の背景色を表示する?
-						const uint8 palette = oamPaletteColor == 0 ? 0 : getAttribute_(canvasX_, lcd_->ly());
+						const uint8 palette = oamPaletteColor == 0 ? 0 : getAttribute(canvasX_ / 8, lcd_->ly() / 8);
 						fetched = lcd_->sgbPaletteColor(palette, oamPaletteColor);
 					}
 				}
@@ -529,19 +530,19 @@ namespace dmge
 		return fetched;
 	}
 
-	void PPU::setAttribute_(int x, int y, uint8 palette)
+	void PPU::setAttribute(int x, int y, uint8 palette)
 	{
-		const uint8 index = (y / 8) * 5 + x / 8 / 4;
-		const uint8 shiftBits = ((3 - ((x / 8) % 4)) * 2);
+		const uint8 index = y * 5 + x / 4;
+		const uint8 shiftBits = ((3 - (x % 4)) * 2);
 
 		sgbCurrentAttr_[index] &= ~(0x3 << shiftBits);
 		sgbCurrentAttr_[index] |= (palette << shiftBits);
 	}
 
-	uint8 PPU::getAttribute_(int x, int y) const
+	uint8 PPU::getAttribute(int x, int y) const
 	{
-		const uint8 index = (y / 8) * 5 + x / 8 / 4;
-		const uint8 shiftBits = ((3 - ((x / 8) % 4)) * 2);
+		const uint8 index = y * 5 + x / 4;
+		const uint8 shiftBits = ((3 - (x % 4)) * 2);
 
 		return (sgbCurrentAttr_[index] >> shiftBits) & 0x3;
 	}

@@ -631,7 +631,7 @@ private:
 			{ ColorF{ U"#e8e8e8" }, ColorF{ U"#a0a0a0" }, ColorF{ U"#585858" }, ColorF{ U"#101010" }, },
 
 			// BGB lcd green
-			{ ColorF{ U"#e0f8d0" }, ColorF{ U"88c070" }, ColorF{ U"#346856" }, ColorF{ U"#081820"}, },
+			{ ColorF{ U"#e0f8d0" }, ColorF{ U"#88c070" }, ColorF{ U"#346856" }, ColorF{ U"#081820"}, },
 
 			// BGB super gameboy
 			{ ColorF{ U"#ffefce" }, ColorF{ U"#de944a" }, ColorF{ U"#ad2921" }, ColorF{ U"#311852" }, },

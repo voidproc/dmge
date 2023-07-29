@@ -31,12 +31,6 @@ namespace dmge
 		// (SGB)
 		void setPlayerCount(int count);
 
-		// (SGB)
-		void incrementJoypadID();
-
-		// (SGB)
-		void resetJoypadID();
-
 	private:
 		Memory* mem_;
 		bool enabled_ = true;

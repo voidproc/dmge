@@ -35,7 +35,7 @@ namespace dmge
 				const int id = 0xf - joypadId_;
 				const int newId = (id + 1) % (playerCount_ + 1);
 				joypadId_ = 0xf - newId;
-				return joypadId_;
+				return 0xf0 | joypadId_;
 			}
 		}
 		else if (selected == 0x20)
@@ -154,18 +154,9 @@ namespace dmge
 				inputStart_ = inputStart_ | gamepad.buttons[gamepadButtonAssign.buttonStart];
 		}
 	}
+
 	void Joypad::setPlayerCount(int count)
 	{
 		playerCount_ = count;
-	}
-
-	void Joypad::incrementJoypadID()
-	{
-		if (--joypadId_ < 0xc) joypadId_ = 0xf;
-	}
-
-	void Joypad::resetJoypadID()
-	{
-		joypadId_ = 0xf;
 	}
 }

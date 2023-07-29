@@ -124,7 +124,9 @@ C++ / OpenSiv3D でゲームボーイのエミュレータを作っています�
   - [ ] それ以外
 - その他
   - [ ] SGB
-    - [ ] SGB カラー表示
+    - [x] 一部の SGB コマンドに対応
+      - `MLT_REQ`, `PAL01/23/03/12`, `PAL_SET`, `PAL_TRN`, `ATTR_BLK`, `ATTR_TRN`
+    - [x] カラー表示
     - [ ] ボーダー
   - [ ] Bootstrap ROM の読み込み
     - [x] DMG

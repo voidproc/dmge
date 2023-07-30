@@ -3,7 +3,7 @@
 #include "Cartridge.h"
 #include "Address.h"
 #include "DMA.h"
-#include "SGB.h"
+#include "SGB/Command.h"
 
 namespace dmge
 {

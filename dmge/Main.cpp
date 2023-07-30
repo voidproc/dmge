@@ -9,7 +9,7 @@
 #include "Timer.h"
 #include "Joypad.h"
 #include "Serial.h"
-#include "SGB.h"
+#include "SGB/Command.h"
 #include "Interrupt.h"
 #include "Address.h"
 #include "Timing.h"

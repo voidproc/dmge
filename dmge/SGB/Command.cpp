@@ -1,8 +1,7 @@
-﻿#include "stdafx.h"
-#include "SGB.h"
-#include "Joypad.h"
-#include "LCD.h"
-#include "PPU.h"
+﻿#include "Command.h"
+#include "../Joypad.h"
+#include "../LCD.h"
+#include "../PPU.h"
 #include <magic_enum/magic_enum.hpp>
 
 namespace dmge
@@ -21,7 +20,7 @@ namespace dmge
 			{
 				if (transferBits == 0)
 				{
-					if (state_ == TransferState::Stop)
+					if (state_ == PacketTransferState::Stop)
 					{
 						// Reset
 
@@ -34,14 +33,14 @@ namespace dmge
 
 						currentByte_ = 0;
 						currentByteReceivedBits_ = 0;
-						state_ = TransferState::Transfering;
+						state_ = PacketTransferState::Transfering;
 					}
 				}
 				else if (transferBits == 0b10)
 				{
 					// 0
 
-					if (state_ == TransferState::Transfering)
+					if (state_ == PacketTransferState::Transfering)
 					{
 						if (receivedSizePartial_ == 16)
 						{
@@ -63,7 +62,7 @@ namespace dmge
 							}
 
 							receivedSizePartial_ = 0;
-							state_ = TransferState::Stop;
+							state_ = PacketTransferState::Stop;
 						}
 						else
 						{
@@ -75,7 +74,7 @@ namespace dmge
 				{
 					// 1
 
-					if (state_ == TransferState::Transfering)
+					if (state_ == PacketTransferState::Transfering)
 					{
 						currentByte_ |= 1 << currentByteReceivedBits_;
 						++currentByteReceivedBits_;

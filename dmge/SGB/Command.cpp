@@ -133,36 +133,44 @@ namespace dmge
 			switch (func)
 			{
 			case Commands::PAL01:
+			{
 				for (int i = 0; i < 3; i++)
 				{
 					lcd_.setSGBPalette(0, i + 1, received_[3 + i * 2] | (received_[3 + i * 2 + 1] << 8));
 					lcd_.setSGBPalette(1, i + 1, received_[9 + i * 2] | (received_[9 + i * 2 + 1] << 8));
 				}
 				break;
+			}
 
 			case Commands::PAL23:
+			{
 				for (int i = 0; i < 3; i++)
 				{
 					lcd_.setSGBPalette(2, i + 1, received_[3 + i * 2] | (received_[3 + i * 2 + 1] << 8));
 					lcd_.setSGBPalette(3, i + 1, received_[9 + i * 2] | (received_[9 + i * 2 + 1] << 8));
 				}
 				break;
+			}
 
 			case Commands::PAL03:
+			{
 				for (int i = 0; i < 3; i++)
 				{
 					lcd_.setSGBPalette(0, i + 1, received_[3 + i * 2] | (received_[3 + i * 2 + 1] << 8));
 					lcd_.setSGBPalette(3, i + 1, received_[9 + i * 2] | (received_[9 + i * 2 + 1] << 8));
 				}
 				break;
+			}
 
 			case Commands::PAL12:
+			{
 				for (int i = 0; i < 3; i++)
 				{
 					lcd_.setSGBPalette(1, i + 1, received_[3 + i * 2] | (received_[3 + i * 2 + 1] << 8));
 					lcd_.setSGBPalette(2, i + 1, received_[9 + i * 2] | (received_[9 + i * 2 + 1] << 8));
 				}
 				break;
+			}
 
 			case Commands::PAL_SET:
 			{
@@ -183,8 +191,10 @@ namespace dmge
 			}
 
 			case Commands::PAL_TRN:
+			{
 				lcd_.transferSystemColorPalette();
 				break;
+			}
 
 			case Commands::ATTR_BLK:
 			{
@@ -253,12 +263,23 @@ namespace dmge
 			}
 
 			case Commands::ATTR_TRN:
+			{
 				ppu_.transferAttributeFiles();
 				break;
+			}
+
+			case Commands::ATTR_SET:
+			{
+				const int atf = Min<uint8>(received_[1] & 0x3f, 0x2c);
+				ppu_.setAttribute(atf);
+				break;
+			}
 
 			case Commands::MLT_REQ:
+			{
 				joypad_.setPlayerCount(received_[1] & 3);
 				break;
+			}
 			}
 		}
 	}

@@ -65,6 +65,12 @@ namespace dmge
 
 		bool testMode = false;
 
+		// オーディオにローパスフィルタを適用する
+		bool enableAudioLPF = false;
+
+		// ローパスフィルタの定数
+		double audioLPFConstant = 0.8;
+
 		// config.ini のパース結果を返す
 		static AppConfig LoadConfig();
 

@@ -54,6 +54,10 @@ namespace dmge
 
 		config.testMode = ini.getOr<int>(U"TestMode", false);
 
+		config.enableAudioLPF = ini.getOr<int>(U"EnableAudioLPF", false);
+
+		config.audioLPFConstant = ini.getOr<double>(U"AudioLPFConstant", 0.8);
+
 		return config;
 	}
 
@@ -106,5 +110,7 @@ namespace dmge
 		DebugPrint::Writeln(U"LogFilePath={}"_fmt(logFilePath));
 		DebugPrint::Writeln(U"ShowDebugMonitor={}"_fmt(showDebugMonitor));
 		DebugPrint::Writeln(U"BootROM={}"_fmt(bootROMPath));
+		DebugPrint::Writeln(U"EnableAudioLPF={}"_fmt(enableAudioLPF));
+		DebugPrint::Writeln(U"AudioLPFConstant={}"_fmt(audioLPFConstant));
 	}
 }

@@ -114,6 +114,10 @@ public:
 
 		// ピクセルシェーダ用パラメータ
 		ppu_.setGamma(config_.cgbColorGamma);
+
+		// オーディオ LPF
+		apu_.setLPFConstant(config_.audioLPFConstant);
+		apu_.setEnableLPF(config_.enableAudioLPF);
 	}
 
 	void setCartridgePath(const String& cartridgePath)
@@ -446,6 +450,12 @@ private:
 			{
 				apu_.pause();
 			}
+		}
+
+		// Toggle LPF
+		if (Key6.down())
+		{
+			apu_.setEnableLPF(not apu_.getEnableLPF());
 		}
 	}
 

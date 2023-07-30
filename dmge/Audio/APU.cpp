@@ -134,7 +134,11 @@ namespace dmge
 				return 0;
 			}
 
-			apuStream_->pushSample(left * leftVolume / 4.0, right * rightVolume / 4.0);
+			const double k = enableLPF_ ? lpfConstant_ : 1.0;
+			lpfLeft_ = (1.0 - k) * lpfLeft_ + k * (left * leftVolume / 4.0);
+			lpfRight_ = (1.0 - k) * lpfRight_ + k * (right * rightVolume / 4.0);
+
+			apuStream_->pushSample(lpfLeft_, lpfRight_);
 
 			return 1;
 		}
@@ -473,5 +477,25 @@ namespace dmge
 	bool APU::getMute(int channel) const
 	{
 		return mute_[channel];
+	}
+
+	void APU::setEnableLPF(bool enableLPF)
+	{
+		enableLPF_ = enableLPF;
+	}
+
+	bool APU::getEnableLPF() const
+	{
+		return enableLPF_;
+	}
+
+	void APU::setLPFConstant(double c)
+	{
+		lpfConstant_ = Clamp(c, 0.0, 1.0);
+	}
+
+	double APU::getLPFConstant() const
+	{
+		return lpfConstant_;
 	}
 }

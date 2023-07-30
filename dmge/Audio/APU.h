@@ -67,6 +67,18 @@ namespace dmge
 		// 各チャンネルのミュート状態を設定
 		bool getMute(int channel) const;
 
+		// LPF
+		void setEnableLPF(bool enableLPF);
+
+		// LPF
+		bool getEnableLPF() const;
+
+		// LPF
+		void setLPFConstant(double c);
+
+		// LPF
+		double getLPFConstant() const;
+
 	private:
 		Timer& timer_;
 
@@ -102,6 +114,13 @@ namespace dmge
 
 		// 倍速モード時の DIV シフト量 (通常:0, 倍速:1)
 		int divShiftBits_ = 0;
+
+		// LPF
+
+		bool enableLPF_ = false;
+		double lpfConstant_ = 0.90;
+		double lpfLeft_ = 0;
+		double lpfRight_ = 0;
 
 	};
 }

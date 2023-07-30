@@ -19,13 +19,13 @@ namespace dmge
 		title = header.slice(Address::Title, 15).map([](uint8 x) { return static_cast<char32_t>(x); }).join(U""_sv, U""_sv, U""_sv);
 
 		// CGB flag
-		cgbFlag = static_cast<CGBFlag>(header[Address::CGBFlag]);
+		cgbFlag = ToEnum<CGBFlag>(header[Address::CGBFlag]);
 
 		// SGB flag
-		sgbFlag = static_cast<SGBFlag>(header[Address::SGBFlag]);
+		sgbFlag = ToEnum<SGBFlag>(header[Address::SGBFlag]);
 
 		// Type
-		type = static_cast<CartridgeType>(header[Address::CartridgeType]);
+		type = ToEnum<CartridgeType>(header[Address::CartridgeType]);
 
 		// ROM size
 

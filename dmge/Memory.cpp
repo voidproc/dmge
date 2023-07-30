@@ -698,12 +698,12 @@ namespace dmge
 
 	bool Memory::isSupportedCGBMode() const
 	{
-		return (static_cast<uint8>(mbc_->cgbFlag()) & 0x80) == 0x80;
+		return (FromEnum(mbc_->cgbFlag()) & 0x80) == 0x80;
 	}
 
 	bool Memory::isSupportedSGBMode() const
 	{
-		return static_cast<uint8>(mbc_->sgbFlag()) == 0x03;
+		return FromEnum(mbc_->sgbFlag()) == 0x03;
 	}
 
 	void Memory::setCGBMode(bool enableCGBMode)

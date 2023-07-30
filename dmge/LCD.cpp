@@ -111,7 +111,7 @@ namespace dmge
 	void LCD::setSTATPPUMode(PPUMode mode)
 	{
 		// LCDがOFFの場合は mode=0 をセットする
-		stat_ = 0x80 | (stat_ & ~3) | (isEnabled() ? (uint8)mode : 0);
+		stat_ = 0x80 | (stat_ & ~3) | (isEnabled() ? FromEnum(mode) : 0);
 	}
 
 	uint8 LCD::scy() const
@@ -141,13 +141,13 @@ namespace dmge
 
 	Colors::Gray LCD::bgp(int n) const
 	{
-		return static_cast<Colors::Gray>((bgp_ >> (n * 2)) & 0b11);
+		return ToEnum<Colors::Gray>((bgp_ >> (n * 2)) & 0b11);
 	}
 
 	Colors::Gray LCD::obp(int palette, int n) const
 	{
 		const uint8& paletteData = palette == 0 ? obp0_ : obp1_;
-		return static_cast<Colors::Gray>((paletteData >> (n * 2)) & 0b11);
+		return ToEnum<Colors::Gray>((paletteData >> (n * 2)) & 0b11);
 	}
 
 	uint8 LCD::wy() const

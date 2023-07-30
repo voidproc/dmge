@@ -34,7 +34,7 @@ namespace dmge
 		case 0xa:
 		case 0xb:
 		case 0xc:
-			selected_ = static_cast<RTCRegisters>(value);
+			selected_ = ToEnum<RTCRegisters>(value);
 			break;
 
 		default:

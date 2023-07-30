@@ -29,14 +29,14 @@ namespace dmge
 
 		case Address::SC:
 		{
-			const SerialClockSource source = static_cast<SerialClockSource>(value & 1);
+			const auto source = ToEnum<SerialClockSource>(value & 1);
 
 			if (source != SerialClockSource::Internal) break;
 
 			if (value >> 7)
 			{
 				remainBits_ = (uint8)8;
-				clockSpeed_ = static_cast<SerialClockSpeed>((value >> 1) & 1);
+				clockSpeed_ = ToEnum<SerialClockSpeed>((value >> 1) & 1);
 				clockSource_ = source;
 
 				clock_ = SerialClockCycles(clockSpeed_);
@@ -54,7 +54,7 @@ namespace dmge
 			return transferData_;
 
 		case Address::SC:
-			return ((uint8)transfering() << 7) | (((uint8)clockSpeed_) << 1) | ((uint8)clockSource_);
+			return ((uint8)transfering() << 7) | ((FromEnum(clockSpeed_)) << 1) | (FromEnum(clockSource_));
 		}
 
 		return 0;

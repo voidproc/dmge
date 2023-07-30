@@ -99,7 +99,7 @@ namespace dmge
 			if (received_.isEmpty()) return;
 
 			const uint8 command = received_[0] >> 3;
-			const auto commandName = magic_enum::enum_name((Functions)command);
+			const auto commandName = magic_enum::enum_name(ToEnum<Commands>(command));
 			Console.write(U"SGB Command={:02X} {:10s} Length={} "_fmt(command, Unicode::WidenAscii(commandName), received_[0] & 7));
 
 			for (const auto byte : received_)
@@ -114,16 +114,16 @@ namespace dmge
 		{
 			if (received_.isEmpty()) return;
 
-			const Functions func = static_cast<Functions>(received_[0] >> 3);
+			const auto func = ToEnum<Commands>(received_[0] >> 3);
 
 			// PALXX : 色番号 0 をパレット 0～3 に適用
 
 			switch (func)
 			{
-			case Functions::PAL01:
-			case Functions::PAL23:
-			case Functions::PAL03:
-			case Functions::PAL12:
+			case Commands::PAL01:
+			case Commands::PAL23:
+			case Commands::PAL03:
+			case Commands::PAL12:
 				const uint16 color0 = received_[1] | (received_[2] << 8);
 				for (int i = 0; i < 4; i++)
 				{
@@ -133,7 +133,7 @@ namespace dmge
 
 			switch (func)
 			{
-			case Functions::PAL01:
+			case Commands::PAL01:
 				for (int i = 0; i < 3; i++)
 				{
 					lcd_.setSGBPalette(0, i + 1, received_[3 + i * 2] | (received_[3 + i * 2 + 1] << 8));
@@ -141,7 +141,7 @@ namespace dmge
 				}
 				break;
 
-			case Functions::PAL23:
+			case Commands::PAL23:
 				for (int i = 0; i < 3; i++)
 				{
 					lcd_.setSGBPalette(2, i + 1, received_[3 + i * 2] | (received_[3 + i * 2 + 1] << 8));
@@ -149,7 +149,7 @@ namespace dmge
 				}
 				break;
 
-			case Functions::PAL03:
+			case Commands::PAL03:
 				for (int i = 0; i < 3; i++)
 				{
 					lcd_.setSGBPalette(0, i + 1, received_[3 + i * 2] | (received_[3 + i * 2 + 1] << 8));
@@ -157,7 +157,7 @@ namespace dmge
 				}
 				break;
 
-			case Functions::PAL12:
+			case Commands::PAL12:
 				for (int i = 0; i < 3; i++)
 				{
 					lcd_.setSGBPalette(1, i + 1, received_[3 + i * 2] | (received_[3 + i * 2 + 1] << 8));
@@ -165,7 +165,7 @@ namespace dmge
 				}
 				break;
 
-			case Functions::PAL_SET:
+			case Commands::PAL_SET:
 			{
 				const uint16 palette0 = received_[1] | (received_[2] << 8);
 				const uint16 palette1 = received_[3] | (received_[4] << 8);
@@ -183,11 +183,11 @@ namespace dmge
 				break;
 			}
 
-			case Functions::PAL_TRN:
+			case Commands::PAL_TRN:
 				lcd_.transferSystemColorPalette();
 				break;
 
-			case Functions::ATTR_BLK:
+			case Commands::ATTR_BLK:
 			{
 				const uint8 groupCount = Min<uint8>(received_[1] & 0x1f, 0x12);
 
@@ -253,11 +253,11 @@ namespace dmge
 				break;
 			}
 
-			case Functions::ATTR_TRN:
+			case Commands::ATTR_TRN:
 				ppu_.transferAttributeFiles();
 				break;
 
-			case Functions::MLT_REQ:
+			case Commands::MLT_REQ:
 				joypad_.setPlayerCount(received_[1] & 3);
 				break;
 			}

@@ -9,7 +9,7 @@ namespace dmge
 	namespace SGB
 	{
 		// SGB System Commands
-		enum class Functions : uint8
+		enum class Commands : uint8
 		{
 			PAL01 = 0x00,
 			PAL23 = 0x01,

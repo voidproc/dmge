@@ -432,7 +432,7 @@ namespace dmge
 		if (not cgbMode_)
 		{
 			// LCDC.0 == 0 の場合はBGを描画しない
-			const uint8 bgPaletteColor = lcd_->isEnabledBgAndWindow() ? (uint8)lcd_->bgp(color) : 0u;
+			const uint8 bgPaletteColor = lcd_->isEnabledBgAndWindow() ? FromEnum(lcd_->bgp(color)) : 0u;
 
 			if (not sgbMode_)
 			{
@@ -492,7 +492,7 @@ namespace dmge
 			{
 				if (oamColor != 0 && not (oam.priority == 1 && bgColor != 0))
 				{
-					const uint8 oamPaletteColor = (uint8)lcd_->obp(oam.palette, oamColor);
+					const uint8 oamPaletteColor = FromEnum(lcd_->obp(oam.palette, oamColor));
 
 					if (not sgbMode_)
 					{

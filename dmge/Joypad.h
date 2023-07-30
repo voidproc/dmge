@@ -60,7 +60,7 @@ namespace dmge
 
 		// (SGB) Joypad ID
 		uint8 joypadId_ = 0xf;
-		bool readyForJoypadIdInc_ = false;
+		bool readyForSwitchJoypad_ = false;
 
 	};
 }

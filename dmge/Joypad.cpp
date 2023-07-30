@@ -12,6 +12,18 @@ namespace dmge
 
 	void Joypad::writeRegister(uint8 value)
 	{
+		// MLT_REQ によるマルチコントローラの設定後、
+		// P14 と P15 を HIGH にして P10-13 を読み取るとコントローラの ID が得られる
+		// ID は自動的にインクリメントされる
+
+		if ((selected_ & 0x30) != 0x30 && (value & 0x30) == 0x30)
+		{
+			const int id = 0xf - joypadId_;
+			const int newId = (id + (readyForSwitchJoypad_ ? 1 : 0)) % (playerCount_ + 1);
+			readyForSwitchJoypad_ = true;
+			joypadId_ = 0xf - newId;
+		}
+
 		selected_ = value & 0x30;
 
 		if (enabled_)
@@ -32,9 +44,6 @@ namespace dmge
 			}
 			else
 			{
-				const int id = 0xf - joypadId_;
-				const int newId = (id + 1) % (playerCount_ + 1);
-				joypadId_ = 0xf - newId;
 				return 0xf0 | joypadId_;
 			}
 		}

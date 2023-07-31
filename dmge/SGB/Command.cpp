@@ -262,6 +262,35 @@ namespace dmge
 				break;
 			}
 
+			case Commands::ATTR_LIN:
+			{
+				const int groupCount = Min<uint8>(received_[1], 0x6e);
+
+				for (int group = 0; group < groupCount; ++group)
+				{
+					const uint8 palette = (received_[2 + group] >> 5) & 3;
+					const uint8 lineNumber = received_[2 + group] & 0x1f;
+
+					if ((received_[2 + group] & 0x80) == 0x80)
+					{
+						// V coord (horizontal line)
+						for (int x = 0; x < 160 / 8; ++x)
+						{
+							ppu_.setAttribute(x, lineNumber, palette);
+						}
+					}
+					else
+					{
+						// H coord (vertical line)
+						for (int y = 0; y < 144 / 8; ++y)
+						{
+							ppu_.setAttribute(lineNumber, y, palette);
+						}
+					}
+				}
+				break;
+			}
+
 			case Commands::ATTR_TRN:
 			{
 				ppu_.transferAttributeFiles();

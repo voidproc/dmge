@@ -42,10 +42,8 @@ namespace
 		Window::Resize(SceneSize);
 	}
 
-	void InitScene(int scale, bool showDebugMonitor)
+	void InitScene()
 	{
-		SetWindowSize(scale, showDebugMonitor);
-
 		Window::SetTitle(U"dmge {}"_fmt(dmge::Version));
 
 		Scene::SetBackground(dmge::DebugMonitor::BgColor);
@@ -127,6 +125,9 @@ public:
 
 	void run()
 	{
+		// ウィンドウサイズを設定
+		SetWindowSize(config_.scale, showDebugMonitor_);
+
 		// 設定ファイルでカートリッジが指定されていない場合は
 		// ファイルを開くダイアログで選択する
 		if (not dmge::IsValidCartridgePath(currentCartridgePath_.value_or(U"")))
@@ -382,7 +383,7 @@ private:
 		// デバッグモニタ表示切り替え
 		if (KeyF10.down())
 		{
-			showDebugMonitor_ = not showDebugMonitor_;
+			config_.showDebugMonitor = showDebugMonitor_ = not showDebugMonitor_;
 			SetWindowSize(config_.scale, showDebugMonitor_);
 		}
 
@@ -706,7 +707,7 @@ void runTest(dmge::AppConfig& config)
 
 	LoadAssets();
 
-	InitScene(config.scale, config.showDebugMonitor);
+	InitScene();
 
 	TextWriter writer{ U"mooneye_test_result.csv" };
 
@@ -757,7 +758,7 @@ void Main()
 	LoadAssets();
 
 	// Siv3Dのシーン・ウィンドウなどの初期化
-	InitScene(config.scale, config.showDebugMonitor);
+	InitScene();
 
 
 	Optional<String> cartridgePath = config.cartridgePath;
@@ -774,8 +775,11 @@ void Main()
 		app->run();
 
 		const auto mode = app->mode();
+
+		// リセットされていない場合はアプリケーションを終了
 		if (mode != DmgeAppMode::Reset) break;
 
+		// 違うファイルが選択されているかもしれないので読み込む
 		cartridgePath = app->currentCartridgePath();
 	}
 }

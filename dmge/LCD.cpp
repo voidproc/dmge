@@ -20,7 +20,13 @@ namespace dmge
 	LCD::LCD(Memory& mem)
 		: mem_{ mem }
 	{
-
+		for (int i = 0; i < sgbDisplayColorPalette_.size(); ++i)
+		{
+			sgbDisplayColorPalette_[i][0] = ColorF{ U"#e8e8e8" };
+			sgbDisplayColorPalette_[i][1] = ColorF{ U"#a0a0a0" };
+			sgbDisplayColorPalette_[i][2] = ColorF{ U"#585858" };
+			sgbDisplayColorPalette_[i][3] = ColorF{ U"#101010" };
+		}
 	}
 
 	uint8 LCD::lcdc() const

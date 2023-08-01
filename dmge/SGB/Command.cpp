@@ -297,8 +297,36 @@ namespace dmge
 			}
 
 			case Commands::ATTR_DIV:
-				DebugPrint::Writeln(U"ATTR_DIV: Not implement");
+			{
+				const uint8 paletteBottomOrRight = received_[1] & 3;
+				const uint8 paletteTopOrLeft = (received_[1] >> 2) & 3;
+				const uint8 paletteOnBorder = (received_[1] >> 4) & 3;
+				const bool divideHorizontal = received_[1] & 0x40;
+				const uint8 dividePos = received_[2] & 0x1f;
+
+				for (int y = 0; y < 144 / 8; ++y)
+				{
+					for (int x = 0; x < 160 / 8; ++x)
+					{
+						const uint8 pos = divideHorizontal ? y : x;
+
+						if (pos < dividePos)
+						{
+							ppu_.setAttribute(x, y, paletteTopOrLeft);
+						}
+						else if (pos > dividePos)
+						{
+							ppu_.setAttribute(x, y, paletteBottomOrRight);
+						}
+						else if (pos == dividePos)
+						{
+							ppu_.setAttribute(x, y, paletteOnBorder);
+						}
+					}
+				}
+
 				break;
+			}
 
 			case Commands::ATTR_CHR:
 			{

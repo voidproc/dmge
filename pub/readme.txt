@@ -42,6 +42,7 @@ C++ / OpenSiv3D でゲームボーイのエミュレータを作っています�
   - チャンネル 3 のミュートを切替 : 3
   - チャンネル 4 のミュートを切替 : 4
   - サウンド有効／無効切替 : 5
+  - LPF 有効／無効切替 : 6
 - デバッグ
   - デバッグモニタ表示切替 : F10
   - デバッグモニタのメモリダンプ対象アドレス設定 : M
@@ -55,15 +56,19 @@ C++ / OpenSiv3D でゲームボーイのエミュレータを作っています�
 - `OpenCartridgeDirectory` : カートリッジを開くダイアログのデフォルトディレクトリ
 - `Breakpoint` : ブレークポイント（コンマ区切りで複数指定可能）
 - `MemoryWriteBreakpoint` : メモリ書き込み時ブレークポイント（コンマ区切りで複数指定可能）
-- `BreakOnLDBB` : LD B,B 実行時にブレークするかどうか
-- `EnableBreakpoint` : 上記ブレークポイントの有効／無効の切替
+- `BreakOnLDBB` : LD B,B 実行時にブレークする（1=有効、0=無効）
+- `EnableBreakpoint` : 上記ブレークポイントの有効／無効の切替（1=有効、0=無効）
 - `TraceDumpStartAddress` : トレースダンプを開始するアドレス（コンマ区切りで複数指定可能）
-- `ShowFPS` : 画面上部にFPSを表示するかどうか
+- `ShowFPS` : 画面上部にFPSを表示する（1=有効、0=無効）
 - `Scale` : 画面の表示倍率
 - `CGBColorGamma` : CGB モードでのカラー補正（ガンマ値）
-- `ShowConsole` : コンソールを表示するかどうか
+- `ShowConsole` : コンソールを表示する（1=有効、0=無効）
 - `LogFilePath` : トレースダンプなどの出力先のパス
-- `ShowDebugMonitor` : デバッグモニタを表示するかどうか
+- `ShowDebugMonitor` : デバッグモニタを表示する（1=有効、0=無効）
 - `DumpAddress` : ブレーク時のメモリダンプ先アドレス（コンマ区切りで複数指定可能）
 - `BootROM` : Bootstrap ROM のパス
 - `GamepadButton****` : ゲームパッドのボタン割り当て
+- `EnableAudioLPF` : オーディオにローパスフィルタを適用する（1=有効、0=無効）
+- `AudioLPFConstant` : ローパスフィルタの定数（0～1）
+- `DetectCGB` : カートリッジが対応していれば CGB モードで実行する（1=有効、0=無効）
+- `DetectSGB` : カートリッジが対応していれば SGB モードで実行する（1=有効、0=無効）

@@ -90,6 +90,8 @@ C++ / OpenSiv3D でゲームボーイのエミュレータを作っています�
 - `GamepadButton****` : ゲームパッドのボタン割り当て
 - `EnableAudioLPF` : オーディオにローパスフィルタを適用する（1=有効、0=無効）
 - `AudioLPFConstant` : ローパスフィルタの定数（0～1）
+- `DetectCGB` : カートリッジが対応していれば CGB モードで実行する（1=有効、0=無効）
+- `DetectSGB` : カートリッジが対応していれば SGB モードで実行する（1=有効、0=無効）
 
 
 ## 実装状況
@@ -128,7 +130,9 @@ C++ / OpenSiv3D でゲームボーイのエミュレータを作っています�
 - その他
   - [ ] SGB
     - [x] 一部の SGB コマンドに対応
-      - `MLT_REQ`, `PAL01/23/03/12`, `PAL_SET`, `PAL_TRN`, `ATTR_BLK`, `ATTR_TRN`
+      - `PAL` 系（`PAL_PRI` を除く）
+      - `ATTR_***`
+      - `MASK_EN`, `MLT_REQ`
     - [x] カラー表示
     - [ ] ボーダー
   - [ ] Bootstrap ROM の読み込み

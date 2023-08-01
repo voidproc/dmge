@@ -133,7 +133,10 @@ namespace dmge
 
 	void PPU::flushRenderingResult()
 	{
-		texture_.fill(canvas_);
+		if (mask_ != SGB::MaskMode::Freeze)
+		{
+			texture_.fill(canvas_);
+		}
 	}
 
 	void PPU::draw(const Vec2& pos, int scale)
@@ -443,6 +446,15 @@ namespace dmge
 				// (SGB) カラー0は透明なので、最新の背景色を表示する?
 				const uint8 palette = bgPaletteColor == 0 ? 0 : getAttribute(canvasX_ / 8, ly / 8);
 				dotColor = lcd_->sgbPaletteColor(palette, bgPaletteColor);
+
+				if (mask_ == SGB::MaskMode::Black)
+				{
+					dotColor = Palette::Black;
+				}
+				else if (mask_ == SGB::MaskMode::Color0)
+				{
+					dotColor = lcd_->sgbPaletteColor(0, 0);
+				}
 			}
 		}
 		else
@@ -504,6 +516,15 @@ namespace dmge
 						const uint8 palette = oamPaletteColor == 0 ? 0 : getAttribute(canvasX_ / 8, lcd_->ly() / 8);
 						fetched = lcd_->sgbPaletteColor(palette, oamPaletteColor);
 					}
+
+					if (mask_ == SGB::MaskMode::Black)
+					{
+						fetched = Palette::Black;
+					}
+					else if (mask_ == SGB::MaskMode::Color0)
+					{
+						fetched = lcd_->sgbPaletteColor(0, 0);
+					}
 				}
 			}
 			else
@@ -545,5 +566,10 @@ namespace dmge
 		const uint8 shiftBits = ((3 - (x % 4)) * 2);
 
 		return (sgbCurrentAttr_[index] >> shiftBits) & 0x3;
+	}
+
+	void PPU::setMask(SGB::MaskMode mask)
+	{
+		mask_ = mask;
 	}
 }

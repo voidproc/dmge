@@ -1,4 +1,5 @@
 ﻿#include "Command.h"
+#include "Mask.h"
 #include "../Joypad.h"
 #include "../LCD.h"
 #include "../PPU.h"
@@ -188,6 +189,12 @@ namespace dmge
 					ppu_.setAttribute(atf);
 				}
 
+				// マスク解除
+				if (received_[9] & 0x40)
+				{
+					ppu_.setMask(MaskMode::None);
+				}
+
 				break;
 			}
 
@@ -309,7 +316,7 @@ namespace dmge
 					for (int x = 0; x < 160 / 8; ++x)
 					{
 						const uint8 pos = divideHorizontal ? y : x;
-
+						
 						if (pos < dividePos)
 						{
 							ppu_.setAttribute(x, y, paletteTopOrLeft);
@@ -389,6 +396,13 @@ namespace dmge
 			{
 				const int atf = Min<uint8>(received_[1] & 0x3f, 0x2c);
 				ppu_.setAttribute(atf);
+
+				// マスク解除
+				if (received_[1] & 0x40)
+				{
+					ppu_.setMask(MaskMode::None);
+				}
+
 				break;
 			}
 
@@ -401,8 +415,11 @@ namespace dmge
 				break;
 
 			case Commands::MASK_EN:
-				DebugPrint::Writeln(U"MASK_EN: Not implement");
+			{
+				const MaskMode mask = ToEnum<MaskMode>(received_[1] & 3);
+				ppu_.setMask(mask);
 				break;
+			}
 
 			case Commands::ATRC_EN:
 				DebugPrint::Writeln(U"ATRC_EN: Not implement");

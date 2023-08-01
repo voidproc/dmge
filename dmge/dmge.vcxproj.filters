@@ -64,6 +64,12 @@
     <Filter Include="Source Files\Audio">
       <UniqueIdentifier>{7c629390-c099-4fa6-a2f7-8c3d5de954a5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\SGB">
+      <UniqueIdentifier>{35891d92-9870-4f4b-bfdf-f5175e7b9116}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\SGB">
+      <UniqueIdentifier>{ce5f0794-a74b-48ec-9de8-21c1bf1a09d4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -158,6 +164,9 @@
     </ClCompile>
     <ClCompile Include="Serial.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SGB\Command.cpp">
+      <Filter>Source Files\SGB</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -537,6 +546,15 @@
     </ClInclude>
     <ClInclude Include="Serial.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SGB\Command.h">
+      <Filter>Header Files\SGB</Filter>
+    </ClInclude>
+    <ClInclude Include="SGB\Commands.h">
+      <Filter>Header Files\SGB</Filter>
+    </ClInclude>
+    <ClInclude Include="SGB\Mask.h">
+      <Filter>Header Files\SGB</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

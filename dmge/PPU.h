@@ -2,6 +2,7 @@
 
 #include "PPUMode.h"
 #include "Colors.h"
+#include "SGB/Mask.h"
 
 namespace dmge
 {
@@ -80,6 +81,9 @@ namespace dmge
 		// x, y はキャラクタ単位の座標
 		uint8 getAttribute(int x, int y) const;
 
+		// (SGB) マスクを設定
+		void setMask(SGB::MaskMode mask);
+
 		// [DEBUG]
 		void dumpAttributeFile(int index);
 
@@ -147,6 +151,9 @@ namespace dmge
 
 		// (SGB) 現在のアトリビュート
 		std::array<uint8, 90> sgbCurrentAttr_{};
+
+		// (SGB) マスク(MASK_EN)の状態
+		SGB::MaskMode mask_ = SGB::MaskMode::None;
 
 
 		void updateLY_();

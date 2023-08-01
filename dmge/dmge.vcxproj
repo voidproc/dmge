@@ -285,6 +285,7 @@
     <ClInclude Include="Serial.h" />
     <ClInclude Include="SGB\Command.h" />
     <ClInclude Include="SGB\Commands.h" />
+    <ClInclude Include="SGB\Mask.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="TileData.h" />
     <ClInclude Include="TileMapAttribute.h" />

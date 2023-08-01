@@ -2,6 +2,7 @@
 #include "../Joypad.h"
 #include "../LCD.h"
 #include "../PPU.h"
+#include "../DebugPrint.h"
 #include <magic_enum/magic_enum.hpp>
 
 namespace dmge
@@ -196,6 +197,10 @@ namespace dmge
 				break;
 			}
 
+			case Commands::PAL_PRI:
+				DebugPrint::Writeln(U"PAL_PRI: Not implement");
+				break;
+
 			case Commands::ATTR_BLK:
 			{
 				const uint8 groupCount = Min<uint8>(received_[1] & 0x1f, 0x12);
@@ -291,6 +296,61 @@ namespace dmge
 				break;
 			}
 
+			case Commands::ATTR_DIV:
+				DebugPrint::Writeln(U"ATTR_DIV: Not implement");
+				break;
+
+			case Commands::ATTR_CHR:
+			{
+				const uint8 startX = received_[1] & 0x1f;
+				const uint8 startY = received_[2] & 0x1f;
+				const int count = Min((received_[3] | (received_[4] << 8)) & 0x1ff, 360);
+
+				int x = startX;
+				int y = startY;
+
+				for (int i = 0; i < count; i++)
+				{
+					const int index = 6 + i / 4;
+					const int shiftBits = (3 - i % 4) * 2;
+					const uint8 palette = (received_[index] >> shiftBits) & 3;
+
+					ppu_.setAttribute(x, y, palette);
+
+					if (received_[5] & 1)
+					{
+						++y;
+
+						if (y == 144 / 8)
+						{
+							y = 0;
+							++x;
+						}
+
+						if (x == 160 / 8)
+						{
+							x = 0;
+						}
+					}
+					else
+					{
+						++x;
+
+						if (x == 160 / 8)
+						{
+							x = 0;
+							++y;
+						}
+
+						if (y == 144 / 8)
+						{
+							y = 0;
+						}
+					}
+				}
+				break;
+			}
+
 			case Commands::ATTR_TRN:
 			{
 				ppu_.transferAttributeFiles();
@@ -304,11 +364,60 @@ namespace dmge
 				break;
 			}
 
+			case Commands::SOUND:
+				DebugPrint::Writeln(U"SOUND: Not implement");
+				break;
+
+			case Commands::SOU_TRN:
+				DebugPrint::Writeln(U"SOU_TRN: Not implement");
+				break;
+
+			case Commands::MASK_EN:
+				DebugPrint::Writeln(U"MASK_EN: Not implement");
+				break;
+
+			case Commands::ATRC_EN:
+				DebugPrint::Writeln(U"ATRC_EN: Not implement");
+				break;
+
+			case Commands::TEST_EN:
+				DebugPrint::Writeln(U"TEST_EN: Not implement");
+				break;
+
+			case Commands::ICON_EN:
+				DebugPrint::Writeln(U"ICON_EN: Not implement");
+				break;
+
+			case Commands::DATA_SND:
+				DebugPrint::Writeln(U"DATA_SND: Not implement");
+				break;
+
+			case Commands::DATA_TRN:
+				DebugPrint::Writeln(U"DATA_TRN: Not implement");
+				break;
+
+			case Commands::JUMP:
+				DebugPrint::Writeln(U"JUMP: Not implement");
+				break;
+
 			case Commands::MLT_REQ:
 			{
 				joypad_.setPlayerCount(received_[1] & 3);
 				break;
 			}
+
+			case Commands::CHR_TRN:
+				DebugPrint::Writeln(U"CHR_TRN: Not implement");
+				break;
+
+			case Commands::PCT_TRN:
+				DebugPrint::Writeln(U"PCT_TRN: Not implement");
+				break;
+
+			case Commands::OBJ_TRN:
+				DebugPrint::Writeln(U"OBJ_TRN: Not implement");
+				break;
+
 			}
 		}
 	}

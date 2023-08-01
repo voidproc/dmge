@@ -18,77 +18,100 @@ namespace dmge
 
 		void Command::send(uint8 transferBits)
 		{
-			if (prevBits_ == 0b11 && transferBits != 0b11)
+			// パケット通信開始後、01=>10 or 10=>01のようなルール外のシーケンスが来た場合に通信を中断する
+			if (state_ == PacketTransferState::Transfering)
 			{
-				if (transferBits == 0)
+				if ((prevBits_ == 0b01 && transferBits == 0b10) || (prevBits_ == 0b10 && transferBits == 0b01))
 				{
-					if (state_ == PacketTransferState::Stop)
-					{
-						// Reset
-
-						if (packetLength_ <= 0)
-						{
-							received_.clear();
-							receivedSizePartial_ = 0;
-							packetLength_ = 0;
-						}
-
-						currentByte_ = 0;
-						currentByteReceivedBits_ = 0;
-						state_ = PacketTransferState::Transfering;
-					}
+					received_.clear();
+					receivedSizePartial_ = 0;
+					packetLength_ = 0;
+					currentByte_ = 0;
+					currentByteReceivedBits_ = 0;
+					state_ = PacketTransferState::Stop;
+					prevBits_ = transferBits;
+					return;
 				}
-				else if (transferBits == 0b10)
+			}
+
+
+			// P14,P15が00なら、現在のモードに関係なくReset
+			// それ以外の場合は、11から変化したか＆現在のモードを考慮
+
+			if (transferBits == 0)
+			{
+				// Reset
+
+				if (state_ == PacketTransferState::Stop)
 				{
-					// 0
-
-					if (state_ == PacketTransferState::Transfering)
+					if (packetLength_ <= 0)
 					{
-						if (receivedSizePartial_ == 16)
+						received_.clear();
+						receivedSizePartial_ = 0;
+						packetLength_ = 0;
+					}
+
+					currentByte_ = 0;
+					currentByteReceivedBits_ = 0;
+					state_ = PacketTransferState::Transfering;
+				}
+			}
+			else
+			{
+				if (prevBits_ == 0b11 && transferBits != 0b11)
+				{
+					if (transferBits == 0b10)
+					{
+						// 0
+
+						if (state_ == PacketTransferState::Transfering)
 						{
-							// Stop
-
-							// パケットの長さを調べる
-							// 長さが 2 以上なら今のコマンドを継続して受け取る必要がある
-							if (packetLength_ == 0)
+							if (receivedSizePartial_ == 16)
 							{
-								packetLength_ = received_[0] & 0b111;
-							}
+								// Stop
 
-							if (--packetLength_ <= 0)
+								// パケットの長さを調べる
+								// 長さが 2 以上なら今のコマンドを継続して受け取る必要がある
+								if (packetLength_ == 0)
+								{
+									packetLength_ = received_[0] & 0b111;
+								}
+
+								if (--packetLength_ <= 0)
+								{
+									dump();
+
+									processCommand_();
+									received_.clear();
+								}
+
+								receivedSizePartial_ = 0;
+								state_ = PacketTransferState::Stop;
+							}
+							else
 							{
-								dump();
-
-								processCommand_();
-								received_.clear();
+								++currentByteReceivedBits_;
 							}
-
-							receivedSizePartial_ = 0;
-							state_ = PacketTransferState::Stop;
 						}
-						else
+					}
+					else if (transferBits == 0b01)
+					{
+						// 1
+
+						if (state_ == PacketTransferState::Transfering)
 						{
+							currentByte_ |= 1 << currentByteReceivedBits_;
 							++currentByteReceivedBits_;
 						}
 					}
-				}
-				else if (transferBits == 0b01)
-				{
-					// 1
 
-					if (state_ == PacketTransferState::Transfering)
+					if (currentByteReceivedBits_ >= 8)
 					{
-						currentByte_ |= 1 << currentByteReceivedBits_;
-						++currentByteReceivedBits_;
+						received_.push_back(currentByte_);
+						++receivedSizePartial_;
+						currentByte_ = 0;
+						currentByteReceivedBits_ = 0;
 					}
-				}
-
-				if (currentByteReceivedBits_ >= 8)
-				{
-					received_.push_back(currentByte_);
-					++receivedSizePartial_;
-					currentByte_ = 0;
-					currentByteReceivedBits_ = 0;
 				}
 			}
 
@@ -205,7 +228,7 @@ namespace dmge
 			}
 
 			case Commands::PAL_PRI:
-				DebugPrint::Writeln(U"PAL_PRI: Not implement");
+				DebugPrint::Writeln(U"PAL_PRI: Not implemented");
 				break;
 
 			case Commands::ATTR_BLK:
@@ -407,11 +430,11 @@ namespace dmge
 			}
 
 			case Commands::SOUND:
-				DebugPrint::Writeln(U"SOUND: Not implement");
+				DebugPrint::Writeln(U"SOUND: Not implemented");
 				break;
 
 			case Commands::SOU_TRN:
-				DebugPrint::Writeln(U"SOU_TRN: Not implement");
+				DebugPrint::Writeln(U"SOU_TRN: Not implemented");
 				break;
 
 			case Commands::MASK_EN:
@@ -422,27 +445,27 @@ namespace dmge
 			}
 
 			case Commands::ATRC_EN:
-				DebugPrint::Writeln(U"ATRC_EN: Not implement");
+				DebugPrint::Writeln(U"ATRC_EN: Not implemented");
 				break;
 
 			case Commands::TEST_EN:
-				DebugPrint::Writeln(U"TEST_EN: Not implement");
+				DebugPrint::Writeln(U"TEST_EN: Not implemented");
 				break;
 
 			case Commands::ICON_EN:
-				DebugPrint::Writeln(U"ICON_EN: Not implement");
+				DebugPrint::Writeln(U"ICON_EN: Not implemented");
 				break;
 
 			case Commands::DATA_SND:
-				DebugPrint::Writeln(U"DATA_SND: Not implement");
+				DebugPrint::Writeln(U"DATA_SND: Not implemented");
 				break;
 
 			case Commands::DATA_TRN:
-				DebugPrint::Writeln(U"DATA_TRN: Not implement");
+				DebugPrint::Writeln(U"DATA_TRN: Not implemented");
 				break;
 
 			case Commands::JUMP:
-				DebugPrint::Writeln(U"JUMP: Not implement");
+				DebugPrint::Writeln(U"JUMP: Not implemented");
 				break;
 
 			case Commands::MLT_REQ:
@@ -452,15 +475,15 @@ namespace dmge
 			}
 
 			case Commands::CHR_TRN:
-				DebugPrint::Writeln(U"CHR_TRN: Not implement");
+				DebugPrint::Writeln(U"CHR_TRN: Not implemented");
 				break;
 
 			case Commands::PCT_TRN:
-				DebugPrint::Writeln(U"PCT_TRN: Not implement");
+				DebugPrint::Writeln(U"PCT_TRN: Not implemented");
 				break;
 
 			case Commands::OBJ_TRN:
-				DebugPrint::Writeln(U"OBJ_TRN: Not implement");
+				DebugPrint::Writeln(U"OBJ_TRN: Not implemented");
 				break;
 
 			}

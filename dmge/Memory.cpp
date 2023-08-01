@@ -694,6 +694,8 @@ namespace dmge
 		mbc_->update(cycles);
 
 		dma_.update(cycles);
+
+		cyclesTotal_ += cycles;
 	}
 
 	bool Memory::isSupportedCGBMode() const

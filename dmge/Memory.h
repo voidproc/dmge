@@ -131,5 +131,8 @@ namespace dmge
 
 		// SGB Mode
 		bool sgbMode_ = false;
+
+		// [DEBUG]
+		uint64 cyclesTotal_ = 0;
 	};
 }

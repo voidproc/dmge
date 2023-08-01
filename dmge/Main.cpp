@@ -167,7 +167,7 @@ public:
 		mem_.dumpCartridgeInfo();
 
 		// CGBモードの適用
-		if (mem_.isSupportedCGBMode())
+		if (mem_.isSupportedCGBMode() && config_.detectCGB)
 		{
 			mem_.setCGBMode(true);
 			ppu_.setCGBMode(true);
@@ -179,7 +179,7 @@ public:
 		cpu_.reset(enableBootROM);
 
 		// SGBモードの適用
-		if (not mem_.isCGBMode() && mem_.isSupportedSGBMode())
+		if (not mem_.isCGBMode() && mem_.isSupportedSGBMode() && config_.detectSGB)
 		{
 			mem_.setSGBMode(true);
 			ppu_.setSGBMode(true);

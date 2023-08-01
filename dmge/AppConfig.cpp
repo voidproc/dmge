@@ -58,6 +58,9 @@ namespace dmge
 
 		config.audioLPFConstant = ini.getOr<double>(U"AudioLPFConstant", 0.8);
 
+		config.detectCGB = ini.getOr<int>(U"DetectCGB", true);
+		config.detectSGB = ini.getOr<int>(U"DetectSGB", true);
+
 		return config;
 	}
 
@@ -112,5 +115,7 @@ namespace dmge
 		DebugPrint::Writeln(U"BootROM={}"_fmt(bootROMPath));
 		DebugPrint::Writeln(U"EnableAudioLPF={}"_fmt(enableAudioLPF));
 		DebugPrint::Writeln(U"AudioLPFConstant={}"_fmt(audioLPFConstant));
+		DebugPrint::Writeln(U"DetectCGB={}"_fmt(detectCGB));
+		DebugPrint::Writeln(U"DetectSGB={}"_fmt(detectSGB));
 	}
 }

@@ -71,6 +71,12 @@ namespace dmge
 		// ローパスフィルタの定数
 		double audioLPFConstant = 0.8;
 
+		// カートリッジが対応していれば CGB モードで実行する
+		bool detectCGB = true;
+
+		// カートリッジが対応していれば SGB モードで実行する
+		bool detectSGB = true;
+
 		// config.ini のパース結果を返す
 		static AppConfig LoadConfig();
 

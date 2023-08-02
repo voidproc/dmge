@@ -90,9 +90,8 @@ class DmgeApp
 {
 public:
 	DmgeApp(dmge::AppConfig& config)
+		: config_{ config }
 	{
-		config_ = config;
-
 		showDebugMonitor_ = config_.showDebugMonitor;
 
 		mem_.init(&ppu_, &apu_, &timer_, &joypad_, &lcd_, &interrupt_, &serial_);
@@ -126,7 +125,7 @@ public:
 	void run()
 	{
 		// ウィンドウサイズを設定
-		SetWindowSize(config_.scale, showDebugMonitor_);
+		SetWindowSize(config_.scale, config_.showDebugMonitor);
 
 		// 設定ファイルでカートリッジが指定されていない場合は
 		// ファイルを開くダイアログで選択する
@@ -383,7 +382,9 @@ private:
 		// デバッグモニタ表示切り替え
 		if (KeyF10.down())
 		{
-			config_.showDebugMonitor = showDebugMonitor_ = not showDebugMonitor_;
+			showDebugMonitor_ = not showDebugMonitor_;
+			config_.showDebugMonitor = showDebugMonitor_;
+
 			SetWindowSize(config_.scale, showDebugMonitor_);
 		}
 
@@ -604,7 +605,7 @@ private:
 	}
 
 
-	dmge::AppConfig config_;
+	dmge::AppConfig& config_;
 
 	dmge::Memory mem_{};
 

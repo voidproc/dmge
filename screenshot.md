@@ -11,7 +11,9 @@
   - [MBC3](#mbc3)
   - [MBC5](#mbc5)
   - [HuC1](#huc1)
+  - [SGB モード](#sgb-モード)
   - [デバッグ表示](#デバッグ表示)
+  - [メニュー](#メニュー)
 
 
 ## No MBC
@@ -63,8 +65,14 @@ https://tangramgames.dk/tobutobugirldx/
 
 ![Pokemon Card GB](screenshot/pokecardgb.png)
 
+## SGB モード
+
+![sgb-kirby2](screenshot/sgb-kirby2.png)
+
 ## デバッグ表示
 
 ![DebugMonitor](screenshot/debugmonitor.png)
 
+## メニュー
 
+![メニュー](screenshot/menu.png)

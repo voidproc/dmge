@@ -16,8 +16,8 @@ C++ / OpenSiv3D でゲームボーイのエミュレータを作っています�
   - [ダウンロード](#ダウンロード)
   - [使用方法](#使用方法)
   - [実装状況](#実装状況)
-  - [テスト ROM 実行結果](#テスト-rom-実行結果)
   - [スクリーンショット](#スクリーンショット)
+  - [テスト ROM 実行結果](#テスト-rom-実行結果)
 
 
 ## 概要
@@ -158,6 +158,17 @@ C++ / OpenSiv3D でゲームボーイのエミュレータを作っています�
   - [ ] その他
 
 
+## スクリーンショット
+
+[View more...](screenshot.md)
+
+![ZELDA](screenshot/zelda.png)
+
+![HOSHINOKA-BI](screenshot/sgb-kirby2.png)
+
+![menu](screenshot/menu.png)
+
+
 ## テスト ROM 実行結果
 
 |Test|Result|
@@ -173,12 +184,3 @@ C++ / OpenSiv3D でゲームボーイのエミュレータを作っています�
 |✅ ax6/​rtc3test-3|![rtc3test_subsec](screenshot/test_result/rtc3test_subsec.png)|
 |✅ mooneye/​acceptance/​timer|Pass|
 |✅ mooneye/manual-only/sprite_priority|![sprite_priority](screenshot/test_result/sprite_priority.png)|
-
-
-## スクリーンショット
-
-[View more...](screenshot.md)
-
-![ZELDA](screenshot/zelda.png)
-
-![HOSHINOKA-BI](screenshot/hoshinok.png)

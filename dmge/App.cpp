@@ -64,7 +64,7 @@ namespace dmge
 		}
 
 		// 画面表示用パレット初期化 (DMG)
-		setPPUPalette_(0);
+		setPPUPalette_(config_.palettePreset);
 
 		// ピクセルシェーダ用パラメータ (CGB)
 		ppu_->setGamma(config_.cgbColorGamma);

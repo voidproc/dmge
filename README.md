@@ -36,14 +36,27 @@ C++ / OpenSiv3D でゲームボーイのエミュレータを作っています�
 
 ## ダウンロード
 
-- [Releases - v1.2.0](https://github.com/voidproc/dmge/releases/download/v1.2.0/dmge_v1.2.0.zip)
+- [Releases - v1.3.0](https://github.com/voidproc/dmge/releases/download/v1.3.0/dmge_v1.3.0.zip)
 
 
 ## 使用方法
 
 `dmge.exe` を起動してください。
 
-以下のキーボードショートカットが使用可能です。
+右クリックまたは <kbd>Escape</kbd> キーでメニューが表示され、以下の操作を行うことができます。
+
+- リセット
+- カートリッジを開く（ダイアログ表示）
+- ポーズ（ステップ実行開始）
+- 画面サイズ変更（x1 ～ x8）
+- パレットカラーのプリセットを切替（DMG/SGB モード）
+- サウンド有効／無効切替
+- チャンネル 1～4 のミュート切替
+- サウンドの LPF 有効／無効切替
+- デバッグモニタ表示切替
+- FPS 表示切替
+
+また、以下のキーボードショートカットが使用可能です。
 
 - ボタン操作
   - 4方向ボタン : <kbd>&uarr;</kbd> <kbd>&darr;</kbd> <kbd>&larr;</kbd> <kbd>&rarr;</kbd>
@@ -55,7 +68,7 @@ C++ / OpenSiv3D でゲームボーイのエミュレータを作っています�
   - カートリッジを開くダイアログ表示 : <kbd>Ctrl + O</kbd>
   - リセット : <kbd>Ctrl + R</kbd>
 - レンダリング
-  - パレット切替（DMG モード） : <kbd>L</kbd>
+  - パレットカラーのプリセットを切替（DMG/SGB モード） : <kbd>L</kbd>
 - サウンド
   - チャンネル 1 のミュートを切替 : <kbd>1</kbd>
   - チャンネル 2 のミュートを切替 : <kbd>2</kbd>
@@ -66,7 +79,7 @@ C++ / OpenSiv3D でゲームボーイのエミュレータを作っています�
 - デバッグ
   - デバッグモニタ表示切替 : <kbd>F10</kbd>
   - デバッグモニタのメモリダンプ対象アドレス設定 : <kbd>M</kbd>
-  - ステップ実行を開始 : <kbd>P</kbd>
+  - ステップ実行を開始／終了 : <kbd>P</kbd>
   - ステップ実行 : <kbd>F7</kbd>
   - ステップ実行を終了 : <kbd>F5</kbd>
 
@@ -92,6 +105,8 @@ C++ / OpenSiv3D でゲームボーイのエミュレータを作っています�
 - `AudioLPFConstant` : ローパスフィルタの定数（0～1）
 - `DetectCGB` : カートリッジが対応していれば CGB モードで実行する（1=有効、0=無効）
 - `DetectSGB` : カートリッジが対応していれば SGB モードで実行する（1=有効、0=無効）
+- `PalettePreset` : パレットカラーのプリセット番号（0～8、0番はカスタムカラー） (DMG/SGB)
+- `PaletteColor0` ～ `PaletteColor3` : カスタムカラー (DMG/SGB)
 
 
 ## 実装状況

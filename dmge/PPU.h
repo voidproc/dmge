@@ -63,9 +63,9 @@ namespace dmge
 
 		int mode3Length() const;
 
-		// (DMG) カラーパレットを設定する
+		// (DMG) パレットの4色を設定する
 		// （「色番号から実際の色への変換テーブル」を置き換える）
-		void setDisplayColorPalette(const std::array<ColorF, 4>& palette);
+		void setPaletteColors(const std::array<ColorF, 4>& palette);
 
 		// (SGB) ATTR_TRN
 		void transferAttributeFiles();
@@ -144,7 +144,7 @@ namespace dmge
 		bool sgbMode_ = false;
 
 		// (DMG) 色番号から実際の色への変換テーブル
-		std::array<ColorF, 4> displayColorPalette_{};
+		std::array<ColorF, 4> paletteColors_{};
 
 		// (SGB) Attribute Files
 		std::array<uint8, 4050> sgbAttrFile_{};

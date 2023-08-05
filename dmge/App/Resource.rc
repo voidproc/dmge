@@ -120,6 +120,7 @@ Resource(engine/texture/box-shadow/8.png)
 //////////////////////////////////////////////////////
 
 Resource(fonts/JF-Dot-MPlus10.ttf)
+Resource(fonts/JF-Dot-MPlus12.ttf)
 Resource(shaders/lcd.hlsl)
 
 

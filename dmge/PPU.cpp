@@ -151,7 +151,7 @@ namespace dmge
 
 		const ScopedCustomShader2D shader{ pixelShader_ };
 
-		texture_.draw();
+		texture_(0, 0, 160, 144).draw();
 	}
 
 	PPUMode PPU::mode() const
@@ -204,9 +204,9 @@ namespace dmge
 		return baseLength;
 	}
 
-	void PPU::setDisplayColorPalette(const std::array<ColorF, 4>& palette)
+	void PPU::setPaletteColors(const std::array<ColorF, 4>& palette)
 	{
-		std::copy(palette.cbegin(), palette.cend(), displayColorPalette_.begin());
+		std::copy(palette.cbegin(), palette.cend(), paletteColors_.begin());
 	}
 
 	void PPU::transferAttributeFiles()
@@ -439,7 +439,7 @@ namespace dmge
 
 			if (not sgbMode_)
 			{
-				dotColor = displayColorPalette_[bgPaletteColor];
+				dotColor = paletteColors_[bgPaletteColor];
 			}
 			else
 			{
@@ -508,7 +508,7 @@ namespace dmge
 
 					if (not sgbMode_)
 					{
-						fetched = displayColorPalette_[oamPaletteColor];
+						fetched = paletteColors_[oamPaletteColor];
 					}
 					else
 					{

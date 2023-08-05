@@ -135,6 +135,9 @@ namespace dmge
 		// (SGB) 実際の描画色
 		const ColorF& sgbPaletteColor(uint8 palette, uint8 color) const;
 
+		// (SGB) 実際の描画色
+		void setSGBPaletteColors(uint8 paletteIndex, const std::array<ColorF, 4>& paletteColors);
+
 		// (SGB) 
 		//ColorF sgbSystemColorPaletteMemoryData(int palette, int color) const;
 
@@ -177,14 +180,13 @@ namespace dmge
 
 		// (CGB) 色番号から実際の色への変換テーブル
 
-		std::array<std::array<ColorF, 4>, 8> displayBGColorPalette_{};
-		std::array<std::array<ColorF, 4>, 8> displayOBJColorPalette_{};
+		std::array<std::array<ColorF, 4>, 8> bgPaletteColors_{};
+		std::array<std::array<ColorF, 4>, 8> objPaletteColors_{};
 
 		// (SGB) System Color Palette Memory
 		std::array<uint16, 512 * 4> sgbSystemColorPaletteMemory_{};
 
 		// (SGB) 色番号から実際の色への変換テーブル
-		std::array<std::array<ColorF, 4>, 4> sgbDisplayColorPalette_{};
-
+		std::array<std::array<ColorF, 4>, 4> sgbPaletteColors_{};
 	};
 }

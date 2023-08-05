@@ -134,11 +134,6 @@ namespace dmge
 	{
 	}
 
-	void DebugMonitor::setCGBMode(bool value)
-	{
-		cgbMode_ = value;
-	}
-
 	void DebugMonitor::update()
 	{
 		if (KeyM.up())
@@ -171,7 +166,7 @@ namespace dmge
 			{
 				tileDataTexture_.update();
 
-				if (cgbMode_)
+				if (mem_->isCGBMode())
 				{
 					tileDataTextureCGB_.update();
 				}
@@ -199,6 +194,14 @@ namespace dmge
 			{
 				DrawDebugItem d{ Vec2{ ColumnWidth * 0, 0 } + Padding };
 
+				// Cartridge
+
+				d.drawSection(U"Cartridge");
+				d.drawText(U"{} mode"_fmt(mem_->isCGBMode() ? U"CGB"_sv : mem_->isSGBMode() ? U"SGB"_sv : U"DMG"_sv));
+				d.drawLabelAndValue(U"ROM Bank", U"{:X}"_fmt(mem_->romBank()));
+				d.drawLabelAndValue(U"RAM Bank", U"{:X}"_fmt(mem_->ramBank()));
+				d.drawEmptyLine();
+
 				// Timer
 
 				d.drawSection(U"Timer");
@@ -206,14 +209,6 @@ namespace dmge
 				d.drawLabelAndValue(U"FF05 TIMA", Uint8ToHexAndBin(mem_->read(Address::TIMA)));
 				d.drawLabelAndValue(U"FF06 TMA ", Uint8ToHexAndBin(mem_->read(Address::TMA)));
 				d.drawLabelAndValue(U"FF07 TAC ", Uint8ToHexAndBin(mem_->read(Address::TAC)));
-				d.drawEmptyLine();
-
-				// Interrupt
-
-				d.drawSection(U"Interrupt");
-				d.drawLabelAndValue(U"IME      ", U"{:d}"_fmt(interrupt_->ime()));
-				d.drawLabelAndValue(U"FF0F IF  ", Uint8ToHexAndBin(mem_->read(Address::IF)));
-				d.drawLabelAndValue(U"FFFF IE  ", Uint8ToHexAndBin(mem_->read(Address::IE)));
 				d.drawEmptyLine();
 
 				// Rendering
@@ -230,6 +225,11 @@ namespace dmge
 				d.drawLabelAndValue(U"FF49 OBP1", Uint8ToHexAndBin(mem_->read(Address::OBP1)));
 				d.drawLabelAndValue(U"FF4A WY  ", Uint8ToHexAndBin(mem_->read(Address::WY)));
 				d.drawLabelAndValue(U"FF4B WX  ", Uint8ToHexAndBin(mem_->read(Address::WX)));
+				d.drawEmptyLine();
+
+				// スペース
+
+				d.drawEmptyLine();
 				d.drawEmptyLine();
 
 				// Memory dump
@@ -257,11 +257,12 @@ namespace dmge
 				d.drawLabelAndValue(U"Double Speed", U"{:d}"_fmt(mem_->read(Address::KEY1) >> 7));
 				d.drawEmptyLine();
 
-				// Cartridge
+				// Interrupt
 
-				d.drawSection(U"Cartridge");
-				d.drawLabelAndValue(U"ROM Bank", U"{:X}"_fmt(mem_->romBank()));
-				d.drawLabelAndValue(U"RAM Bank", U"{:X}"_fmt(mem_->ramBank()));
+				d.drawSection(U"Interrupt");
+				d.drawLabelAndValue(U"IME    ", U"{:d}"_fmt(interrupt_->ime()));
+				d.drawLabelAndValue(U"FF0F IF", Uint8ToHexAndBin(mem_->read(Address::IF)));
+				d.drawLabelAndValue(U"FFFF IE", Uint8ToHexAndBin(mem_->read(Address::IE)));
 				d.drawEmptyLine();
 
 				// Sound
@@ -296,7 +297,7 @@ namespace dmge
 				d.drawTileDataTexture(tileDataTexture_);
 				d.drawEmptyLine();
 
-				if (cgbMode_)
+				if (mem_->isCGBMode())
 				{
 					d.drawTileDataTexture(tileDataTextureCGB_);
 					d.drawEmptyLine();

@@ -20,12 +20,12 @@ namespace dmge
 	LCD::LCD(Memory& mem)
 		: mem_{ mem }
 	{
-		for (int i = 0; i < sgbDisplayColorPalette_.size(); ++i)
+		for (int i = 0; i < sgbPaletteColors_.size(); ++i)
 		{
-			sgbDisplayColorPalette_[i][0] = ColorF{ U"#e8e8e8" };
-			sgbDisplayColorPalette_[i][1] = ColorF{ U"#a0a0a0" };
-			sgbDisplayColorPalette_[i][2] = ColorF{ U"#585858" };
-			sgbDisplayColorPalette_[i][3] = ColorF{ U"#101010" };
+			sgbPaletteColors_[i][0] = ColorF{ U"#e8e8e8" };
+			sgbPaletteColors_[i][1] = ColorF{ U"#a0a0a0" };
+			sgbPaletteColors_[i][2] = ColorF{ U"#585858" };
+			sgbPaletteColors_[i][3] = ColorF{ U"#101010" };
 		}
 	}
 
@@ -193,12 +193,12 @@ namespace dmge
 
 	const ColorF& LCD::bgPaletteColor(uint8 palette, uint8 color) const
 	{
-		return displayBGColorPalette_[palette][color];
+		return bgPaletteColors_[palette][color];
 	}
 
 	const ColorF& LCD::objPaletteColor(uint8 palette, uint8 color) const
 	{
-		return displayOBJColorPalette_[palette][color];
+		return objPaletteColors_[palette][color];
 	}
 
 	void LCD::writeRegister(uint16 addr, uint8 value)
@@ -266,7 +266,7 @@ namespace dmge
 			const int nColor = (bgPaletteIndex_ / 2) % 4;
 			const uint16 color = bgPalette_[pal * 8 + nColor * 2] | (bgPalette_[pal * 8 + nColor * 2 + 1] << 8);
 
-			displayBGColorPalette_[pal][nColor] = ConvertColorFrom555(color);
+			bgPaletteColors_[pal][nColor] = ConvertColorFrom555(color);
 
 			if (bgPaletteIndexAutoIncr_)
 			{
@@ -286,7 +286,7 @@ namespace dmge
 			const int nColor = (objPaletteIndex_ / 2) % 4;
 			const uint16 color = objPalette_[pal * 8 + nColor * 2] | (objPalette_[pal * 8 + nColor * 2 + 1] << 8);
 
-			displayOBJColorPalette_[pal][nColor] = ConvertColorFrom555(color);
+			objPaletteColors_[pal][nColor] = ConvertColorFrom555(color);
 
 			if (objPaletteIndexAutoIncr_)
 			{
@@ -382,21 +382,26 @@ namespace dmge
 	{
 		for (int color = 0; color < 4; ++color)
 		{
-			sgbDisplayColorPalette_[0][color] = ConvertColorFrom555(sgbSystemColorPaletteMemory_[palette0 * 4 + color]);
-			sgbDisplayColorPalette_[1][color] = ConvertColorFrom555(sgbSystemColorPaletteMemory_[palette1 * 4 + color]);
-			sgbDisplayColorPalette_[2][color] = ConvertColorFrom555(sgbSystemColorPaletteMemory_[palette2 * 4 + color]);
-			sgbDisplayColorPalette_[3][color] = ConvertColorFrom555(sgbSystemColorPaletteMemory_[palette3 * 4 + color]);
+			sgbPaletteColors_[0][color] = ConvertColorFrom555(sgbSystemColorPaletteMemory_[palette0 * 4 + color]);
+			sgbPaletteColors_[1][color] = ConvertColorFrom555(sgbSystemColorPaletteMemory_[palette1 * 4 + color]);
+			sgbPaletteColors_[2][color] = ConvertColorFrom555(sgbSystemColorPaletteMemory_[palette2 * 4 + color]);
+			sgbPaletteColors_[3][color] = ConvertColorFrom555(sgbSystemColorPaletteMemory_[palette3 * 4 + color]);
 		}
 	}
 
 	void LCD::setSGBPalette(int palette, int colorId, uint16 color)
 	{
-		sgbDisplayColorPalette_[palette][colorId] = ConvertColorFrom555(color);
+		sgbPaletteColors_[palette][colorId] = ConvertColorFrom555(color);
 	}
 
 	const ColorF& LCD::sgbPaletteColor(uint8 palette, uint8 color) const
 	{
-		return sgbDisplayColorPalette_[palette][color];
+		return sgbPaletteColors_[palette][color];
+	}
+
+	void LCD::setSGBPaletteColors(uint8 paletteIndex, const std::array<ColorF, 4>& paletteColors)
+	{
+		std::copy(paletteColors.cbegin(), paletteColors.cend(), sgbPaletteColors_[paletteIndex].begin());
 	}
 
 	//ColorF LCD::sgbSystemColorPaletteMemoryData(int palette, int color) const

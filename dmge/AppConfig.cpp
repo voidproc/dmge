@@ -59,7 +59,15 @@ namespace dmge
 		config.audioLPFConstant = ini.getOr<double>(U"AudioLPFConstant", 0.8);
 
 		config.detectCGB = ini.getOr<int>(U"DetectCGB", true);
+
 		config.detectSGB = ini.getOr<int>(U"DetectSGB", true);
+
+		config.palettePreset = ini.getOr<int>(U"PalettePreset", 0);
+
+		config.paletteColors[0] = ColorF{ U"#" + ini.getOr<String>(U"PaletteColor0", U"e8e8e8")};
+		config.paletteColors[1] = ColorF{ U"#" + ini.getOr<String>(U"PaletteColor1", U"a0a0a0") };
+		config.paletteColors[2] = ColorF{ U"#" + ini.getOr<String>(U"PaletteColor2", U"585858") };
+		config.paletteColors[3] = ColorF{ U"#" + ini.getOr<String>(U"PaletteColor3", U"101010") };
 
 		return config;
 	}

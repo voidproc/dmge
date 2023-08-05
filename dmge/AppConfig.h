@@ -12,6 +12,8 @@ namespace dmge
 
 	struct AppConfig
 	{
+		static inline constexpr int ScalingMax = 8;
+
 		// 読み込むカートリッジのパス
 		String cartridgePath{};
 
@@ -76,6 +78,14 @@ namespace dmge
 
 		// カートリッジが対応していれば SGB モードで実行する
 		bool detectSGB = true;
+
+		// (DMG/SGB) パレット番号
+		int palettePreset = 0;
+
+		// (DMG/SGB) カスタムパレットカラー
+		std::array<ColorF, 4> paletteColors{
+			ColorF{ U"#e8e8e8" }, ColorF{ U"#a0a0a0" }, ColorF{ U"#585858" }, ColorF{ U"#101010" }
+		};
 
 		// config.ini のパース結果を返す
 		static AppConfig LoadConfig();

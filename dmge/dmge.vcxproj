@@ -119,7 +119,9 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="App.cpp" />
     <ClCompile Include="AppConfig.cpp" />
+    <ClCompile Include="AppWindow.cpp" />
     <ClCompile Include="Audio\APU.cpp" />
     <ClCompile Include="Audio\APUStream.cpp" />
     <ClCompile Include="Audio\Channel.cpp" />
@@ -136,6 +138,7 @@
     <ClCompile Include="CPU.cpp" />
     <ClCompile Include="DebugMonitor.cpp" />
     <ClCompile Include="DMA.cpp" />
+    <ClCompile Include="GUI\Menu.cpp" />
     <ClCompile Include="Interrupt.cpp" />
     <ClCompile Include="Joypad.cpp" />
     <ClCompile Include="LCD.cpp" />
@@ -248,7 +251,9 @@
     <None Include="App\engine\soundfont\GMGSx.sf2.zstdcmp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="App.h" />
     <ClInclude Include="AppConfig.h" />
+    <ClInclude Include="AppWindow.h" />
     <ClInclude Include="Audio\APU.h" />
     <ClInclude Include="Audio\APUStream.h" />
     <ClInclude Include="Audio\Channel.h" />
@@ -271,6 +276,7 @@
     <ClInclude Include="DebugMonitor.h" />
     <ClInclude Include="DebugPrint.h" />
     <ClInclude Include="DMA.h" />
+    <ClInclude Include="GUI\Menu.h" />
     <ClInclude Include="Interrupt.h" />
     <ClInclude Include="Joypad.h" />
     <ClInclude Include="LCD.h" />
@@ -287,6 +293,7 @@
     <ClInclude Include="SGB\Commands.h" />
     <ClInclude Include="SGB\Mask.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="Test.h" />
     <ClInclude Include="TileData.h" />
     <ClInclude Include="TileMapAttribute.h" />
     <ClInclude Include="Timer.h" />

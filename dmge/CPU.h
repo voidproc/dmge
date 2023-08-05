@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include "Test.h"
+
 namespace dmge
 {
 	class Memory;
@@ -16,13 +18,6 @@ namespace dmge
 		uint16 pc;
 		bool halt;
 		bool cgbMode;
-	};
-
-	enum class MooneyeTestResult
-	{
-		Running,
-		Passed,
-		Failed,
 	};
 
 	class CPU

@@ -12,8 +12,8 @@ namespace dmge
 	class DebugMonitor
 	{
 	public:
-		// 表示サイズは 横90 * 縦40 [chars] くらい
-		inline static constexpr Size ViewportSize{ 5 * 90, 10 * 40 };
+		// 表示サイズは 横 90 [chars]、縦 144*3 [px] くらい
+		inline static constexpr Size ViewportSize{ 5 * 90, 144 * 3 };
 
 		// 背景色
 		inline static constexpr Color BgColor{ 32 };
@@ -21,8 +21,6 @@ namespace dmge
 		DebugMonitor(Memory* mem, CPU* cpu, APU* apu, Interrupt* interrupt);
 
 		~DebugMonitor();
-
-		void setCGBMode(bool value);
 
 		void update();
 
@@ -38,8 +36,6 @@ namespace dmge
 		APU* apu_;
 		Interrupt* interrupt_;
 
-		bool cgbMode_ = false;
-
 		// メモリダンプ用
 
 		uint16 dumpAddress_ = 0x0000;
@@ -47,6 +43,7 @@ namespace dmge
 		TextEditState textStateDumpAddress_;
 
 		// タイルデータ表示用
+
 		TileDataTexture tileDataTexture_;
 		TileDataTexture tileDataTextureCGB_;
 	};

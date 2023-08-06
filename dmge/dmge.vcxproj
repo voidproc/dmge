@@ -139,8 +139,10 @@
     <ClCompile Include="DebugMonitor.cpp" />
     <ClCompile Include="DMA.cpp" />
     <ClCompile Include="GUI\Menu.cpp" />
+    <ClCompile Include="InputMappingOverlay.cpp" />
     <ClCompile Include="Interrupt.cpp" />
     <ClCompile Include="Joypad.cpp" />
+    <ClCompile Include="InputMapping.cpp" />
     <ClCompile Include="LCD.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="MBC.cpp" />
@@ -277,8 +279,12 @@
     <ClInclude Include="DebugPrint.h" />
     <ClInclude Include="DMA.h" />
     <ClInclude Include="GUI\Menu.h" />
+    <ClInclude Include="InputMappingArray.h" />
+    <ClInclude Include="InputMappingOverlay.h" />
     <ClInclude Include="Interrupt.h" />
     <ClInclude Include="Joypad.h" />
+    <ClInclude Include="JoypadButtons.h" />
+    <ClInclude Include="InputMapping.h" />
     <ClInclude Include="LCD.h" />
     <ClInclude Include="MBC.h" />
     <ClInclude Include="Memory.h" />

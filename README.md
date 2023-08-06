@@ -15,6 +15,10 @@ C++ / OpenSiv3D でゲームボーイのエミュレータを作っています�
   - [開発環境](#開発環境)
   - [ダウンロード](#ダウンロード)
   - [使用方法](#使用方法)
+    - [アプリケーションの起動](#アプリケーションの起動)
+    - [メニュー](#メニュー)
+    - [キーボードショートカット](#キーボードショートカット)
+    - [設定（`config.ini`）](#設定configini)
   - [実装状況](#実装状況)
   - [スクリーンショット](#スクリーンショット)
   - [テスト ROM 実行結果](#テスト-rom-実行結果)
@@ -41,24 +45,38 @@ C++ / OpenSiv3D でゲームボーイのエミュレータを作っています�
 
 ## 使用方法
 
+### アプリケーションの起動
+
 `dmge.exe` を起動してください。
 
-右クリックまたは <kbd>Escape</kbd> キーでメニューが表示され、以下の操作を行うことができます。
+### メニュー
+
+右クリックまたは <kbd>Escape</kbd> キーを押すとメニューが表示されます。次に示す各種操作や設定変更を行うことができます。
 
 - リセット
 - カートリッジを開く（ダイアログ表示）
 - ポーズ（ステップ実行開始）
 - 画面サイズ変更（x1 ～ x8）
 - パレットカラーのプリセットを切替（DMG/SGB モード）
-- サウンド有効／無効切替
-- チャンネル 1～4 のミュート切替
-- サウンドの LPF 有効／無効切替
+- コントローラ設定（キーボード／ゲームパッドのボタン割り当て）
+- オーディオ有効／無効切替
+- オーディオチャンネル 1～4 のミュート切替
+- オーディオの LPF 有効／無効切替
 - デバッグモニタ表示切替
 - FPS 表示切替
 
-また、以下のキーボードショートカットが使用可能です。
+メニューはキーボードまたはマウスで操作できます。
 
-- ボタン操作
+- 選択: <kbd>&uarr;</kbd>、<kbd>&darr;</kbd>、<kbd>マウスホイール</kbd>
+- 決定／値の変更: <kbd>Enter</kbd>、<kbd>左クリック</kbd>
+- 値の変更（増減）: <kbd>&larr;</kbd>、<kbd>&rarr;</kbd>
+- 戻る: <kbd>Escape</kbd>、<kbd>右クリック</kbd>
+
+### キーボードショートカット
+
+以下のキーボードショートカットが使用できます。
+
+- ボタン操作（カスタマイズ可能）
   - 4方向ボタン : <kbd>&uarr;</kbd> <kbd>&darr;</kbd> <kbd>&larr;</kbd> <kbd>&rarr;</kbd>
   - A ボタン : <kbd>X</kbd>
   - B ボタン : <kbd>Z</kbd>
@@ -68,45 +86,62 @@ C++ / OpenSiv3D でゲームボーイのエミュレータを作っています�
   - カートリッジを開くダイアログ表示 : <kbd>Ctrl + O</kbd>
   - リセット : <kbd>Ctrl + R</kbd>
 - レンダリング
-  - パレットカラーのプリセットを切替（DMG/SGB モード） : <kbd>L</kbd>
-- サウンド
+  - パレットカラーのプリセットを切替（DMG/SGB モード） : <kbd>Ctrl + L</kbd>
+- オーディオ
   - チャンネル 1 のミュートを切替 : <kbd>1</kbd>
   - チャンネル 2 のミュートを切替 : <kbd>2</kbd>
   - チャンネル 3 のミュートを切替 : <kbd>3</kbd>
   - チャンネル 4 のミュートを切替 : <kbd>4</kbd>
-  - サウンド有効／無効切替 : <kbd>5</kbd>
-  - LPF 有効／無効切替 : <kbd>6</kbd>
+  - オーディオ有効／無効切替 : <kbd>5</kbd>
+  - オーディオの LPF 有効／無効切替 : <kbd>6</kbd>
 - デバッグ
   - デバッグモニタ表示切替 : <kbd>F10</kbd>
-  - デバッグモニタのメモリダンプ対象アドレス設定 : <kbd>M</kbd>
-  - ステップ実行を開始／終了 : <kbd>P</kbd>
+  - デバッグモニタのメモリダンプ対象アドレス設定 : <kbd>Ctrl + M</kbd>
+  - ステップ実行を開始／終了 : <kbd>Ctrl + P</kbd>
   - ステップ実行 : <kbd>F7</kbd>
   - ステップ実行を終了 : <kbd>F5</kbd>
+  - コンソールへ常に実行結果をダンプする : <kbd>Ctrl + D</kbd>
 
-また、`config.ini` を編集して以下の設定を行うことができます（[`config.example.ini`](https://github.com/voidproc/dmge/blob/main/dmge/App/config.example.ini) を参考にしてください）。
+### 設定（`config.ini`）
 
-- `CartridgePath` : 読み込むカートリッジファイルのパス
-- `OpenCartridgeDirectory` : カートリッジを開くダイアログのデフォルトディレクトリ
-- `Breakpoint` : ブレークポイント（コンマ区切りで複数指定可能）
-- `MemoryWriteBreakpoint` : メモリ書き込み時ブレークポイント（コンマ区切りで複数指定可能）
-- `BreakOnLDBB` : LD B,B 実行時にブレークする（1=有効、0=無効）
-- `EnableBreakpoint` : 上記ブレークポイントの有効／無効の切替（1=有効、0=無効）
-- `TraceDumpStartAddress` : トレースダンプを開始するアドレス（コンマ区切りで複数指定可能）
-- `ShowFPS` : 画面上部にFPSを表示する（1=有効、0=無効）
-- `Scale` : 画面の表示倍率
-- `CGBColorGamma` : CGB モードでのカラー補正（ガンマ値）
-- `ShowConsole` : コンソールを表示する（1=有効、0=無効）
-- `LogFilePath` : トレースダンプなどの出力先のパス
-- `ShowDebugMonitor` : デバッグモニタを表示する（1=有効、0=無効）
-- `DumpAddress` : ブレーク時のメモリダンプ先アドレス（コンマ区切りで複数指定可能）
-- `BootROM` : Bootstrap ROM のパス
-- `GamepadButton****` : ゲームパッドのボタン割り当て
-- `EnableAudioLPF` : オーディオにローパスフィルタを適用する（1=有効、0=無効）
-- `AudioLPFConstant` : ローパスフィルタの定数（0～1）
-- `DetectCGB` : カートリッジが対応していれば CGB モードで実行する（1=有効、0=無効）
-- `DetectSGB` : カートリッジが対応していれば SGB モードで実行する（1=有効、0=無効）
-- `PalettePreset` : パレットカラーのプリセット番号（0～8、0番はカスタムカラー） (DMG/SGB)
-- `PaletteColor0` ～ `PaletteColor3` : カスタムカラー (DMG/SGB)
+各種設定は起動時に `config.ini` から読み込まれ、アプリケーション終了時に**上書き保存されます** 。
+
+設定変更は上記のメニューから行うことができます。または `config.ini` ファイルを直接編集することも可能です。
+
+設定項目は次のとおりです（[`config.example.ini`](https://github.com/voidproc/dmge/blob/main/dmge/App/config.example.ini) を参考にしてください）。
+
+- カートリッジ関連
+  - `CartridgePath` : 読み込むカートリッジファイルのパス
+  - `OpenCartridgeDirectory` : カートリッジを開くダイアログのデフォルトディレクトリ
+  - `DetectCGB` : カートリッジが対応していれば CGB モードで実行する（1=有効、0=無効）
+  - `DetectSGB` : カートリッジが対応していれば SGB モードで実行する（1=有効、0=無効）
+  - `BootROM` : Bootstrap ROM のパス
+- 画面表示関連
+  - `Scale` : 画面の表示倍率
+  - `ShowFPS` : 画面上部にFPSを表示する（1=有効、0=無効）
+  - `PalettePreset` : パレットカラーのプリセット番号（0～8、0番はカスタムカラー） (DMG/SGB)
+  - `PaletteColor0` ～ `PaletteColor3` : カスタムカラー (DMG/SGB)
+  - `CGBColorGamma` : CGB モードでのカラー補正（ガンマ値）
+- デバッグモニタ関連
+  - `ShowDebugMonitor` : デバッグモニタを表示する（1=有効、0=無効）
+- 入力関連
+  - `Keyboard****` : キーボードの割り当て
+    - `KeyboardRight`, `KeyboardLeft`, `KeyboardUp`, `KeyboardDown`, `KeyboardA`, `KeyboardB`, `KeyboardSelect`, `KeyboardStart`
+  - `GamepadButton****` : ゲームパッドのボタン割り当て
+    - `GamepadButtonA`, `GamepadButtonB`, `GamepadButtonSelect`, `GamepadButtonStart`
+- オーディオ関連
+  - `EnableAudioLPF` : オーディオにローパスフィルタを適用する（1=有効、0=無効）
+  - `AudioLPFConstant` : ローパスフィルタの定数（0～1）
+- デバッグ関連
+  - `ShowConsole` : コンソールを表示する（1=有効、0=無効）
+  - `Breakpoint` : ブレークポイント（コンマ区切りで複数指定可能）
+  - `MemoryWriteBreakpoint` : メモリ書き込み時ブレークポイント（コンマ区切りで複数指定可能）
+  - `BreakOnLDBB` : LD B,B 実行時にブレークする（1=有効、0=無効）
+  - `EnableBreakpoint` : 上記ブレークポイントの有効／無効の切替（1=有効、0=無効）
+  - `DumpAddress` : ブレーク時のメモリダンプ先アドレス（コンマ区切りで複数指定可能）
+  - `TraceDumpStartAddress` : トレースダンプを開始するアドレス（コンマ区切りで複数指定可能）
+  - `LogFilePath` : トレースダンプなどの出力先のパス
+  - `TestMode` : テスト ROM 実行モード（1=有効、0=無効）
 
 
 ## 実装状況
@@ -137,8 +172,6 @@ C++ / OpenSiv3D でゲームボーイのエミュレータを作っています�
 - Joypad
   - [x] キーボードによる操作
   - [x] ゲームパッドによる操作
-  - [x] Joy-Conによる操作（両手持ち）
-  - [x] Proコントローラーによる操作
 - シリアル通信
   - [x] 相手がいない場合の内部クロック通信・割り込み
   - [ ] それ以外

@@ -3,8 +3,7 @@
 namespace dmge
 {
 	class Memory;
-
-	struct GamepadButtonAssign;
+	class InputMapping;
 
 	class Joypad
 	{
@@ -26,7 +25,7 @@ namespace dmge
 		void setEnable(bool enable);
 
 		// ボタン割り当てを設定
-		void setButtonAssign(const GamepadButtonAssign& gamepadButtonAssign);
+		void setMapping(const InputMapping& keyMap, const InputMapping& gamepadMap);
 
 		// (SGB)
 		void setPlayerCount(int count);

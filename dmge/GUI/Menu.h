@@ -53,6 +53,8 @@ namespace dmge
 
 			void set(Menu& menu);
 
+			void backToPrevious();
+
 			void show();
 
 			void hide();
@@ -68,7 +70,7 @@ namespace dmge
 
 			bool visible_ = false;
 
-			Menu menu_;
+			Array<Menu> menu_;
 
 			// 選択されているメニュー項目のインデックス
 			int selectedIndex_ = 0;
@@ -78,6 +80,9 @@ namespace dmge
 
 			// マウスオーバーによる選択の有効化
 			bool enableMouseSelection_ = true;
+
+			Menu& currentMenu_();
+			const Menu& currentMenu_() const;
 
 			Rect scrollingAreaRect_() const;
 			void scrollToIndex_(int index);

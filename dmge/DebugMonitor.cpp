@@ -136,7 +136,7 @@ namespace dmge
 
 	void DebugMonitor::update()
 	{
-		if (KeyM.up())
+		if (KeyM.up() + KeyControl.pressed())
 		{
 			showDumpAddressTextbox_ = true;
 			textStateDumpAddress_.active = true;
@@ -230,7 +230,6 @@ namespace dmge
 				// スペース
 
 				d.drawEmptyLine();
-				d.drawEmptyLine();
 
 				// Memory dump
 
@@ -278,15 +277,10 @@ namespace dmge
 				// Joypad
 
 				const auto gamepad = Gamepad(0);
-				const auto joyconL = JoyConL(0);
-				const auto joyconR = JoyConR(0);
-				const auto procon = ProController(0);
 
 				d.drawSection(U"Joypad");
 				d.drawLabelAndValue(U"FF00 JOYP", Uint8ToHexAndBin(mem_->read(Address::JOYP)));
 				d.drawText(U"Gamepad: {}"_fmt(gamepad.isConnected() ? U"connected" : U"not found"));
-				d.drawText(U"JoyCon : {}"_fmt(joyconL.isConnected() && joyconR.isConnected() ? U"connected" : U"not found"));
-				d.drawText(U"ProCon : {}"_fmt(procon.isConnected() ? U"connected" : U"not found"));
 				d.drawEmptyLine();
 			}
 

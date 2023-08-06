@@ -2,6 +2,7 @@
 #include "Memory.h"
 #include "Address.h"
 #include "AppConfig.h"
+#include "InputMapping.h"
 
 namespace dmge
 {
@@ -93,53 +94,18 @@ namespace dmge
 		enabled_ = enable;
 	}
 
-	void Joypad::setButtonAssign(const GamepadButtonAssign& gamepadButtonAssign)
+	void Joypad::setMapping(const InputMapping& keyMap, const InputMapping& gamepadMap)
 	{
 		// キーボード
 
-		inputRight_ = KeyRight;
-		inputLeft_ = KeyLeft;
-		inputUp_ = KeyUp;
-		inputDown_ = KeyDown;
-		inputA_ = KeyX;
-		inputB_ = KeyZ;
-		inputSelect_ = KeyBackspace;
-		inputStart_ = KeyEnter;
-
-		// Joy-Con(L), Joy-Con(R) （両手持ち）
-
-		const auto joyConL = JoyConL(0);
-		const auto joyConR = JoyConR(0);
-
-		if (joyConL.isConnected() && joyConR.isConnected())
-		{
-			inputRight_ = inputRight_ | joyConL.button3;
-			inputLeft_ = inputLeft_ | joyConL.button0;
-			inputUp_ = inputUp_ | joyConL.button2;
-			inputDown_ = inputDown_ | joyConL.button1;
-			inputA_ = inputA_ | joyConR.button0;
-			inputB_ = inputB_ | joyConR.button2;
-			inputSelect_ = inputSelect_ | joyConR.button3;
-			inputStart_ = inputStart_ | joyConR.button1;
-
-			return;
-		}
-
-		// Proコントローラー
-
-		if (const auto procon = ProController(0); procon.isConnected())
-		{
-			inputRight_ = inputRight_ | procon.povRight;
-			inputLeft_ = inputLeft_ | procon.povLeft;
-			inputUp_ = inputUp_ | procon.povUp;
-			inputDown_ = inputDown_ | procon.povDown;
-			inputA_ = inputA_ | procon.buttonA;
-			inputB_ = inputB_ | procon.buttonB;
-			inputSelect_ = inputSelect_ | procon.buttonMinus;
-			inputStart_ = inputStart_ | procon.buttonPlus;
-
-			return;
-		}
+		inputRight_ = keyMap.get(JoypadButtons::Right);
+		inputLeft_ = keyMap.get(JoypadButtons::Left);
+		inputUp_ = keyMap.get(JoypadButtons::Up);
+		inputDown_ = keyMap.get(JoypadButtons::Down);
+		inputA_ = keyMap.get(JoypadButtons::A);
+		inputB_ = keyMap.get(JoypadButtons::B);
+		inputSelect_ = keyMap.get(JoypadButtons::Select);
+		inputStart_ = keyMap.get(JoypadButtons::Start);
 
 		// 汎用ゲームパッド
 
@@ -150,17 +116,17 @@ namespace dmge
 			inputUp_ = inputUp_ | gamepad.povUp;
 			inputDown_ = inputDown_ | gamepad.povDown;
 
-			if (gamepad.buttons.size() > gamepadButtonAssign.buttonA)
-				inputA_ = inputA_ | gamepad.buttons[gamepadButtonAssign.buttonA];
+			if (gamepad.buttons.size() > gamepadMap.get(JoypadButtons::A).code())
+				inputA_ = inputA_ | gamepadMap.get(JoypadButtons::A);
 
-			if (gamepad.buttons.size() > gamepadButtonAssign.buttonB)
-				inputB_ = inputB_ | gamepad.buttons[gamepadButtonAssign.buttonB];
+			if (gamepad.buttons.size() > gamepadMap.get(JoypadButtons::B).code())
+				inputB_ = inputB_ | gamepadMap.get(JoypadButtons::B);
 
-			if (gamepad.buttons.size() > gamepadButtonAssign.buttonSelect)
-				inputSelect_ = inputSelect_ | gamepad.buttons[gamepadButtonAssign.buttonSelect];
+			if (gamepad.buttons.size() > gamepadMap.get(JoypadButtons::Select).code())
+				inputSelect_ = inputSelect_ | gamepadMap.get(JoypadButtons::Select);
 
-			if (gamepad.buttons.size() > gamepadButtonAssign.buttonStart)
-				inputStart_ = inputStart_ | gamepad.buttons[gamepadButtonAssign.buttonStart];
+			if (gamepad.buttons.size() > gamepadMap.get(JoypadButtons::Start).code())
+				inputStart_ = inputStart_ | gamepadMap.get(JoypadButtons::Start);
 		}
 	}
 

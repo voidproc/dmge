@@ -17,6 +17,8 @@
 #include "DebugMonitor.h"
 #include "AppWindow.h"
 #include "Colors.h"
+#include "InputMapping.h"
+#include "InputMappingOverlay.h"
 
 namespace dmge
 {
@@ -49,11 +51,18 @@ namespace dmge
 		cpu_{ std::make_unique<CPU>(mem_.get(), interrupt_.get()) },
 		joypad_{ std::make_unique<Joypad>(mem_.get()) },
 		serial_{ std::make_unique<Serial>(*interrupt_.get()) },
-		debugMonitor_{ std::make_unique<DebugMonitor>(mem_.get(), cpu_.get(), apu_.get(), interrupt_.get()) }
+		debugMonitor_{ std::make_unique<DebugMonitor>(mem_.get(), cpu_.get(), apu_.get(), interrupt_.get()) },
+		keyMap_{ std::make_unique<InputMapping>(InputDeviceType::Keyboard) },
+		gamepadMap_{ std::make_unique<InputMapping>(InputDeviceType::Gamepad) }
 	{
 		mem_->init(ppu_.get(), apu_.get(), timer_.get(), joypad_.get(), lcd_.get(), interrupt_.get(), serial_.get());
 
-		joypad_->setButtonAssign(config_.gamepadButtonAssign);
+		// config.ini のキー／ボタンマッピングを適用
+
+		keyMap_->set(config_.keyMapping);
+		gamepadMap_->set(config_.gamepadMapping);
+
+		joypad_->setMapping(*keyMap_, *gamepadMap_);
 
 		// メモリ書き込み時フックを設定
 		if (config_.enableBreakpoint && not config_.memoryWriteBreakpoints.empty())
@@ -274,8 +283,8 @@ namespace dmge
 
 				commonInput_();
 
-				// トレースモードに移行
-				if (KeyP.down())
+				// トレースモードに移行 (Ctrl+P)
+				if (KeyP.down() && KeyControl.pressed())
 				{
 					pause_();
 				}
@@ -332,14 +341,14 @@ namespace dmge
 				break;
 			}
 
-			// ステップ実行
+			// ステップ実行 (F7)
 			if (KeyF7.down())
 			{
 				break;
 			}
 
-			// トレースモード終了
-			if (KeyP.down() || KeyF5.down())
+			// トレースモード終了 (Ctrl+P or F5)
+			if ((KeyP.down() && KeyControl.pressed()) || KeyF5.down())
 			{
 				resume_();
 				break;
@@ -383,22 +392,22 @@ namespace dmge
 
 	void DmgeApp::commonInput_()
 	{
-		// デバッグモニタ表示切り替え
+		// デバッグモニタ表示切り替え (F10)
 		if (KeyF10.down())
 		{
 			toggleDebugMonitor_(true);
 		}
 
-		// [DEBUG]常にダンプ
-		if (KeyD.down())
+		// [DEBUG]常にダンプ (Ctrl+D)
+		if (KeyD.down() && KeyControl.pressed())
 		{
 			enableTraceDump_ = not enableTraceDump_;
 
 			DebugPrint::Writeln(U"EnableTraceDump={}"_fmt(enableTraceDump_));
 		}
 
-		// パレット切り替え
-		if (KeyL.down())
+		// パレット切り替え (Ctrl+L)
+		if (KeyL.down() && KeyControl.pressed())
 		{
 			changePalettePreset_(1);
 		}
@@ -415,7 +424,7 @@ namespace dmge
 			openCartridge_();
 		}
 
-		// APUの各チャンネルをミュート
+		// APUの各チャンネルをミュート (Key 1-4)
 
 		if (Key1.down())
 		{
@@ -437,19 +446,19 @@ namespace dmge
 			toggleAudioChannelMute_(3);
 		}
 
-		// APUの使用を切替
+		// APUの使用を切替 (Key 5)
 		if (Key5.down())
 		{
 			toggleAudio_();
 		}
 
-		// Toggle LPF
+		// Toggle LPF (Key 6)
 		if (Key6.down())
 		{
 			toggleAudioLPF_();
 		}
 
-		// メニューを開く
+		// メニューを開く (ESC or 右クリック)
 		if (KeyEscape.up() || MouseR.up())
 		{
 			menuOverlay_.show();
@@ -693,6 +702,17 @@ namespace dmge
 		rootMenu_.items.push_back({
 			.textFunc = [&]() {
 				return GUI::MenuItemText{
+					.label = U"Controller settings...",
+				};
+			},
+			.handler = [&]() {
+				menuOverlay_.set(inputMenu_);
+			},
+		});
+
+		rootMenu_.items.push_back({
+			.textFunc = [&]() {
+				return GUI::MenuItemText{
 					.label = U"Audio",
 					.state = enableAPU_ ? U"On" : U"Off",
 					.shortcut = U"5",
@@ -806,6 +826,8 @@ namespace dmge
 			.text = GUI::MenuItemText{.label = U"--------" },
 		};
 
+		const auto menuItemEmpty = GUI::MenuItem{};
+
 		rootMenu_.items.push_back(menuItemBorder);
 		rootMenu_.items.push_back(menuItemBorder);
 		rootMenu_.items.push_back(menuItemBorder);
@@ -819,6 +841,232 @@ namespace dmge
 			.text = GUI::MenuItemText{.label = U"Back" },
 			.handler = [&]() {
 				menuOverlay_.hide();
+			}
+		});
+
+
+		// Input settings
+
+		inputMenu_.items.push_back({
+			.text = GUI::MenuItemText{.label = U"---- Keyboard Mapping ----"},
+		});
+
+		inputMenu_.items.push_back({
+			.textFunc = [&]() {
+				return GUI::MenuItemText{
+					.label = U"Right",
+					.state = keyMap_->get(JoypadButtons::Right).name()
+				};
+			},
+			.handler = [&]() {
+				const auto input = InputMappingOverlay::Get(InputDeviceType::Keyboard, JoypadButtons::Right);
+				if (input.code())
+				{
+					keyMap_->set(JoypadButtons::Right, input);
+					applyInputMapping_();
+				}
+			}
+		});
+
+		inputMenu_.items.push_back({
+			.textFunc = [&]() {
+				return GUI::MenuItemText{
+					.label = U"Left",
+					.state = keyMap_->get(JoypadButtons::Left).name()
+				};
+			},
+			.handler = [&]() {
+				const auto input = InputMappingOverlay::Get(InputDeviceType::Keyboard, JoypadButtons::Left);
+				if (input.code())
+				{
+					keyMap_->set(JoypadButtons::Left, input);
+					applyInputMapping_();
+				}
+			}
+		});
+
+		inputMenu_.items.push_back({
+			.textFunc = [&]() {
+				return GUI::MenuItemText{
+					.label = U"Up",
+					.state = keyMap_->get(JoypadButtons::Up).name()
+				};
+			},
+			.handler = [&]() {
+				const auto input = InputMappingOverlay::Get(InputDeviceType::Keyboard, JoypadButtons::Up);
+				if (input.code())
+				{
+					keyMap_->set(JoypadButtons::Up, input);
+					applyInputMapping_();
+				}
+			}
+		});
+
+		inputMenu_.items.push_back({
+			.textFunc = [&]() {
+				return GUI::MenuItemText{
+					.label = U"Down",
+					.state = keyMap_->get(JoypadButtons::Down).name()
+				};
+			},
+			.handler = [&]() {
+				const auto input = InputMappingOverlay::Get(InputDeviceType::Keyboard, JoypadButtons::Down);
+				if (input.code())
+				{
+					keyMap_->set(JoypadButtons::Down, input);
+					applyInputMapping_();
+				}
+			}
+		});
+
+		inputMenu_.items.push_back({
+			.textFunc = [&]() {
+				return GUI::MenuItemText{
+					.label = U"A",
+					.state = keyMap_->get(JoypadButtons::A).name()
+				};
+			},
+			.handler = [&]() {
+				const auto input = InputMappingOverlay::Get(InputDeviceType::Keyboard, JoypadButtons::A);
+				if (input.code())
+				{
+					keyMap_->set(JoypadButtons::A, input);
+					applyInputMapping_();
+				}
+			}
+		});
+
+		inputMenu_.items.push_back({
+			.textFunc = [&]() {
+				return GUI::MenuItemText{
+					.label = U"B",
+					.state = keyMap_->get(JoypadButtons::B).name()
+				};
+			},
+			.handler = [&]() {
+				const auto input = InputMappingOverlay::Get(InputDeviceType::Keyboard, JoypadButtons::B);
+				if (input.code())
+				{
+					keyMap_->set(JoypadButtons::B, input);
+					applyInputMapping_();
+				}
+			}
+		});
+
+		inputMenu_.items.push_back({
+			.textFunc = [&]() {
+				return GUI::MenuItemText{
+					.label = U"Select",
+					.state = keyMap_->get(JoypadButtons::Select).name()
+				};
+			},
+			.handler = [&]() {
+				const auto input = InputMappingOverlay::Get(InputDeviceType::Keyboard, JoypadButtons::Select);
+				if (input.code())
+				{
+					keyMap_->set(JoypadButtons::Select, input);
+					applyInputMapping_();
+				}
+			}
+		});
+
+		inputMenu_.items.push_back({
+			.textFunc = [&]() {
+				return GUI::MenuItemText{
+					.label = U"Start",
+					.state = keyMap_->get(JoypadButtons::Start).name()
+				};
+			},
+			.handler = [&]() {
+				const auto input = InputMappingOverlay::Get(InputDeviceType::Keyboard, JoypadButtons::Start);
+				if (input.code())
+				{
+					keyMap_->set(JoypadButtons::Start, input);
+					applyInputMapping_();
+				}
+			}
+		});
+
+		inputMenu_.items.push_back(menuItemEmpty);
+
+		inputMenu_.items.push_back({
+			.text = GUI::MenuItemText{.label = U"---- Gamepad Mapping ----"},
+		});
+
+		inputMenu_.items.push_back({
+			.textFunc = [&]() {
+				return GUI::MenuItemText{
+					.label = U"A",
+					.state = Format(U"Button "_sv, gamepadMap_->get(JoypadButtons::A).code()),
+				};
+			},
+			.handler = [&]() {
+				const auto input = InputMappingOverlay::Get(InputDeviceType::Gamepad, JoypadButtons::A);
+				if (input.deviceType() == InputDeviceType::Gamepad)
+				{
+					gamepadMap_->set(JoypadButtons::A, input);
+					applyInputMapping_();
+				}
+			}
+		});
+
+		inputMenu_.items.push_back({
+			.textFunc = [&]() {
+				return GUI::MenuItemText{
+					.label = U"B",
+					.state = Format(U"Button "_sv, gamepadMap_->get(JoypadButtons::B).code()),
+				};
+			},
+			.handler = [&]() {
+				const auto input = InputMappingOverlay::Get(InputDeviceType::Gamepad, JoypadButtons::B);
+				if (input.deviceType() == InputDeviceType::Gamepad)
+				{
+					gamepadMap_->set(JoypadButtons::B, input);
+					applyInputMapping_();
+				}
+			}
+		});
+
+		inputMenu_.items.push_back({
+			.textFunc = [&]() {
+				return GUI::MenuItemText{
+					.label = U"Select",
+					.state = Format(U"Button "_sv, gamepadMap_->get(JoypadButtons::Select).code()),
+				};
+			},
+			.handler = [&]() {
+				const auto input = InputMappingOverlay::Get(InputDeviceType::Gamepad, JoypadButtons::Select);
+				if (input.deviceType() == InputDeviceType::Gamepad)
+				{
+					gamepadMap_->set(JoypadButtons::Select, input);
+					applyInputMapping_();
+				}
+			}
+		});
+
+		inputMenu_.items.push_back({
+			.textFunc = [&]() {
+				return GUI::MenuItemText{
+					.label = U"Start",
+					.state = Format(U"Button "_sv, gamepadMap_->get(JoypadButtons::Start).code()),
+				};
+			},
+			.handler = [&]() {
+				const auto input = InputMappingOverlay::Get(InputDeviceType::Gamepad, JoypadButtons::Start);
+				if (input.deviceType() == InputDeviceType::Gamepad)
+				{
+					gamepadMap_->set(JoypadButtons::Start, input);
+					applyInputMapping_();
+				}
+			}
+		});
+
+		inputMenu_.items.push_back(menuItemEmpty);
+
+		inputMenu_.items.push_back({
+			.text = GUI::MenuItemText{.label = U"Back" },
+			.handler = [&]() {
+				menuOverlay_.backToPrevious();
 			}
 		});
 
@@ -892,5 +1140,13 @@ namespace dmge
 	{
 		config_.palettePreset = (config_.palettePreset + Colors::PalettePresetsCount + changeIndex) % Colors::PalettePresetsCount;
 		setPPUPalette_(config_.palettePreset);
+	}
+
+	void DmgeApp::applyInputMapping_()
+	{
+		joypad_->setMapping(*keyMap_, *gamepadMap_);
+
+		config_.keyMapping = keyMap_->get();
+		config_.gamepadMapping = gamepadMap_->get();
 	}
 }

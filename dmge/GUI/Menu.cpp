@@ -49,7 +49,16 @@ namespace dmge
 
 		void MenuOverlay::set(Menu& menu)
 		{
-			menu_ = menu;
+			menu_.push_back(menu);
+			selectedIndex_ = 0;
+			scrollToIndex_(0);
+		}
+
+		void MenuOverlay::backToPrevious()
+		{
+			menu_.pop_back();
+			selectedIndex_ = 0;
+			scrollToIndex_(0);
 		}
 
 		void MenuOverlay::show()
@@ -80,7 +89,7 @@ namespace dmge
 		void MenuOverlay::update()
 		{
 			if (not visible_) return;
-			if (menu_.items.isEmpty()) return;
+			if (currentMenu_().items.isEmpty()) return;
 
 			// マウスを動かすと、マウスによる選択が可能になる（キー操作すると、無効になる）
 			if (Cursor::Delta().length() > 0)
@@ -92,7 +101,7 @@ namespace dmge
 
 			if (KeyDown.down())
 			{
-				selectedIndex_ = (selectedIndex_ + 1) % menu_.items.size();
+				selectedIndex_ = (selectedIndex_ + 1) % currentMenu_().items.size();
 				scrollToIndex_(selectedIndex_);
 				enableMouseSelection_ = false;
 				return;
@@ -100,7 +109,7 @@ namespace dmge
 
 			if (KeyUp.down())
 			{
-				selectedIndex_ = (selectedIndex_ + menu_.items.size() - 1) % menu_.items.size();
+				selectedIndex_ = (selectedIndex_ + currentMenu_().items.size() - 1) % currentMenu_().items.size();
 				scrollToIndex_(selectedIndex_);
 				enableMouseSelection_ = false;
 				return;
@@ -110,18 +119,18 @@ namespace dmge
 
 			if (KeyLeft.down() || KeyRight.down())
 			{
-				if (menu_.items[selectedIndex_].handlerLR)
+				if (currentMenu_().items[selectedIndex_].handlerLR)
 				{
 					// handlerLR が設定されていたら実行
-					menu_.items[selectedIndex_].handlerLR(KeyLeft.pressed());
+					currentMenu_().items[selectedIndex_].handlerLR(KeyLeft.pressed());
 					return;
 				}
-				else if (menu_.items[selectedIndex_].enableLR)
+				else if (currentMenu_().items[selectedIndex_].enableLR)
 				{
 					// enableLR が設定されていたら、handler を代わりに実行
-					if (menu_.items[selectedIndex_].handler)
+					if (currentMenu_().items[selectedIndex_].handler)
 					{
-						menu_.items[selectedIndex_].handler();
+						currentMenu_().items[selectedIndex_].handler();
 					}
 					return;
 				}
@@ -131,18 +140,25 @@ namespace dmge
 
 			if (KeyEnter.up())
 			{
-				if (menu_.items[selectedIndex_].handler)
+				if (currentMenu_().items[selectedIndex_].handler)
 				{
-					menu_.items[selectedIndex_].handler();
+					currentMenu_().items[selectedIndex_].handler();
 				}
 				return;
 			}
 
-			// Escキー/マウス右クリック: メニューを閉じる
+			// Escキー/マウス右クリック: 前のメニューへ／メニューを閉じる
 
 			if (KeyEscape.up() || MouseR.up())
 			{
-				hide();
+				if (menu_.size() > 1)
+				{
+					backToPrevious();
+				}
+				else
+				{
+					hide();
+				}
 				return;
 			}
 
@@ -162,15 +178,16 @@ namespace dmge
 				// マウスクリック位置にスクロールを適用したいので座標変換をする
 				const Transformer2D transformer = getScrollingAreaTransform_();
 
-				for (auto [index, item] : Indexed(menu_.items))
+				for (auto [index, item] : Indexed(currentMenu_().items))
 				{
 					const Rect itemRegion{ 0, index * RowHeight, scrollingArea.w, RowHeight };
 
 					if (itemRegion.leftClicked())
 					{
-						if (menu_.items[selectedIndex_].handler)
+						if (currentMenu_().items[selectedIndex_].handler)
 						{
-							menu_.items[selectedIndex_].handler();
+							// handler() には座標変換を適用したくない
+							goto callSelectedItemHandler;
 						}
 						return;
 					}
@@ -181,12 +198,17 @@ namespace dmge
 					}
 				}
 			}
+
+			return;
+
+		callSelectedItemHandler:
+			currentMenu_().items[selectedIndex_].handler();
 		}
 
 		void MenuOverlay::draw() const
 		{
 			if (not visible_) return;
-			if (menu_.items.isEmpty()) return;
+			if (currentMenu_().items.isEmpty()) return;
 
 			const auto scrollingArea = scrollingAreaRect_();
 
@@ -206,7 +228,7 @@ namespace dmge
 				{
 					const Transformer2D transformer = getScrollingAreaTransform_();
 
-					for (auto [index, item] : Indexed(menu_.items))
+					for (auto [index, item] : Indexed(currentMenu_().items))
 					{
 						const bool selected = index == selectedIndex_;
 
@@ -254,11 +276,21 @@ namespace dmge
 					FontAsset(U"menu")(U"▲").drawAt(scrollingArea.w - 8, RowHeight / 2, AlphaF(0.8 + 0.1 * Periodic::Square0_1(0.5s)));
 				}
 
-				if (verticalScroll_ < menu_.getTotalHeight() - scrollingArea.h)
+				if (verticalScroll_ < currentMenu_().getTotalHeight() - scrollingArea.h)
 				{
 					FontAsset(U"menu")(U"▼").drawAt(scrollingArea.w - 8, scrollingArea.h - RowHeight / 2, AlphaF(0.8 + 0.1 * Periodic::Square0_1(0.5s)));
 				}
 			}
+		}
+
+		Menu& MenuOverlay::currentMenu_()
+		{
+			return menu_.back();
+		}
+
+		const Menu& MenuOverlay::currentMenu_() const
+		{
+			return menu_.back();
 		}
 
 		Rect MenuOverlay::scrollingAreaRect_() const
@@ -271,7 +303,7 @@ namespace dmge
 			verticalScroll_ = Clamp<int>(
 				verticalScroll_ + scrollAmount,
 				0,
-				menu_.getTotalHeight() - scrollingAreaRect_().h);
+				currentMenu_().getTotalHeight() - scrollingAreaRect_().h);
 		}
 
 		void MenuOverlay::scrollToIndex_(int index)
@@ -281,13 +313,13 @@ namespace dmge
 			verticalScroll_ = Clamp<int>(
 				index * RowHeight + RowHeight / 2 - scrollingArea.h / 2,
 				0,
-				menu_.getTotalHeight() - scrollingArea.h);
+				currentMenu_().getTotalHeight() - scrollingArea.h);
 		}
 
 		Transformer2D MenuOverlay::getScrollingAreaTransform_() const
 		{
 			const auto scrollingArea = scrollingAreaRect_();
-			const auto MenuHeight = menu_.getTotalHeight();
+			const auto MenuHeight = currentMenu_().getTotalHeight();
 			const bool scrollNeeded = scrollingArea.h < MenuHeight;
 			const double cameraTranslateY = scrollNeeded ? -verticalScroll_ : (scrollingArea.h - MenuHeight) / 2;
 			const auto cameraTransform = Mat3x2::Translate(Float2{ 0, cameraTranslateY });

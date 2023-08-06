@@ -30,6 +30,7 @@ namespace dmge
 	class Joypad;
 	class Serial;
 	class DebugMonitor;
+	class InputMapping;
 
 	// アプリケーション
 	class DmgeApp
@@ -98,6 +99,9 @@ namespace dmge
 
 		void changePalettePreset_(int changeIndex);
 
+		// キー／ボタンのマッピングが変更されたので Joypad と config に変更を適用する
+		void applyInputMapping_();
+
 		AppConfig& config_;
 
 		std::unique_ptr<Memory> mem_;
@@ -110,8 +114,11 @@ namespace dmge
 		std::unique_ptr<Joypad> joypad_;
 		std::unique_ptr<Serial> serial_;
 		std::unique_ptr<DebugMonitor> debugMonitor_;
+		std::unique_ptr<InputMapping> keyMap_;
+		std::unique_ptr<InputMapping> gamepadMap_;
 
 		GUI::Menu rootMenu_;
+		GUI::Menu inputMenu_;
 		GUI::MenuOverlay menuOverlay_{ config_ };
 
 		// アプリケーションの状態

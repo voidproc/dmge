@@ -135,4 +135,7 @@ void Main()
 		// 違うファイルが選択されているかもしれないので読み込む
 		cartridgePath = app->currentCartridgePath();
 	}
+
+	config.save();
+
 }

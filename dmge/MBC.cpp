@@ -209,6 +209,11 @@ namespace dmge
 		boot_.clear();
 	}
 
+	const CartridgeHeader& MBC::cartridgeHeader() const
+	{
+		return cartridgeHeader_;
+	}
+
 	// ------------------------------------------------
 	// No MBC
 	// ------------------------------------------------

@@ -743,6 +743,11 @@ namespace dmge
 		return vramBank_;
 	}
 
+	const CartridgeHeader& Memory::cartridgeHeader() const
+	{
+		return mbc_->cartridgeHeader();
+	}
+
 	void Memory::dumpCartridgeInfo()
 	{
 		mbc_->dumpCartridgeInfo();

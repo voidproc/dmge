@@ -41,6 +41,8 @@ namespace dmge
 
 		void disableBootROM();
 
+		const CartridgeHeader& cartridgeHeader() const;
+
 	private:
 		virtual void loadSRAM_(FilePathView saveFilePath);
 		virtual void saveSRAM_(FilePathView saveFilePath);

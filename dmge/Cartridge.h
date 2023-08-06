@@ -61,6 +61,8 @@ namespace dmge
 		// Cartridge type (0x0147)
 		CartridgeType type{};
 
+		String typeText{};
+
 		// ROM size (0x0148)
 		int romSizeKB{};
 

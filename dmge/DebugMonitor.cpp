@@ -4,6 +4,7 @@
 #include "Audio/APU.h"
 #include "Address.h"
 #include "Interrupt.h"
+#include "Cartridge.h"
 
 namespace dmge
 {
@@ -198,6 +199,7 @@ namespace dmge
 
 				d.drawSection(U"Cartridge");
 				d.drawText(U"{} mode"_fmt(mem_->isCGBMode() ? U"CGB"_sv : mem_->isSGBMode() ? U"SGB"_sv : U"DMG"_sv));
+				d.drawLabelAndValue(U"Mapper", U"{}"_fmt(mem_->cartridgeHeader().typeText.substrView(0, 16)));
 				d.drawLabelAndValue(U"ROM Bank", U"{:X}"_fmt(mem_->romBank()));
 				d.drawLabelAndValue(U"RAM Bank", U"{:X}"_fmt(mem_->ramBank()));
 				d.drawEmptyLine();
@@ -229,7 +231,7 @@ namespace dmge
 
 				// スペース
 
-				d.drawEmptyLine();
+				//d.drawEmptyLine();
 
 				// Memory dump
 

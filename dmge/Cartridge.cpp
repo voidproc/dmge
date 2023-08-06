@@ -25,7 +25,9 @@ namespace dmge
 		sgbFlag = ToEnum<SGBFlag>(header[Address::SGBFlag]);
 
 		// Type
+
 		type = ToEnum<CartridgeType>(header[Address::CartridgeType]);
+		typeText = Unicode::WidenAscii(magic_enum::enum_name(type));
 
 		// ROM size
 
@@ -58,8 +60,7 @@ namespace dmge
 		const auto sgbFlagStr = magic_enum::enum_name(sgbFlag);
 		DebugPrint::Writeln(U"SGBFlag={}"_fmt(Unicode::WidenAscii(sgbFlagStr)));
 
-		const auto typeStr = magic_enum::enum_name(type);
-		DebugPrint::Writeln(U"Type={}"_fmt(Unicode::WidenAscii(typeStr)));
+		DebugPrint::Writeln(U"Type={}"_fmt(typeText));
 
 		DebugPrint::Writeln(U"RomSize={}KB"_fmt(romSizeKB));
 		DebugPrint::Writeln(U"RamSize={}KB"_fmt(ramSizeKB));

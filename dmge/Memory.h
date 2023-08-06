@@ -66,6 +66,8 @@ namespace dmge
 
 		int vramBank() const;
 
+		const CartridgeHeader& cartridgeHeader() const;
+
 		void dumpCartridgeInfo();
 
 		void dump(uint16 addrBegin, uint16 addrEnd);

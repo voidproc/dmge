@@ -40,7 +40,7 @@ C++ / OpenSiv3D でゲームボーイのエミュレータを作っています�
 
 ## ダウンロード
 
-- [Releases - v1.3.0](https://github.com/voidproc/dmge/releases/download/v1.3.0/dmge_v1.3.0.zip)
+- [Releases - v1.3.0](https://github.com/voidproc/dmge/releases/download/v1.4.0/dmge_v1.4.0.zip)
 
 
 ## 使用方法

@@ -45,7 +45,7 @@ namespace dmge
 		int scale = 3;
 
 		// FPSを表示する
-		bool showFPS = true;
+		bool showFPS = false;
 
 		// (DMG/SGB) パレット番号
 		int palettePreset = 0;
@@ -64,7 +64,7 @@ namespace dmge
 		// --------------------------------
 
 		// デバッグモニタを表示する
-		bool showDebugMonitor = true;
+		bool showDebugMonitor = false;
 
 
 		// --------------------------------

@@ -29,7 +29,7 @@ namespace dmge
 		// Display
 
 		config.scale = ini.getOr<int>(U"Scale", 3);
-		config.showFPS = ini.getOr<int>(U"ShowFPS", true);
+		config.showFPS = ini.getOr<int>(U"ShowFPS", false);
 		config.palettePreset = ini.getOr<int>(U"PalettePreset", 0);
 		config.paletteColors[0] = ColorF{ U"#" + ini.getOr<String>(U"PaletteColor0", U"e8e8e8") };
 		config.paletteColors[1] = ColorF{ U"#" + ini.getOr<String>(U"PaletteColor1", U"a0a0a0") };
@@ -39,7 +39,7 @@ namespace dmge
 
 		// DebugMonitor
 
-		config.showDebugMonitor = ini.getOr<int>(U"ShowDebugMonitor", true);
+		config.showDebugMonitor = ini.getOr<int>(U"ShowDebugMonitor", false);
 
 		// Input
 

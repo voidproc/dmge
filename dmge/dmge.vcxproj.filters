@@ -183,6 +183,9 @@
     <ClCompile Include="InputMappingOverlay.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="TextboxOverlay.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Image Include="App\icon.ico">
@@ -593,6 +596,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="InputMappingArray.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TextboxOverlay.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

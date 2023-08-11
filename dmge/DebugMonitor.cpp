@@ -128,7 +128,6 @@ namespace dmge
 	DebugMonitor::DebugMonitor(Memory* mem, CPU* cpu, APU* apu, Interrupt* interrupt)
 		: mem_{ mem }, cpu_{ cpu }, apu_{ apu }, interrupt_{ interrupt }, tileDataTexture_{ *mem }, tileDataTextureCGB_{ *mem, 1 }
 	{
-		textStateDumpAddress_.text = U"0000";
 	}
 
 	DebugMonitor::~DebugMonitor()
@@ -137,29 +136,33 @@ namespace dmge
 
 	void DebugMonitor::update()
 	{
+		const bool showDumpAddressTextbox = textbox_.isVisible();
+
 		// テキストボックス表示 (Ctrl+M)
-		if (KeyM.up() && KeyControl.pressed())
+		if (not showDumpAddressTextbox && (KeyM.down() && KeyControl.pressed()))
 		{
-			showDumpAddressTextbox_ = true;
-			textStateDumpAddress_.active = true;
+			textbox_.show(true);
 		}
 
-		if (showDumpAddressTextbox_)
+		if (showDumpAddressTextbox)
 		{
-			// テキストボックス消去 (Enter or Ctrl+M)
-			if (KeyEnter.up() || (KeyM.up() && KeyControl.pressed()))
+			// テキストボックス消去 (Enter or ESC or Ctrl+M)
+			if (KeyEnter.down() || KeyEscape.down() || (KeyM.down() && KeyControl.pressed()))
 			{
-				showDumpAddressTextbox_ = false;
-				textStateDumpAddress_.active = true;
+				if (TextInput::GetEditingText().isEmpty())
+				{
+					textbox_.show(false);
+					timerTextboxHidden_.restart();
+				}
 			}
 
-			if (textStateDumpAddress_.textChanged)
+			// テキスト入力を処理
+			textbox_.update();
+
+			if (const auto addr = ParseIntOpt<uint16>(textbox_.text(), 16);
+				addr)
 			{
-				if (const auto addr = ParseIntOpt<uint16>(textStateDumpAddress_.text, 16);
-					addr)
-				{
-					dumpAddress_ = Min<uint16>(*addr, 0xffc0);
-				}
+				dumpAddress_ = Min<uint16>(*addr, 0xffc0);
 			}
 		}
 
@@ -177,14 +180,6 @@ namespace dmge
 
 				mem_->resetVRAMTileDataModified();
 			}
-		}
-	}
-
-	void DebugMonitor::updateGUI()
-	{
-		if (showDumpAddressTextbox_)
-		{
-			SimpleGUI::TextBoxAt(textStateDumpAddress_, Scene::Rect().bottomCenter().movedBy(0, -48));
 		}
 	}
 
@@ -303,10 +298,13 @@ namespace dmge
 				}
 			}
 		}
+
+		// テキストボックス
+		textbox_.drawAt(Scene::CenterF());
 	}
 
 	bool DebugMonitor::isVisibleTextbox() const
 	{
-		return showDumpAddressTextbox_;
+		return textbox_.isVisible() || (timerTextboxHidden_.isRunning() && timerTextboxHidden_.sF() < 0.1);
 	}
 }

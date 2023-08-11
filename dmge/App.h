@@ -102,6 +102,9 @@ namespace dmge
 		// キー／ボタンのマッピングが変更されたので Joypad と config に変更を適用する
 		void applyInputMapping_();
 
+		// デバッグモニタを表示中かつテキストボックスへの入力中か？
+		bool processingDebugMonitorTextInput_() const;
+
 		AppConfig& config_;
 
 		std::unique_ptr<Memory> mem_;

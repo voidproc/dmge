@@ -13,9 +13,11 @@ namespace
 		const auto preloadText = U"0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ=-~^|@`[{;+:*]},<.>/?_";
 
 		FontAsset::Register(U"debug", 10, Resource(U"fonts/JF-Dot-MPlus10.ttf"), FontStyle::Bitmap);
+		FontAsset::Register(U"textbox", 12, Resource(U"fonts/JF-Dot-MPlus12.ttf"), FontStyle::Bitmap);
 		FontAsset::Register(U"menu", 12, Resource(U"fonts/JF-Dot-MPlus12.ttf"), FontStyle::Bitmap);
 
 		FontAsset::Load(U"debug", preloadText);
+		FontAsset::Load(U"textbox", preloadText);
 		FontAsset::Load(U"menu", preloadText);
 	}
 

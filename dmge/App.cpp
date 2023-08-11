@@ -281,12 +281,17 @@ namespace dmge
 					return;
 				}
 
-				commonInput_();
-
-				// トレースモードに移行 (Ctrl+P)
-				if (KeyP.down() && KeyControl.pressed())
+				// キーボード入力処理
+				// ※デバッグモニタでテキスト入力中はキーボード入力を受け付けない
+				if (not processingDebugMonitorTextInput_())
 				{
-					pause_();
+					commonInput_();
+
+					// トレースモードに移行 (Ctrl+P)
+					if (KeyP.down() && KeyControl.pressed())
+					{
+						pause_();
+					}
 				}
 
 				// PPUのレンダリング結果を画面表示
@@ -306,7 +311,7 @@ namespace dmge
 				}
 
 				// デバッグモニタのテキストボックス入力中はJOYPADを更新しない
-				joypad_->setEnable(not (config_.showDebugMonitor && debugMonitor_->isVisibleTextbox()));
+				joypad_->setEnable(not processingDebugMonitorTextInput_());
 
 				if (config_.showFPS)
 				{
@@ -333,25 +338,30 @@ namespace dmge
 			// メニューの表示状態
 			const bool visibleMenu = menuOverlay_.isVisible();
 
-			commonInput_();
-
-			// メニューを表示したタイミングでループから抜けてメニューループへ移る
-			if (not visibleMenu && menuOverlay_.isVisible())
+			// キーボード入力処理
+			// ※デバッグモニタでテキスト入力中はキーボード入力を受け付けない
+			if (not processingDebugMonitorTextInput_())
 			{
-				break;
-			}
+				commonInput_();
 
-			// ステップ実行 (F7)
-			if (KeyF7.down())
-			{
-				break;
-			}
+				// メニューを表示したタイミングでループから抜けてメニューループへ移る
+				if (not visibleMenu && menuOverlay_.isVisible())
+				{
+					break;
+				}
 
-			// トレースモード終了 (Ctrl+P or F5)
-			if ((KeyP.down() && KeyControl.pressed()) || KeyF5.down())
-			{
-				resume_();
-				break;
+				// ステップ実行 (F7)
+				if (KeyF7.down())
+				{
+					break;
+				}
+
+				// トレースモード終了 (Ctrl+P or F5)
+				if ((KeyP.down() && KeyControl.pressed()) || KeyF5.down())
+				{
+					resume_();
+					break;
+				}
 			}
 
 			ppu_->draw(Point{ 0, 0 }, config_.scale);
@@ -612,7 +622,7 @@ namespace dmge
 
 		debugMonitor_->draw(Point{ 160 * config_.scale, 0 });
 
-		debugMonitor_->updateGUI();
+		//debugMonitor_->updateGUI();
 	}
 
 	void DmgeApp::initMenu_()
@@ -1148,5 +1158,10 @@ namespace dmge
 
 		config_.keyMapping = keyMap_->get();
 		config_.gamepadMapping = gamepadMap_->get();
+	}
+
+	bool DmgeApp::processingDebugMonitorTextInput_() const
+	{
+		return config_.showDebugMonitor && debugMonitor_->isVisibleTextbox();
 	}
 }

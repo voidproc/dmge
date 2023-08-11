@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "TileData.h"
+#include "TextboxOverlay.h"
 
 namespace dmge
 {
@@ -24,7 +25,7 @@ namespace dmge
 
 		void update();
 
-		void updateGUI();
+		//void updateGUI();
 
 		void draw(const Point& pos) const;
 
@@ -38,9 +39,9 @@ namespace dmge
 
 		// メモリダンプ用
 
+		GUI::TextboxOverlay textbox_{ U"0000", U"Address:" };
 		uint16 dumpAddress_ = 0x0000;
-		bool showDumpAddressTextbox_ = false;
-		TextEditState textStateDumpAddress_;
+		Stopwatch timerTextboxHidden_{};
 
 		// タイルデータ表示用
 

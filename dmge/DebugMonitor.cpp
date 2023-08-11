@@ -137,7 +137,8 @@ namespace dmge
 
 	void DebugMonitor::update()
 	{
-		if (KeyM.up() + KeyControl.pressed())
+		// テキストボックス表示 (Ctrl+M)
+		if (KeyM.up() && KeyControl.pressed())
 		{
 			showDumpAddressTextbox_ = true;
 			textStateDumpAddress_.active = true;
@@ -145,9 +146,10 @@ namespace dmge
 
 		if (showDumpAddressTextbox_)
 		{
-			if (KeyEscape.down() || KeyEnter.down())
+			if (KeyEnter.up())
 			{
 				showDumpAddressTextbox_ = false;
+				textStateDumpAddress_.active = true;
 			}
 
 			if (textStateDumpAddress_.textChanged)

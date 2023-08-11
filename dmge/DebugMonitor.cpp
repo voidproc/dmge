@@ -146,7 +146,8 @@ namespace dmge
 
 		if (showDumpAddressTextbox_)
 		{
-			if (KeyEnter.up())
+			// テキストボックス消去 (Enter or Ctrl+M)
+			if (KeyEnter.up() || (KeyM.up() && KeyControl.pressed()))
 			{
 				showDumpAddressTextbox_ = false;
 				textStateDumpAddress_.active = true;

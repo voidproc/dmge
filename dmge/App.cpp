@@ -621,8 +621,6 @@ namespace dmge
 		debugMonitor_->update();
 
 		debugMonitor_->draw(Point{ 160 * config_.scale, 0 });
-
-		//debugMonitor_->updateGUI();
 	}
 
 	void DmgeApp::initMenu_()

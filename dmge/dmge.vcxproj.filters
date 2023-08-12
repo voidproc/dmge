@@ -70,6 +70,12 @@
     <Filter Include="Source Files\SGB">
       <UniqueIdentifier>{ce5f0794-a74b-48ec-9de8-21c1bf1a09d4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\GUI">
+      <UniqueIdentifier>{0baca655-99c8-4925-b7db-e889300e5c0b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\GUI">
+      <UniqueIdentifier>{78b2d9f5-d7cc-4112-ba4a-2e5877bbfca6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -174,17 +180,17 @@
     <ClCompile Include="AppWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GUI\Menu.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="InputMapping.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="InputMappingOverlay.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TextboxOverlay.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="GUI\Menu.cpp">
+      <Filter>Source Files\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="GUI\TextboxOverlay.cpp">
+      <Filter>Source Files\GUI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -580,9 +586,6 @@
     <ClInclude Include="AppWindow.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GUI\Menu.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Test.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -598,8 +601,11 @@
     <ClInclude Include="InputMappingArray.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="TextboxOverlay.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="GUI\Menu.h">
+      <Filter>Header Files\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="GUI\TextboxOverlay.h">
+      <Filter>Header Files\GUI</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

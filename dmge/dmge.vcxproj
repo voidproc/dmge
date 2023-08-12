@@ -139,6 +139,7 @@
     <ClCompile Include="DebugMonitor.cpp" />
     <ClCompile Include="DMA.cpp" />
     <ClCompile Include="GUI\Menu.cpp" />
+    <ClCompile Include="GUI\TextboxOverlay.cpp" />
     <ClCompile Include="InputMappingOverlay.cpp" />
     <ClCompile Include="Interrupt.cpp" />
     <ClCompile Include="Joypad.cpp" />
@@ -155,7 +156,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="TextboxOverlay.cpp" />
     <ClCompile Include="TileData.cpp" />
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="DebugPrint.cpp" />
@@ -280,6 +280,7 @@
     <ClInclude Include="DebugPrint.h" />
     <ClInclude Include="DMA.h" />
     <ClInclude Include="GUI\Menu.h" />
+    <ClInclude Include="GUI\TextboxOverlay.h" />
     <ClInclude Include="InputMappingArray.h" />
     <ClInclude Include="InputMappingOverlay.h" />
     <ClInclude Include="Interrupt.h" />
@@ -301,7 +302,6 @@
     <ClInclude Include="SGB\Mask.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Test.h" />
-    <ClInclude Include="TextboxOverlay.h" />
     <ClInclude Include="TileData.h" />
     <ClInclude Include="TileMapAttribute.h" />
     <ClInclude Include="Timer.h" />

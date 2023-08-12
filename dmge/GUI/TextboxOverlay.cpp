@@ -1,5 +1,4 @@
-﻿#include "stdafx.h"
-#include "TextboxOverlay.h"
+﻿#include "TextboxOverlay.h"
 
 namespace dmge
 {

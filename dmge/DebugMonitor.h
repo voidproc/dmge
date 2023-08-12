@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "TileData.h"
-#include "TextboxOverlay.h"
+#include "GUI/TextboxOverlay.h"
 
 namespace dmge
 {

@@ -4,6 +4,7 @@ namespace dmge
 {
 	namespace GUI
 	{
+		// 最前面に表示されるテキストボックス
 		class TextboxOverlay
 		{
 		public:

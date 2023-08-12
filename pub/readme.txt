@@ -16,7 +16,7 @@ C++ / OpenSiv3D でゲームボーイのエミュレータを作っています�
 
 - Windows 11
 - Visual Studio 2022
-- [OpenSiv3D](https://github.com/Siv3D/OpenSiv3D) v0.6.10
+- [OpenSiv3D](https://github.com/Siv3D/OpenSiv3D) v0.6.11
 
 
 ## 使用方法

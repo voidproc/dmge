@@ -35,12 +35,12 @@ C++ / OpenSiv3D でゲームボーイのエミュレータを作っています�
 
 - Windows 11
 - Visual Studio 2022
-- [OpenSiv3D](https://github.com/Siv3D/OpenSiv3D) v0.6.10
+- [OpenSiv3D](https://github.com/Siv3D/OpenSiv3D) v0.6.11
 
 
 ## ダウンロード
 
-- [Releases - v1.4.0](https://github.com/voidproc/dmge/releases/download/v1.4.0/dmge_v1.4.0.zip)
+- [Releases - v1.4.1](https://github.com/voidproc/dmge/releases/download/v1.4.1/dmge_v1.4.1.zip)
 
 
 ## 使用方法

@@ -669,9 +669,6 @@ namespace dmge
 					.state = U"{} ({}x{})"_fmt(config_.scale, 160 * config_.scale, 144 * config_.scale),
 				};
 			},
-			.handler = [&]() {
-				config_.scale = Max(1, (config_.scale + 1) % (AppConfig::ScalingMax + 1));
-			},
 			.handlerLR = [&](bool leftPressed) {
 				if (leftPressed)
 				{
@@ -690,9 +687,6 @@ namespace dmge
 					.label = U"Palette (for DMG/SGB)",
 					.state = U"{}/{}"_fmt(config_.palettePreset + 1, Colors::PalettePresetsCount)
 				};
-			},
-			.handler = [&]() {
-				changePalettePreset_(1);
 			},
 			.handlerLR = [&](bool leftPressed) {
 				if (leftPressed)
@@ -729,7 +723,7 @@ namespace dmge
 			.handler = [&]() {
 				toggleAudio_();
 			},
-			.enableLR = true
+			.allowLR = true
 		});
 
 		rootMenu_.items.push_back({
@@ -743,7 +737,7 @@ namespace dmge
 			.handler = [&]() {
 				toggleAudioChannelMute_(0);
 			},
-			.enableLR = true
+			.allowLR = true
 		});
 
 		rootMenu_.items.push_back({
@@ -757,7 +751,7 @@ namespace dmge
 			.handler = [&]() {
 				toggleAudioChannelMute_(1);
 			},
-			.enableLR = true
+			.allowLR = true
 		});
 
 		rootMenu_.items.push_back({
@@ -771,7 +765,7 @@ namespace dmge
 			.handler = [&]() {
 				toggleAudioChannelMute_(2);
 			},
-			.enableLR = true
+			.allowLR = true
 		});
 
 		rootMenu_.items.push_back({
@@ -785,7 +779,7 @@ namespace dmge
 			.handler = [&]() {
 				toggleAudioChannelMute_(3);
 			},
-			.enableLR = true
+			.allowLR = true
 		});
 
 		rootMenu_.items.push_back({
@@ -799,7 +793,7 @@ namespace dmge
 			.handler = [&]() {
 				toggleAudioLPF_();
 			},
-			.enableLR = true
+			.allowLR = true
 		});
 
 		rootMenu_.items.push_back({
@@ -813,7 +807,7 @@ namespace dmge
 			.handler = [&]() {
 				toggleDebugMonitor_(false);
 			},
-			.enableLR = true
+			.allowLR = true
 		});
 
 		rootMenu_.items.push_back({
@@ -826,7 +820,7 @@ namespace dmge
 			.handler = [&]() {
 				toggleShowFPS_();
 			},
-			.enableLR = true
+			.allowLR = true
 		});
 
 

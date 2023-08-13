@@ -121,18 +121,12 @@ namespace dmge
 			{
 				if (currentMenu_().items[selectedIndex_].handlerLR)
 				{
-					// handlerLR が設定されていたら実行
 					currentMenu_().items[selectedIndex_].handlerLR(KeyLeft.pressed());
 					return;
 				}
-				else if (currentMenu_().items[selectedIndex_].enableLR)
+				else if (currentMenu_().items[selectedIndex_].handler && currentMenu_().items[selectedIndex_].allowLR)
 				{
-					// enableLR が設定されていたら、handler を代わりに実行
-					if (currentMenu_().items[selectedIndex_].handler)
-					{
-						currentMenu_().items[selectedIndex_].handler();
-					}
-					return;
+					currentMenu_().items[selectedIndex_].handler();
 				}
 			}
 
@@ -172,37 +166,25 @@ namespace dmge
 
 			// マウス左クリック: マウスオーバーしているメニュー項目を決定または値の変更
 
-			if (const auto scrollingArea = scrollingAreaRect_();
-				scrollingArea.contains(Cursor::Pos()))
+			const auto mouseEvent = getMenuItemMouseEvent_();
+
+			if (mouseEvent.type == MenuItemMouseEventType::Clicked)
 			{
-				// マウスクリック位置にスクロールを適用したいので座標変換をする
-				const Transformer2D transformer = getScrollingAreaTransform_();
+				const auto& selectedMenuItem = currentMenu_().items[selectedIndex_];
 
-				for (auto [index, item] : Indexed(currentMenu_().items))
+				if (selectedMenuItem.handlerLR)
 				{
-					const Rect itemRegion{ 0, index * RowHeight, scrollingArea.w, RowHeight };
-
-					if (itemRegion.leftClicked())
-					{
-						if (currentMenu_().items[selectedIndex_].handler)
-						{
-							// handler() には座標変換を適用したくない
-							goto callSelectedItemHandler;
-						}
-						return;
-					}
-					else if (itemRegion.mouseOver() && enableMouseSelection_)
-					{
-						selectedIndex_ = index;
-						return;
-					}
+					selectedMenuItem.handlerLR(mouseEvent.left);
+				}
+				else if (selectedMenuItem.handler)
+				{
+					selectedMenuItem.handler();
 				}
 			}
-
-			return;
-
-		callSelectedItemHandler:
-			currentMenu_().items[selectedIndex_].handler();
+			else if (mouseEvent.type == MenuItemMouseEventType::Over)
+			{
+				selectedIndex_ = mouseEvent.index;
+			}
 		}
 
 		void MenuOverlay::draw() const
@@ -237,7 +219,23 @@ namespace dmge
 						const Rect itemRegion{ 0, index * RowHeight, scrollingArea.w, RowHeight };
 						const ColorF menuItemBgColor = ColorF{ MenuItemSelectedFontColor, selected ? 0.2 : 0 };
 						const ColorF menuItemFontColor = selected ? MenuItemSelectedFontColor : MenuItemFontColor;
-						itemRegion.draw(menuItemBgColor);
+
+						if (enableMouseSelection_ && item.handlerLR)
+						{
+							// マウスによる選択：値の増減が可能な場合、右寄りか左寄りかで値の増減を変える
+							if (Cursor::Pos().x > itemRegion.w / 2)
+							{
+								itemRegion.draw(Arg::left = ColorF{ menuItemBgColor, 0 }, Arg::right = menuItemBgColor);
+							}
+							else
+							{
+								itemRegion.draw(Arg::left = menuItemBgColor, Arg::right = ColorF{ menuItemBgColor, 0 });
+							}
+						}
+						else
+						{
+							itemRegion.draw(menuItemBgColor);
+						}
 
 						// メニュー項目のテキストを1文字ずつ描画
 
@@ -368,6 +366,40 @@ namespace dmge
 				FontAsset(U"menu")(text)
 					.drawAt(scrollingAreaRect_().bottomCenter().movedBy(0, RowHeight / 2 + index * RowHeight), HelpFontColor);
 			}
+		}
+
+		MenuItemMouseEvent MenuOverlay::getMenuItemMouseEvent_() const
+		{
+			if (const auto scrollingArea = scrollingAreaRect_();
+				scrollingArea.contains(Cursor::Pos()))
+			{
+				// マウスクリック位置にスクロールを適用したいので座標変換をする
+				const Transformer2D transformer = getScrollingAreaTransform_();
+
+				for (auto [index, item] : Indexed(currentMenu_().items))
+				{
+					const Rect itemRegion{ 0, index * RowHeight, scrollingArea.w, RowHeight };
+
+					if (itemRegion.leftClicked())
+					{
+						if (currentMenu_().items[selectedIndex_].handlerLR)
+						{
+							return { MenuItemMouseEventType::Clicked, (int)index, Cursor::PosF().x < itemRegion.w / 2 };
+						}
+						else if (currentMenu_().items[selectedIndex_].handler)
+						{
+							return { MenuItemMouseEventType::Clicked, (int)index };
+						}
+						return { MenuItemMouseEventType::None, 0 };
+					}
+					else if (itemRegion.mouseOver() && enableMouseSelection_)
+					{
+						return { MenuItemMouseEventType::Over, (int)index };
+					}
+				}
+			}
+
+			return { MenuItemMouseEventType::None, 0 };
 		}
 
 	}

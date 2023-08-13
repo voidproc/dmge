@@ -33,10 +33,26 @@ namespace dmge
 			// 引数に bool leftPressed (←キーが押されたか) をとる
 			std::function<void(bool)> handlerLR;
 
-			bool enableLR = false;
+			// トグルなど、値の増減ではないが、左右キーでの操作を可能にする
+			bool allowLR = false;
 
 			// パレット選択用
 			bool isPaletteSetting = false;
+		};
+
+		// メニュー項目がマウスオーバー or クリックされたかどうかを表す
+		enum class MenuItemMouseEventType
+		{
+			None,
+			Over,
+			Clicked,
+		};
+
+		struct MenuItemMouseEvent
+		{
+			MenuItemMouseEventType type;
+			int index;
+			bool left;
 		};
 
 		struct Menu
@@ -90,6 +106,7 @@ namespace dmge
 			Transformer2D getScrollingAreaTransform_() const;
 			void drawMenuItemTextAt_(const MenuItemText& text, const Vec2& pos, bool selected) const;
 			void drawHelp_() const;
+			MenuItemMouseEvent getMenuItemMouseEvent_() const;
 		};
 	}
 }

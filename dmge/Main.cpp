@@ -148,6 +148,11 @@ void Main()
 		}
 	}
 
+	config.paletteColors[0] = ColorF{ U"#E0E9C4" };
+	config.paletteColors[1] = ColorF{ U"#9AA57C" };
+	config.paletteColors[2] = ColorF{ U"#4B564D" };
+	config.paletteColors[3] = ColorF{ U"#252525" };
+
 	config.cartridgePath = U"/cartridges/pocket.gb";
 #endif
 

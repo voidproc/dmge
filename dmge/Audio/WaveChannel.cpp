@@ -1,4 +1,5 @@
-﻿#include "WaveChannel.h"
+﻿#include "../stdafx.h"
+#include "WaveChannel.h"
 #include "Frequency.h"
 #include "../Memory.h"
 

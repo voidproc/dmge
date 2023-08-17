@@ -111,7 +111,7 @@ namespace dmge
 		Image canvas_;
 		DynamicTexture texture_;
 
-		const PixelShader pixelShader_;
+		PixelShader pixelShader_;
 		ConstantBuffer<RenderingSetting> cbRenderingSetting_{};
 
 		double gamma_ = 1;

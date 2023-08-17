@@ -1,4 +1,5 @@
-﻿#include "AppConfig.h"
+﻿#include "stdafx.h"
+#include "AppConfig.h"
 #include "DebugPrint.h"
 
 namespace dmge

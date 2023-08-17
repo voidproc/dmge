@@ -1,5 +1,4 @@
-﻿# include <Siv3D.hpp> // OpenSiv3D v0.6.10
-
+﻿#include "stdafx.h"
 #include "App.h"
 #include "AppConfig.h"
 #include "DebugPrint.h"
@@ -12,9 +11,15 @@ namespace
 	{
 		const auto preloadText = U"0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ=-~^|@`[{;+:*]},<.>/?_";
 
+#if SIV3D_PLATFORM(WINDOWS)
 		FontAsset::Register(U"debug", 10, Resource(U"fonts/JF-Dot-MPlus10.ttf"), FontStyle::Bitmap);
 		FontAsset::Register(U"textbox", 12, Resource(U"fonts/JF-Dot-MPlus12.ttf"), FontStyle::Bitmap);
 		FontAsset::Register(U"menu", 12, Resource(U"fonts/JF-Dot-MPlus12.ttf"), FontStyle::Bitmap);
+#elif SIV3D_PLATFORM(WEB)
+		FontAsset::Register(U"debug", 10, U"/fonts/JF-Dot-MPlus10-subset.ttf", FontStyle::Bitmap);
+		FontAsset::Register(U"textbox", 12, U"/fonts/JF-Dot-MPlus12-subset.ttf", FontStyle::Bitmap);
+		FontAsset::Register(U"menu", 12, U"/fonts/JF-Dot-MPlus12-subset.ttf", FontStyle::Bitmap);
+#endif
 
 		FontAsset::Load(U"debug", preloadText);
 		FontAsset::Load(U"textbox", preloadText);
@@ -27,6 +32,8 @@ namespace
 
 		Scene::SetBackground(dmge::DebugMonitor::BgColor);
 
+		Scene::SetLetterbox(Palette::Black);
+
 		Scene::SetTextureFilter(TextureFilter::Nearest);
 
 		Graphics::SetVSyncEnabled(true);
@@ -36,13 +43,16 @@ namespace
 		Profiler::EnableAssetCreationWarning(false);
 	}
 
+#if SIV3D_PLATFORM(WINDOWS)
 	void SaveScreenshot(FilePathView path)
 	{
 		ScreenCapture::SaveCurrentFrame(path + U"");
 		System::Update();
 	}
+#endif
 }
 
+#if SIV3D_PLATFORM(WINDOWS)
 void runTest(dmge::AppConfig& config)
 {
 	config.cartridgePath.clear();
@@ -90,11 +100,17 @@ void runTest(dmge::AppConfig& config)
 		writer.writeln(U"{},{}"_fmt(testRomPath, app->mooneyeTestResult() == dmge::MooneyeTestResult::Passed ? 1 : 0));
 	}
 }
+#endif
 
 void Main()
 {
+#if SIV3D_PLATFORM(WINDOWS)
 	dmge::AppConfig config = dmge::AppConfig::LoadConfig();
+#elif SIV3D_PLATFORM(WEB)
+	dmge::AppConfig config;
+#endif
 
+#if SIV3D_PLATFORM(WINDOWS)
 	if (config.testMode)
 	{
 		runTest(config);
@@ -113,6 +129,7 @@ void Main()
 
 	// [DEBUG]
 	config.print();
+#endif
 
 	// フォントなどのアセット読み込み
 	LoadAssets();
@@ -120,6 +137,19 @@ void Main()
 	// Siv3Dのシーン・ウィンドウなどの初期化
 	InitScene();
 
+#if SIV3D_PLATFORM(WEB)
+	while (System::Update())
+	{
+		FontAsset(U"menu")(U"Click here to start emulation...").drawAt(Scene::Center());
+
+		if (Scene::Rect().leftClicked())
+		{
+			break;
+		}
+	}
+
+	config.cartridgePath = U"/cartridges/pocket.gb";
+#endif
 
 	Optional<String> cartridgePath = config.cartridgePath;
 

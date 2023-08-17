@@ -1,4 +1,5 @@
-﻿#include "SquareChannel.h"
+﻿#include "../stdafx.h"
+#include "SquareChannel.h"
 #include "SquareWave.h"
 #include "Frequency.h"
 #include "../Address.h"

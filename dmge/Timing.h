@@ -17,7 +17,9 @@ namespace dmge
 		void sleep(double fps = 60.0);
 
 	private:
-		uint64 last_ = 0;
+		//uint64 last_ = 0;
+		Stopwatch sw_{ StartImmediately::Yes };
+		double next_ = 0;
 		bool enabled_ = true;
 	};
 }

@@ -1,4 +1,5 @@
-﻿#include "CPU.h"
+﻿#include "stdafx.h"
+#include "CPU.h"
 #include "Memory.h"
 #include "Interrupt.h"
 #include "DebugPrint.h"

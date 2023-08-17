@@ -1,4 +1,5 @@
-﻿#include "LCD.h"
+﻿#include "stdafx.h"
+#include "LCD.h"
 #include "Memory.h"
 #include "BitMask/LCDC.h"
 #include "BitMask/STAT.h"

@@ -1,4 +1,5 @@
-﻿#include "DebugMonitor.h"
+﻿#include "stdafx.h"
+#include "DebugMonitor.h"
 #include "Memory.h"
 #include "CPU.h"
 #include "Audio/APU.h"

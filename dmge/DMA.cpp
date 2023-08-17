@@ -1,4 +1,5 @@
-﻿#include "DMA.h"
+﻿#include "stdafx.h"
+#include "DMA.h"
 #include "Memory.h"
 
 namespace dmge

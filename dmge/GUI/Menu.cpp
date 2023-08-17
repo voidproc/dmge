@@ -1,4 +1,5 @@
-﻿#include "Menu.h"
+﻿#include "../stdafx.h"
+#include "Menu.h"
 #include "../AppConfig.h"
 #include "../AppWindow.h"
 #include "../Colors.h"
@@ -70,7 +71,11 @@ namespace dmge
 			const auto windowSize = Size{ Max(Scene::Width(), MinWindowSize.x), Max(Scene::Height(), MinWindowSize.y) };
 
 			Scene::Resize(windowSize);
+#if SIV3D_PLATFORM(WEB)
+			Scene::SetResizeMode(ResizeMode::Keep);
+#elif SIV3D_PLATFORM(WINDOWS)
 			Window::Resize(windowSize, Centering::No);
+#endif
 		}
 
 		void MenuOverlay::hide()

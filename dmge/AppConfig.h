@@ -72,7 +72,7 @@ namespace dmge
 		// --------------------------------
 
 		// キーボード割り当て
-		InputMappingArray keyMapping;
+		InputMappingArray keyMapping = { KeyRight, KeyLeft, KeyUp, KeyDown, KeyX, KeyZ, KeyBackspace, KeyEnter };
 
 		// ゲームパッドのボタン割り当て
 		InputMappingArray gamepadMapping;

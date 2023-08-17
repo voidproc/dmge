@@ -1,4 +1,5 @@
-﻿#include "App.h"
+﻿#include "stdafx.h"
+#include "App.h"
 #include "Memory.h"
 #include "Cartridge.h"
 #include "CPU.h"
@@ -37,6 +38,13 @@ namespace dmge
 			const auto directory = FileSystem::FullPath(defaultDirectory);
 			return Dialog::OpenFile({ FileFilter{.name = U"GAMEBOY Cartridge", .patterns = {U"gb?"} } }, directory, U"ファイルを開く");
 		}
+
+#if SIV3D_PLATFORM(WEB)
+		AsyncTask<Optional<String>> ChooseCartridge_Web()
+		{
+			return Platform::Web::Dialog::OpenFile({ FileFilter{.name = U"GAMEBOY Cartridge", .patterns = {U"gb?"} } }, U"", U"ファイルを開く");
+		}
+#endif
 	}
 
 	DmgeApp::DmgeApp(AppConfig& config)
@@ -94,14 +102,23 @@ namespace dmge
 	{
 		// ウィンドウサイズを設定
 		static bool isFirstResize = true;
-		SetScaleWindowSize(config_.scale, config_.showDebugMonitor, Centering::YesNo(isFirstResize));
+		SetScaleWindowSize(config_.scale, config_.showDebugMonitor, isFirstResize ? Centering::Yes : Centering::No);
 		isFirstResize = false;
 
 		// 設定ファイルでカートリッジが指定されていない場合は
 		// ファイルを開くダイアログで選択する
 		if (not IsValidCartridgePath(currentCartridgePath_.value_or(U"")))
 		{
+#if SIV3D_PLATFORM(WINDOWS)
 			currentCartridgePath_ = ChooseCartridge(config_.openCartridgeDirectory);
+
+#elif SIV3D_PLATFORM(WEB)
+			AsyncTask<Optional<String>> pathTask = ChooseCartridge_Web();
+			if (auto pathResolved = s3d::Platform::Web::System::AwaitAsyncTask(pathTask))
+			{
+				currentCartridgePath_ = *pathResolved;
+			}
+#endif
 		}
 
 		// ファイルが開けない場合は終了する
@@ -120,15 +137,21 @@ namespace dmge
 			return;
 		}
 
+#if SIV3D_PLATFORM(WINDOWS)
 		// SRAMをロード
 		mem_->loadSRAM();
+#endif
 
+#if SIV3D_PLATFORM(WINDOWS)
 		// BootROM
 		bool enableBootROM = not config_.bootROMPath.isEmpty() && FileSystem::Exists(config_.bootROMPath);
 		if (enableBootROM)
 		{
 			mem_->enableBootROM(config_.bootROMPath);
 		}
+#elif SIV3D_PLATFORM(WEB)
+		bool enableBootROM = false;
+#endif
 
 		// [DEBUG]
 		DebugPrint::Writeln(U"* Cartridge loaded:");
@@ -159,8 +182,10 @@ namespace dmge
 
 		mainLoop_();
 
+#if SIV3D_PLATFORM(WINDOWS)
 		// アプリケーション終了時にSRAMを保存する
 		mem_->saveSRAM();
+#endif
 	}
 
 	void DmgeApp::setCartridgePath(const String& cartridgePath)

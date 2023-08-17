@@ -1,4 +1,5 @@
-﻿#include "Interrupt.h"
+﻿#include "stdafx.h"
+#include "Interrupt.h"
 #include "Address.h"
 
 namespace dmge

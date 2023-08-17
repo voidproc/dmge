@@ -1,4 +1,5 @@
-﻿#include "AppWindow.h"
+﻿#include "stdafx.h"
+#include "AppWindow.h"
 #include "DebugMonitor.h"
 
 namespace dmge
@@ -13,6 +14,10 @@ namespace dmge
 
 		const auto SceneSize = showDebugMonitor ? Size{ widthWithDebugMonitor, heightWithDebugMonitor } : Size{ width, height };
 		Scene::Resize(SceneSize);
+#if SIV3D_PLATFORM(WEB)
+		Scene::SetResizeMode(ResizeMode::Keep);
+#elif SIV3D_PLATFORM(WINDOWS)
 		Window::Resize(SceneSize, centering);
+#endif
 	}
 }

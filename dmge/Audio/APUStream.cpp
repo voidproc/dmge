@@ -1,4 +1,5 @@
-﻿#include "APUStream.h"
+﻿#include "../stdafx.h"
+#include "APUStream.h"
 
 namespace dmge
 {

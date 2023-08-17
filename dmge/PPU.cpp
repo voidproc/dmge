@@ -1,4 +1,5 @@
-﻿#include "PPU.h"
+﻿#include "stdafx.h"
+#include "PPU.h"
 #include "PPUConstants.h"
 #include "LCD.h"
 #include "Memory.h"
@@ -25,12 +26,15 @@ namespace dmge
 		lcd_{ lcd },
 		interrupt_{ interrupt },
 		canvas_{ LCDSize.x + 8, LCDSize.y },
-		texture_{ canvas_.size() },
-		pixelShader_{ PPURenderingShader() }
+		texture_{ canvas_.size() }
 	{
 		dot_ = FrameDots - 52 + 4;
 		canvas_.fill(Palette::White);
 		oamBuffer_.reserve(10);
+
+#if SIV3D_PLATFORM(WINDOWS)
+		pixelShader_ = HLSL{ PPURenderingShader() };
+#endif
 	}
 
 	PPU::~PPU()
@@ -147,9 +151,11 @@ namespace dmge
 
 		const Transformer2D transformer{ Mat3x2::Scale(scale).translated(pos) };
 
+#if SIV3D_PLATFORM(WINDOWS)
 		Graphics2D::SetPSConstantBuffer(1, cbRenderingSetting_);
 
 		const ScopedCustomShader2D shader{ pixelShader_ };
+#endif
 
 		texture_(0, 0, 160, 144).draw();
 	}
@@ -419,7 +425,7 @@ namespace dmge
 		}
 
 		// (CGB) 背景マップ属性を取得（VRAM Bank1）
-		const TileMapAttribute tileMapAttr{ cgbMode_ ? mem_->readVRAMBank(tileAddr, 1) : 0u };
+		const TileMapAttribute tileMapAttr{ cgbMode_ ? mem_->readVRAMBank(tileAddr, 1) : uint8(0) };
 
 		// タイルデータのアドレスを得る
 		const uint8 tileId = mem_->readVRAMBank(tileAddr, 0);

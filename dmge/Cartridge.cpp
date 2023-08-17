@@ -1,4 +1,5 @@
-﻿#include "Cartridge.h"
+﻿#include "stdafx.h"
+#include "Cartridge.h"
 #include "Address.h"
 #include "DebugPrint.h"
 

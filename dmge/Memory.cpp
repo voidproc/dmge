@@ -1,4 +1,5 @@
-﻿#include "Memory.h"
+﻿#include "stdafx.h"
+#include "Memory.h"
 #include "MBC.h"
 #include "PPU.h"
 #include "LCD.h"

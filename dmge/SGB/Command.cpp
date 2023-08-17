@@ -1,4 +1,5 @@
-﻿#include "Command.h"
+﻿#include "../stdafx.h"
+#include "Command.h"
 #include "Mask.h"
 #include "../Joypad.h"
 #include "../LCD.h"

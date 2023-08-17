@@ -1,4 +1,5 @@
-﻿#include "LengthCounter.h"
+﻿#include "../stdafx.h"
+#include "LengthCounter.h"
 #include "Channel.h"
 
 namespace dmge

@@ -1,4 +1,5 @@
-﻿#include "NoiseChannel.h"
+﻿#include "../stdafx.h"
+#include "NoiseChannel.h"
 #include "../Address.h"
 
 namespace dmge

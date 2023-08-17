@@ -1,4 +1,5 @@
-﻿#include "TileData.h"
+﻿#include "stdafx.h"
+#include "TileData.h"
 #include "Memory.h"
 #include "Address.h"
 
@@ -48,7 +49,7 @@ namespace dmge
 				for (int x = 0, bit = 7; x < 8; ++x, --bit)
 				{
 					const uint8 colorID = (((tileData & 0xff) >> bit) & 1) | (((((tileData >> 8) & 0xff) >> bit) & 1) << 1);
-					tileImage_[tileTopLeftPos.y + y][tileTopLeftPos.x + x] = Color{ colorID * (255u / 3), 255u };
+					tileImage_[tileTopLeftPos.y + y][tileTopLeftPos.x + x] = Color(colorID * (255u / 3), 255u);
 				}
 			}
 		}

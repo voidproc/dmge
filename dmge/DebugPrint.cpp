@@ -1,4 +1,5 @@
-﻿#include "DebugPrint.h"
+﻿#include "stdafx.h"
+#include "DebugPrint.h"
 
 namespace dmge
 {

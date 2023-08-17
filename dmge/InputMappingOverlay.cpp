@@ -1,4 +1,5 @@
-﻿#include "InputMappingOverlay.h"
+﻿#include "stdafx.h"
+#include "InputMappingOverlay.h"
 
 namespace dmge
 {

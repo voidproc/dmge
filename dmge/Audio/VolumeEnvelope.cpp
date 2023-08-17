@@ -1,4 +1,5 @@
-﻿#include "VolumeEnvelope.h"
+﻿#include "../stdafx.h"
+#include "VolumeEnvelope.h"
 
 namespace dmge
 {

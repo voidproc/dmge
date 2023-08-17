@@ -1,4 +1,5 @@
-﻿#include "Frequency.h"
+﻿#include "../stdafx.h"
+#include "Frequency.h"
 
 namespace dmge
 {

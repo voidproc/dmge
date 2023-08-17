@@ -1,4 +1,5 @@
-﻿#include "APU.h"
+﻿#include "../stdafx.h"
+#include "APU.h"
 #include "APUStream.h"
 #include "../Address.h"
 #include "../Timing.h"

@@ -408,3 +408,6 @@ MigrationBackup/
 **/App/*_test_result.csv
 
 tool/dmge_v**
+
+dmge_wasm/assets/cartridges/
+dmge_wasm/Emscripten/

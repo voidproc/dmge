@@ -1,4 +1,5 @@
-﻿#include "RTC.h"
+﻿#include "stdafx.h"
+#include "RTC.h"
 #include "Timing.h"
 
 namespace dmge

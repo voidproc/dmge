@@ -1,4 +1,5 @@
-﻿#include "FrameSequencer.h"
+﻿#include "../stdafx.h"
+#include "FrameSequencer.h"
 
 namespace dmge
 {

@@ -1,4 +1,5 @@
-﻿#include "SquareWave.h"
+﻿#include "../stdafx.h"
+#include "SquareWave.h"
 
 namespace dmge
 {

@@ -4,8 +4,8 @@
 namespace dmge
 {
 	FPSKeeper::FPSKeeper()
-		: last_{ Time::GetMicrosec() }
 	{
+		next_ = 1000.0 / 60.0;
 	}
 
 	void FPSKeeper::setEnable(bool enable)
@@ -15,17 +15,17 @@ namespace dmge
 
 	void FPSKeeper::sleep(double fps)
 	{
-		while (enabled_)
+		// あまりに差がある場合はリセット
+		if (Abs(sw_.msF() - next_) > 1000.0)
 		{
-			const auto t = Time::GetMicrosec();
-
-			if (t - last_ > 1'000'000 / fps)
-			{
-				last_ = t;
-				return;
-			}
-
-			System::Sleep(static_cast<int32>((1000 / fps - (t - last_)) * 0.95));
+			next_ = sw_.msF() + 1000.0 / fps;
 		}
+
+		while (enabled_ && sw_.msF() < next_)
+		{
+			System::Sleep(1);
+		}
+
+		next_ += 1000.0 / fps;
 	}
 }

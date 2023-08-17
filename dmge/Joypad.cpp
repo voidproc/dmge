@@ -1,4 +1,5 @@
-﻿#include "Joypad.h"
+﻿#include "stdafx.h"
+#include "Joypad.h"
 #include "Memory.h"
 #include "Address.h"
 #include "AppConfig.h"

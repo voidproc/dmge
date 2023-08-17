@@ -1,4 +1,5 @@
-﻿#include "FrequencySweep.h"
+﻿#include "../stdafx.h"
+#include "FrequencySweep.h"
 #include "Channel.h"
 
 namespace dmge

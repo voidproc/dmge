@@ -1,4 +1,5 @@
-﻿#include "Timer.h"
+﻿#include "stdafx.h"
+#include "Timer.h"
 #include "Memory.h"
 #include "Interrupt.h"
 #include "Address.h"

@@ -45,18 +45,23 @@ namespace
 
 void runTest(dmge::AppConfig& config)
 {
-	config.bootROMPath.clear();
-	config.breakOnLDBB = false;
-	config.breakpoints.clear();
 	config.cartridgePath.clear();
-	config.dumpAddress.clear();
-	config.logFilePath.clear();
-	config.memoryWriteBreakpoints.clear();
-	config.showConsole = true;
-	config.showDebugMonitor = false;
-	config.showFPS = false;
-	config.traceDumpStartAddress.clear();
+	config.detectCGB = true;
+	config.detectSGB = true;
+	config.bootROMPath.clear();
 	config.scale = 2;
+	config.showFPS = false;
+	config.palettePreset = 1;
+	config.cgbColorGamma = 1.0;
+	config.showDebugMonitor = false;
+	config.showConsole = true;
+	config.breakpoints.clear();
+	config.memoryWriteBreakpoints.clear();
+	config.breakOnLDBB = false;
+	config.enableBreakpoint = false;
+	config.dumpAddress.clear();
+	config.traceDumpStartAddress.clear();
+	config.logFilePath.clear();
 
 	dmge::DebugPrint::EnableConsole();
 

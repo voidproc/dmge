@@ -38,13 +38,6 @@ namespace dmge
 			const auto directory = FileSystem::FullPath(defaultDirectory);
 			return Dialog::OpenFile({ FileFilter{.name = U"GAMEBOY Cartridge", .patterns = {U"gb?"} } }, directory, U"ファイルを開く");
 		}
-
-#if SIV3D_PLATFORM(WEB)
-		AsyncTask<Optional<String>> ChooseCartridge_Web()
-		{
-			return Platform::Web::Dialog::OpenFile({ FileFilter{.name = U"GAMEBOY Cartridge", .patterns = {U"gb?"} } }, U"", U"ファイルを開く");
-		}
-#endif
 	}
 
 	DmgeApp::DmgeApp(AppConfig& config)
@@ -111,13 +104,8 @@ namespace dmge
 		{
 #if SIV3D_PLATFORM(WINDOWS)
 			currentCartridgePath_ = ChooseCartridge(config_.openCartridgeDirectory);
-
 #elif SIV3D_PLATFORM(WEB)
-			AsyncTask<Optional<String>> pathTask = ChooseCartridge_Web();
-			if (auto pathResolved = s3d::Platform::Web::System::AwaitAsyncTask(pathTask))
-			{
-				currentCartridgePath_ = *pathResolved;
-			}
+			currentCartridgePath_ = ChooseCartridge(U"");
 #endif
 		}
 
@@ -1120,8 +1108,13 @@ namespace dmge
 
 	void DmgeApp::openCartridge_()
 	{
-		if (const auto openPath = ChooseCartridge(FileSystem::ParentPath(currentCartridgePath_.value_or(U"")));
-			openPath)
+#if SIV3D_PLATFORM(WINDOWS)
+		Optional<String> openPath = ChooseCartridge(FileSystem::ParentPath(currentCartridgePath_.value_or(U"")));
+#elif SIV3D_PLATFORM(WEB)
+		Optional<String> openPath = ChooseCartridge(U"");
+#endif
+
+		if (openPath)
 		{
 			currentCartridgePath_ = openPath;
 			mode_ = DmgeAppMode::Reset;

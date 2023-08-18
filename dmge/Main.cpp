@@ -178,6 +178,7 @@ void Main()
 		cartridgePath = app->currentCartridgePath();
 	}
 
+#if SIV3D_PLATFORM(WINDOWS)
 	config.save();
-
+#endif
 }

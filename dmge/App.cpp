@@ -482,7 +482,7 @@ namespace dmge
 		}
 
 		// メニューを開く (ESC or 右クリック or 左クリック長押し)
-		if (KeyEscape.up() || MouseR.up() || MouseL.pressedDuration() > 0.8s)
+		if (KeyEscape.up() || MouseR.up() || MouseL.pressedDuration() > 0.7s && MouseL.pressedDuration() < 0.8s)
 		{
 			menuOverlay_.show();
 		}
@@ -1111,7 +1111,17 @@ namespace dmge
 #if SIV3D_PLATFORM(WINDOWS)
 		Optional<String> openPath = ChooseCartridge(FileSystem::ParentPath(currentCartridgePath_.value_or(U"")));
 #elif SIV3D_PLATFORM(WEB)
+
+		// ユーザーアクション待ち
+		while (System::Update())
+		{
+			Scene::Rect().draw(Palette::Black);
+			FontAsset(U"menu")(U"Click here to choose cartridge...").drawAt(Scene::Center());
+			if (MouseL.down() || MouseR.down() || MouseM.down()) break;
+		}
+
 		Optional<String> openPath = ChooseCartridge(U"");
+
 #endif
 
 		if (openPath)

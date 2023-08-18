@@ -97,6 +97,9 @@ namespace dmge
 			// マウスオーバーによる選択の有効化
 			bool enableMouseSelection_ = true;
 
+			Optional<Vec2> swipeBeginPos_;//スワイプ開始時のマウス位置
+			int swipeBeginScroll_ = 0;//スワイプ開始時のスクロール量
+
 			Menu& currentMenu_();
 			const Menu& currentMenu_() const;
 

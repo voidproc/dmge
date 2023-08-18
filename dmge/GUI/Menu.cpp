@@ -102,6 +102,14 @@ namespace dmge
 				enableMouseSelection_ = true;
 			}
 
+			// スワイプ
+
+			if (MouseL.down())
+			{
+				swipeBeginPos_ = Cursor::PosF();
+				swipeBeginScroll_ = verticalScroll_;
+			}
+
 			// ↑↓キー: １つ前/後の項目を選択し、選択項目を中心にスクロールする
 
 			if (KeyDown.down())
@@ -169,11 +177,34 @@ namespace dmge
 				return;
 			}
 
+			// スワイプが一定の距離を超えたらクリックを無効にする
+
+			bool allowLClick = true;
+
+			if (swipeBeginPos_)
+			{
+				const double swipeDistanceY = Cursor::PosF().y - swipeBeginPos_->y;
+
+				verticalScroll_ = Clamp((int)(swipeBeginScroll_ - swipeDistanceY),
+					0,
+					currentMenu_().getTotalHeight() - scrollingAreaRect_().h);
+
+				if (Abs(swipeDistanceY) > 2)
+				{
+					allowLClick = false;
+				}
+
+				if (MouseL.up())
+				{
+					swipeBeginPos_ = none;
+				}
+			}
+
 			// マウス左クリック: マウスオーバーしているメニュー項目を決定または値の変更
 
 			const auto mouseEvent = getMenuItemMouseEvent_();
 
-			if (mouseEvent.type == MenuItemMouseEventType::Clicked)
+			if (mouseEvent.type == MenuItemMouseEventType::Clicked && allowLClick && MouseL.pressedDuration() < 0.3s)
 			{
 				const auto& selectedMenuItem = currentMenu_().items[selectedIndex_];
 
@@ -385,7 +416,7 @@ namespace dmge
 				{
 					const Rect itemRegion{ 0, index * RowHeight, scrollingArea.w, RowHeight };
 
-					if (itemRegion.leftClicked())
+					if (itemRegion.leftReleased())
 					{
 						if (currentMenu_().items[selectedIndex_].handlerLR)
 						{

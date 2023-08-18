@@ -493,8 +493,8 @@ namespace dmge
 			toggleAudioLPF_();
 		}
 
-		// メニューを開く (ESC or 右クリック)
-		if (KeyEscape.up() || MouseR.up())
+		// メニューを開く (ESC or 右クリック or 左クリック長押し)
+		if (KeyEscape.up() || MouseR.up() || MouseL.pressedDuration() > 0.8s)
 		{
 			menuOverlay_.show();
 		}

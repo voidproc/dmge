@@ -17,13 +17,20 @@ C++ / OpenSiv3D でゲームボーイのエミュレータを作っています�
 - Windows 11
 - Visual Studio 2022
 - [OpenSiv3D](https://github.com/Siv3D/OpenSiv3D) v0.6.11
+- [OpenSiv3D for Web](https://siv3d.kamenokosoft.com/docs/ja/) v0.6.6
 
 
 ## 使用方法
 
-### アプリケーションの起動
+### Windows 版
 
 `dmge.exe` を起動してください。
+
+### Web 版
+
+https://voidproc.github.io/dmge_web/
+
+※ Web 版では、設定の保存／読み込みやセーブデータの保存／読み込みができないなどの制限があります
 
 ### メニュー
 
